@@ -1,10 +1,9 @@
-
-# Find_My_Gig - Team 1E
+# Find My Gig - Team 1E
 
 Welcome to the Find My Gig repository. The objective of our application is to give musicians and bands a place to connect, collaborate, and fill open gig opportunities near them.
 
 ## Tech Stack
-* Backend: Django (Python)
+* Backend: Django 4.2 LTS (Python 3.11)
 * Frontend: HTML, CSS, JavaScript (AJAX)
 * Database: SQLite (Default Django)
 * APIs: Google Maps API
@@ -13,26 +12,26 @@ Welcome to the Find My Gig repository. The objective of our application is to gi
 
 ## Local Setup Instructions (VS Code)
 
-To start working on the project, follow these steps exactly. Make sure you have Python and VS Code installed on your computer first.
+To start working on the project, follow these steps exactly. Make sure you have Python 3.11 and VS Code installed on your computer first.
 
 ### 1. Clone the Repository
-Open your VS Code terminal and run:
-git clone https://github.com/YOUR-USERNAME/Find_My-Gig.git
+Open your VS Code terminal (Command Prompt) and run:
+git clone https://github.com/YOUR-USERNAME/Find_My_Gig.git
 cd Find_My_Gig
 
 ### 2. Set Up Your Virtual Environment
 We use a virtual environment to make sure everyone is using the exact same versions of our packages and to avoid conflicts.
-* Mac/Linux: python3 -m venv venv
-* Windows: python -m venv venv
+* Mac/Linux: python3 -m venv gig_env
+* Windows: python -m venv gig_env
 
 ### 3. Activate the Virtual Environment
 You must do this every time you open the project in VS Code.
-* Mac/Linux: source venv/bin/activate
-* Windows: venv\Scripts\activate
-(You will know it worked if you see (venv) at the start of your terminal line).
+* Mac/Linux: source gig_env/bin/activate
+* Windows: gig_env\Scripts\activate
+(You will know it worked if you see (gig_env) at the start of your terminal line).
 
 ### 4. Install the Dependencies
-Now, install Django and any other packages we are using:
+Now, install our specific version of Django and our other packages:
 pip install -r requirements.txt
 
 ### 5. Run the Server
