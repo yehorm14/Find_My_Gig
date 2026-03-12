@@ -13,4 +13,9 @@ class UserSignUpForm(UserCreationForm):
 class MusicianProfileForm(forms.ModelForm):
     class Meta:
         model = Musician
-        fields = ['instruments']
+        fields = ['instruments', 'bio', 'profile_picture', 'media_link', 'location']
+
+class BandProfileForm(forms.ModelForm):
+    class Meta:
+        model = Band
+        fields = ['name', 'location', 'bio', 'profile_picture']
