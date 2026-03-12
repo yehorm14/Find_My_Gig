@@ -1,0 +1,60 @@
+{% load static %}
+
+<!doctype html>
+
+<html>
+  <head lang="en">
+    <meta charset="UTF-8" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+      crossorigin="anonymous"
+    />
+    <link href="{% static 'find_my_gig/css/style.css' %}" rel="stylesheet" />
+    <title>{% block title_block %} {% endblock %}</title>
+  </head>
+
+  <body>
+    {% block header_block %}
+    <div class="m-4">
+      <h1>
+        <a href="/" class="site-title">Find My Gig</a>
+      </h1>
+    </div>
+    {% endblock%}
+
+    {% block header_detailed %}
+<div class="row align-items-center primary-color">
+  <div class="col-auto">
+    <div class="m-4">
+        <h1>
+        <a href="/" class="site-title">Find My Gig</a>
+        </h1>
+    </div>
+  </div>
+
+  <div class="col m-4">
+    <div class="row justify-content-end m-4">
+      Logged in as: {{ user.username }}<!--backend username-->
+    </div>
+
+    <div class="row justify-content-end">
+      <div class="col text-end">
+        <a href="" class="btn btn-primary nice-button background-color">My Applications</a>
+        <a href="" class="btn btn-primary nice-button background-color">My Profile</a>
+        <a href="" class="btn btn-primary nice-button background-color">Sign Out</a>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="col-auto mx-4">
+    <img src="{{ user.profile.profile_pic.url }}" class="profile-pic">
+  </div>
+</div>
+    {% endblock %}
+
+    {% block body_block %} {% endblock%}
+  </body>
+</html>
