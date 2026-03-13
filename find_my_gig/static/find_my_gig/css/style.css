@@ -1,0 +1,182 @@
+:root {
+    --primary-color: #283845;
+    --background-color: #202C39;
+    --highlight-color: #F29559;
+    --darker-highlight-color: #bf7547;
+    --text-color: #B8B08D;
+}
+
+body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+    min-height: 100vh;
+    margin: 0;
+}
+
+.primary-color {
+    background-color: var(--primary-color);
+}
+
+.background-color {
+    background-color: var(--background-color);
+}
+
+.text-color {
+    color: var(--text-color);
+}
+
+.home-title {
+    margin-top: 8vh;
+}
+
+.home-discover {
+    margin-bottom: 50%;
+}
+
+.home-button {
+    min-width: 200px;
+    max-width: 300px;
+}
+
+.nice-button {
+    max-width: 200px;
+    width: 100%;
+    border: none;
+    color: var(--text-color);
+}
+
+.btn-primary {
+    --bs-btn-hover-bg: var(--darker-highlight-color);
+    --bs-btn-active-bg: var(--highlight-color);
+}
+
+.form-control {
+    background-color: var(--primary-color);
+    color: var(--text-color);
+    border: none;
+}
+.form-control:focus {
+    background-color: var(--primary-color);
+    color: var(--text-color);
+    border: none;
+    box-shadow: none;
+}
+
+.form-check-input {
+    background-color: var(--primary-color);
+    border-color: var(--text-color);
+}
+
+.form-check-input:checked {
+    background-color: var(--highlight-color);
+    border-color: var(--highlight-color);
+}
+
+.site-title {
+    color: var(--text-color);
+    text-decoration: none;
+    display: inline-block;
+}
+
+
+.site-title:hover {
+    color: var(--highlight-color);
+}
+
+.subtle-link {
+    color: var(--highlight-color);
+    display: inline-block;
+}
+
+.site-title:hover {
+    color: var(--highlight-color);
+}
+
+.profile-pic {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+textarea {
+    background-color: var(--primary-color);
+    color: var(--text-color);
+    resize: vertical;
+}
+
+textarea:focus {
+    background-color: var(--primary-color);
+    color: var(--text-color);
+    box-shadow: none;
+}
+
+.form-select {
+    background-color: var(--primary-color);
+    color: var(--text-color);
+    border: none;
+}
+
+.form-select:focus {
+    background-color: var(--primary-color);
+    color: var(--text-color);
+    box-shadow: none;
+}
+
+.listings-container {
+    height: 70vh;
+    overflow-y: scroll;
+    border: 1px solid var(--primary-color);
+    border-radius: 10px;
+    opacity: 0.8;
+}
+
+.listing-card {
+    background-color: var(--primary-color);
+    border-radius: 5px;
+    padding: 15px;
+    color: var(--text-color);
+}
+
+.map-placeholder {
+    background-color: var(--background-color);
+    height: 150px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-color);
+}
+
+.square {
+    aspect-ratio: 1 / 1;
+}
+
+.dashboard-card {
+    border-radius: 10px;
+    border: 1px solid var(--text-color);
+    transition: transform 0.2s;
+    cursor: pointer;
+    width: 20vw;
+    height: auto;
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    color: var(--text-color);
+    align-items: center;
+}
+
+.dashboard-card:hover {
+    transform: scale(1.05);
+}
+
+.dashboard-card:hover h5{
+    color: var(--highlight-color);
+}
+
+.dashboard-icon {
+    filter: brightness(0) saturate(100%) invert(70%) sepia(12%) saturate(578%) hue-rotate(12deg) brightness(97%) contrast(93%);
+    width: 50%;
+    height: auto;
+}

@@ -1,0 +1,30 @@
+{% extends 'find_my_gig/base.html' %}
+{% load static %}
+
+{% block title_block %}
+{{ gig.title }}
+{% endblock %}
+
+{% block header_block %}
+{% endblock %} {% block body_block %}
+<div class="text-center m-4">
+  <h2>{{ gig.title }}</h2>
+  <h5>{{ gig.author }}</h5>
+</div>
+
+<hr class="mx-5" />
+
+<p class="text-center">{{ gig.date }}</p>
+
+<div class="row justify-content-center">
+  <div class="col-4 text-center">
+    <p>{{ gig.position }}</p>
+    <p>{{ gig.description }}</p>
+  </div>
+
+  <div class="col-4 text-center">
+    <p>{{ gig.location }}</p>
+    <p>insert google maps pic here</p>
+  </div>
+</div>
+{% endblock %}

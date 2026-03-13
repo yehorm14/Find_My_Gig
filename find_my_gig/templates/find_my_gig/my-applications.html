@@ -1,0 +1,60 @@
+{% extends 'find_my_gig/base.html' %}
+
+{% load static %}
+
+{% block title_block %}
+My Applications
+{% endblock %}
+
+{% block header_block %}
+{% endblock %}
+
+{% block body_block %}
+<div class="text-center m-4">
+  <h2>My Applications</h2>
+</div>
+
+<hr class="mx-5">
+
+<div class="row justify-content-center">
+  <div class="col mx-5">
+    <div class="listings-container">
+      <!--add for loop here for application in applications -->
+        <div class="listing-card m-2">
+            <div class="row">
+                <div class="col">
+                    <h4> {{ application.gig.title }}</h4>
+                    <p>Posted by: {{ application.gig.author }}</p>
+                    <p>Position: {{ application.gig.position }}</p>
+                    <p>Date: {{ application.gig.date }}</p>
+                </div>
+
+                <div class="col">
+                  <p>Description: {{ application.gig.description }}</p>
+                  <p>Location: {{ application.gig.location }}</p>
+                </div>
+
+                <div class="col-3">
+                  <div class="d-flex flex-column justify-content-center h-100">
+                    <!-- Google Maps API placeholder -->
+                    <div class="map-placeholder">
+                        Map coming soon
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-3 d-flex flex-column align-items-center text-center justify-content-center">
+                    <button href="" class="btn btn-primary nice-button background-color w-100 my-2">
+                        <p class="m-3 mx-5">Revoke Application</p>
+                    </button>
+
+                    <button href="" class="btn btn-primary nice-button background-color w-100 my-2">
+                        <p class="m-3 mx-5">Review</p>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+</div>
+{% endblock %}

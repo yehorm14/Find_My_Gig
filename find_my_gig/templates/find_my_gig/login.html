@@ -1,0 +1,45 @@
+{% extends 'find_my_gig/base.html' %}
+
+{% load static %}
+
+{% block title_block %}
+Login
+{% endblock %}
+
+{% block header_detailed %}
+{% endblock %}
+
+{% block body_block %}
+<div class="row justify-content-center">
+  <div class="col-4">
+    <form method="POST" action="">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label for="username" class="form-label">Username</label>
+        <input type="text" class="form-control" id="username" name="username" required />
+      </div>
+
+      <div class="mb-3">
+        <label for="password" class="form-label">Password</label>
+        <input type="password" class="form-control" id="password" name="password" required />
+      </div>
+
+      <div class="my-4">
+        <a href="">Forgot your password? Click here</a>
+      </div>
+
+      <button type="submit" class="btn btn-primary nice-button primary-color">
+        Log in
+      </button>
+
+      <div class="my-4">
+        <p>Not registered an account with us?</p>
+        Sign up here:
+        <a href="" class="btn btn-primary nice-button primary-color"
+          >Sign Up</a
+        >
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
