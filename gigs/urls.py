@@ -30,4 +30,9 @@ urlpatterns = [
     
     # Grabs the specific ID from the URL to show a single band's profile
     path('bands/<int:id>/', views.band_profile, name='band_profile'),
+
+    # -- AUTHENTICATION AND SIGNUPS --
+    path('signup/', views.signup_choice, name='signup'),
+    path('signup/musician/', views.musician_signup, name='musician_signup'),
+    path('signup/band/', views.band_signup, name='band_signup')
 ]

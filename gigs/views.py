@@ -1,5 +1,8 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse
+from django.contrib.auth import login
+from django.db import transaction
+from rango.forms import UserSignUpForm, MusicianProfileForm, BandProfileForm
 import difflib
 
 # ==========================================
@@ -135,3 +138,64 @@ def create_gig(request):
     
     # If they just navigated to the page, show them the empty HTML form
     return render(request, 'gigs/create_gig.html')
+
+def signup_choice(request):
+    if request.user.is_authenticated:
+        return redirect('gigs:home')
+    
+    if request.method == 'POST':
+        # Uses the radio buttons entered on signup.html page
+        user_type = request.POST.get('user_type')
+
+        if user_type == 'musician':
+            return redirect('gigs:musician_signup')
+        elif user_type == 'band':
+            return redirect('gigs:band_signup')
+        # Could add an error redirect if user is neither band or musician
+    return render(request, 'gigs/signup.html')
+
+@transaction.atomic
+def musician_signup(request):
+    if request.user.is_authenticated:
+        return redirect('gigs:home')
+    
+    if request.method == 'POST':
+        user_form = UserSignUpForm(request.POST)
+        profile_form = MusicianProfileForm(request.POST, request.FILES)
+
+        if user_form.is_valid() and profile_form.is_valid():
+            user = user_form.save()
+            musician = profile_form.save(commit=False)
+            musician.user = user
+            musician.save()
+
+            login(request, user)
+            redirect('gigs:home')
+    else: 
+        user_form = UserSignUpForm()
+        profile_form = MusicianProfileForm()
+    
+    return render(request, 'gigs/signup_musician.html', {'user_form': user_form,'profile_form': profile_form,})
+
+@transaction.atomic
+def band_signup(request):
+    if request.user.is_authenticated:
+        return redirect('gigs:home')
+
+    if request.method == 'POST':
+        user_form = UserSignUpForm(request.POST)
+        profile_form = BandProfileForm(request.POST, request.FILES)
+
+        if user_form.is_valid() and profile_form.is_valid():
+            user = user_form.save()
+            band = profile_form.save(commit=False)
+            band.user = user
+            band.save()
+
+            login(request, user)
+            return redirect('gigs:home')
+    else:
+        user_form = UserSignUpForm()
+        profile_form = BandProfileForm()
+
+    return render(request, 'gigs/signup_band.html', {'user_form': user_form,'profile_form': profile_form,})
