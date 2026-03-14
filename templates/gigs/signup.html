@@ -1,0 +1,77 @@
+{% extends 'gigs/base.html' %}
+
+{% load static %}
+
+{% block title_block %}
+Sign Up
+{% endblock %}
+
+{% block header_detailed %}
+{% endblock %}
+
+{% block body_block %}
+<div class="row justify-content-center">
+  <div class="col-4 my-4">
+    <form method="POST" action="">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label for="username" class="form-label">Username</label>
+        <input type="text" class="form-control" id="username" name="username" required />
+      </div>
+
+      <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <input type="text" class="form-control" id="email" name="email" required />
+      </div>
+
+      <div class="mb-3">
+        <div class="form-check form-check-inline">
+          <input
+            class="form-check-input"
+            type="radio"
+            name="user_type"
+            id="band"
+            value="band"
+          />
+          <label class="form-check-label" for="inlineRadio1">Band</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input
+            class="form-check-input"
+            type="radio"
+            name="user_type"
+            id="musician"
+            value="musician"
+            checked
+          />
+          <label class="form-check-label" for="inlineRadio2">Musician</label>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="password" class="form-label">Password</label>
+        <input type="password" class="form-control" id="password" name="password" required />
+      </div>
+
+      <!--backend must add password same logic or remove below confirmation -->
+
+      <div class="mb-3">
+        <label for="passwordConfirm" class="form-label">Confirm Password</label>
+        <input
+          type="password"
+          class="form-control"
+          id="passwordConfirm"
+          name="passwordConfirm"
+          required
+        />
+      </div>
+      <button
+        type="submit"
+        class="btn btn-primary nice-button primary-color mb-5"
+      >
+        Sign Up
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

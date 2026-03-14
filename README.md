@@ -56,14 +56,14 @@ Please follow these exact steps to ensure we don't overwrite each other's code o
 ### 1. Starting a New Task
 Never create a new branch from an outdated blueprint. Always update your local `main` first.
 ```bash
-# 1. Go to your local main branch
-git checkout main
+# 1. Switch to your local main branch
+git switch main
 
 # 2. Download the absolute newest code from GitHub
 git pull origin main
 
-# 3. Create your new task branch and switch to it
-git checkout -b your-descriptive-branch-name
+# 3. Create a new task branch (-c stands for create) and switch to it
+git switch -c your-descriptive-branch-name
 ```
 
 ### 2. Saving and Pushing Your Work
@@ -88,20 +88,26 @@ git add .
 git commit -m "chore: save progress before pulling updated main"
 
 # 2. Switch to your local main branch
-git checkout main
+git switch main
 
 # 3. Download the new code from GitHub
 git pull origin main
 
 # 4. Switch back to your active feature branch
-git checkout your-descriptive-branch-name
+git switch your-descriptive-branch-name
 
 # 5. Inject the newly updated main code into your workspace
 git merge main
 ```
 *(Note: If step 5 causes a Merge Conflict, open the conflicting files in your VS Code editor, choose which code to keep, save the file, and run `git commit -am "Resolved merge conflicts"`).*
 
-### 4. Opening a Pull Request
+### 4. 🚑 Emergency Tip: Undoing Mistakes
+If you accidentally save or delete code in a file and want to throw away your local changes to go back to the last committed version, do not use checkout! Use restore:
+```bash
+git restore name_of_the_broken_file.py
+```
+
+### 5. Opening a Pull Request
 Once your code is pushed and your branch is fully up-to-date with `main`:
 1. Go to our repository on GitHub.
 2. Click the green **Compare & pull request** button next to your branch.
