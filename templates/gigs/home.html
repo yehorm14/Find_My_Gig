@@ -45,25 +45,44 @@ Home
 
     <div class="col-3 align-self-stretch primary-color">
       <div class="row mt-5">
-        <p class="text-color">Currently not logged in</p>
+        {% if user.is_authenticated %}
+          <p class="text-color">Currently logged in as {{ user.username }}</p>
+        {% else %}
+          <p class="text-color">Currently not logged in</p>
+        {% endif %}
         <!--backend replace with username when logged in-->
       </div>
-      <div class="row justify-content-center m-4">
-        <button
-          href=""
-          class="btn btn-primary btn-lg nice-button background-color"
-        >
-          <p class="text-color">Log in</p>
-        </button>
-      </div>
-      <div class="row justify-content-center m-4">
-        <button
-          href=""
-          class="btn btn-primary btn-lg nice-button background-color"
-        >
-          <p class="text-color">Sign up</p>
-        </button>
-      </div>
+      {% if user.is_authenticated %}
+        <div class="row justify-content-center m-4">
+          <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button
+              type="submit"
+              class="btn btn-primary btn-lg nice-button background-color"
+            >
+              <p class="text-color">Log out</p>
+            </button>
+          </form>
+        </div>
+      {% else %}
+        <div class="row justify-content-center m-4">
+          <a
+            href="{% url 'login' %}"
+            class="btn btn-primary btn-lg nice-button background-color text-color"
+          >
+            Login
+          </a>
+        </div>
+
+        <div class="row justify-content-center m-4">
+          <a
+            href="{% url 'gigs:signup' %}"
+            class="btn btn-primary btn-lg nice-button background-color text-color"
+          >
+            Sign up
+          </a>
+        </div>
+      {% endif %}
     </div>
   </div>
 </div>

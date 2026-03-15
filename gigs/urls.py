@@ -1,5 +1,6 @@
-from django.urls import path
+from django.urls import path, reverse_lazy
 from gigs import views
+from django.contrib.auth import views as auth_views
 
 # This is our "namespace". If we ever add another app (like 'accounts'), 
 # this stops Django from confusing 'gigs:home' with 'accounts:home'.
@@ -34,5 +35,39 @@ urlpatterns = [
     # -- AUTHENTICATION AND SIGNUPS --
     path('signup/', views.signup_choice, name='signup'),
     path('signup/musician/', views.musician_signup, name='musician_signup'),
-    path('signup/band/', views.band_signup, name='band_signup')
+    path('signup/band/', views.band_signup, name='band_signup'),
+
+    # -- PASSWORD RESETS --
+path(
+        'password-reset/',
+        auth_views.PasswordResetView.as_view(
+            template_name='gigs/password_reset_form.html',
+            email_template_name='gigs/password_reset_email.html',
+            subject_template_name='gigs/password_reset_subject.txt',
+            success_url=reverse_lazy('gigs:password_reset_done'),
+        ),
+        name='password_reset',
+    ),
+    path(
+        'password-reset/done/',
+        auth_views.PasswordResetDoneView.as_view(
+            template_name='gigs/password_reset_done.html',
+        ),
+        name='password_reset_done',
+    ),
+    path(
+        'reset/<uidb64>/<token>/',
+        auth_views.PasswordResetConfirmView.as_view(
+            template_name='gigs/password_reset_confirm.html',
+            success_url=reverse_lazy('gigs:password_reset_complete'),
+        ),
+        name='password_reset_confirm',
+    ),
+    path(
+        'reset/done/',
+        auth_views.PasswordResetCompleteView.as_view(
+            template_name='gigs/password_reset_complete.html',
+        ),
+        name='password_reset_complete',
+    ),
 ]

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Musician, Band, Listing, Review
+from rango.models import Musician, Band, Listing, Review
 
 # Register our models here, models will be visible on the admin panel
 
