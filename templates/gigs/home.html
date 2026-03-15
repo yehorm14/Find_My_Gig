@@ -54,7 +54,7 @@ Home
       </div>
       {% if user.is_authenticated %}
         <div class="row justify-content-center m-4">
-          <form method="post" action="{% url 'logout' %}">
+          <form method="post" action="{% url 'gigs:logout' %}">
             {% csrf_token %}
             <button
               type="submit"
@@ -67,7 +67,7 @@ Home
       {% else %}
         <div class="row justify-content-center m-4">
           <a
-            href="{% url 'login' %}"
+            href="{% url 'gigs:login' %}"
             class="btn btn-primary btn-lg nice-button background-color text-color"
           >
             Login

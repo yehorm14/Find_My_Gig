@@ -37,8 +37,18 @@ urlpatterns = [
     path('signup/musician/', views.musician_signup, name='musician_signup'),
     path('signup/band/', views.band_signup, name='band_signup'),
 
+    # -- LOGIN/LOGOUT --
+    path(
+        'login/', 
+         auth_views.LoginView.as_view(
+             template_name='gigs/login.html',
+             redirect_authenticated_user=True,), 
+        name='login'),
+
+    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+
     # -- PASSWORD RESETS --
-path(
+    path(
         'password-reset/',
         auth_views.PasswordResetView.as_view(
             template_name='gigs/password_reset_form.html',
