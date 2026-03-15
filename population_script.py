@@ -5,7 +5,7 @@ from datetime import date
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'find_my_gig.settings')
 django.setup()
 
-import rango.models as models
+import gigs.models as models
 
 from django.contrib.auth.models import User
 

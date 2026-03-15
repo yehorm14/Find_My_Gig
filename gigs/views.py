@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib.auth import login
 from django.db import transaction
-from rango.forms import UserSignUpForm, MusicianProfileForm, BandProfileForm
+from gigs.forms import UserSignUpForm, MusicianProfileForm, BandProfileForm
 import difflib
 
 # ==========================================
