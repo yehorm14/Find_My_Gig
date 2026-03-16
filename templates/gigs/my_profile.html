@@ -21,7 +21,7 @@ My Profile
       <div class="row justify-content-center m-4">
         <div class="col text-center">
           <label for="username" class="form-label">Username</label>
-          <input type="text" class="form-control" id="username" name="username" value="backend add here" required />
+          <input type="text" class="form-control" id="profile-username" name="username" value="backend add here" required />
         </div>
 
         <div class="col text-center">
@@ -36,7 +36,7 @@ My Profile
 
         <div class="col text-center">
           <label for="age" class="form-label">Age</label>
-          <input type="text" class="form-control" id="age" name="age" value="backend add" required />
+          <input type="text" class="form-control" id="profile-age" name="age" value="backend add" required />
         </div>
       </div>
 
@@ -44,14 +44,14 @@ My Profile
         <div class="col text-center">
           <!--backend people do magic here pls-->
           <label for="profile-pic-upload" class="profile-pic-label">
-            <img
+            <img id="profile-picture-preview"
               src="{% static 'find_my_gig/images/pfp-placeholder.png' %}"
               class="profile-pic"
             />
           </label>
           <input
             type="file"
-            id="profile-pic-upload"
+            id="profile-picture-input"
             accept="image/*"
             style="display: none"
           />
@@ -59,34 +59,11 @@ My Profile
           <p>Click to update</p>
         </div>
 
-        <div class="col text-center m-4">
-          <h4>Media:</h4>
-          <div class="row justify-content-center mb-3">
-            <div class="col-8">
-              <input
-                type="text"
-                class="form-control"
-                id="media-link"
-                name="media-link"
-                placeholder="Paste link here"
-              />
-            </div>
-            <div class="col-auto">
-              <button
-                type="button"
-                class="btn btn-primary nice-button primary-color"
-              >
-                Add
-              </button>
-            </div>
-          </div>
-        </div>
-
         <div class="row justify-content-center m-4">
           <div class="col">
             <div class="mb-3">
               <label for="about" class="form-label">About</label>
-              <textarea class="form-control" id="about" rows="5">{{ user.profile.about }}</textarea>
+              <textarea class="form-control" id="profile-about" rows="5">{{ user.profile.about }}</textarea>
             </div>
           </div>
 
@@ -122,12 +99,14 @@ My Profile
                   <input
                     type="text"
                     class="form-control"
+                    id="media-link-input"
                     placeholder="Paste link here"
                   />
                 </div>
                 <div class="col-auto">
                   <button
                     type="button"
+                    id="add-media-btn"
                     class="btn btn-primary nice-button primary-color"
                   >
                     Add

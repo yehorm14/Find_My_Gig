@@ -26,18 +26,16 @@ Home
 
         <div class="row">
           <div class="col-6">
-            <button
-              class="btn btn-primary btn-lg w-100 nice-button primary-color home-button"
-            >
+            <a href="{% url 'gigs:gig_listings' %}"
+              class="btn btn-primary btn-lg w-100 nice-button primary-color home-button">
               <p class="text-color">Gigs</p>
-            </button>
+            </a>
           </div>
           <div class="col-6">
-            <button
-              class="btn btn-primary btn-lg w-100 nice-button primary-color home-button"
-            >
+            <a href="{% url 'gigs:musicians_list' %}"
+              class="btn btn-primary btn-lg w-100 nice-button primary-color home-button">
               <p class="text-color">Musicians</p>
-            </button>
+            </a>
           </div>
         </div>
       </div>
@@ -54,12 +52,11 @@ Home
       </div>
       {% if user.is_authenticated %}
         <div class="row justify-content-center m-4">
-          <form method="post" action="{% url 'gigs:logout' %}">
+          <form id="logout-form" method="post" action="{% url 'gigs:logout' %}">
             {% csrf_token %}
-            <button
+            <button id="sign-out-btn"
               type="submit"
-              class="btn btn-primary btn-lg nice-button background-color"
-            >
+              class="btn btn-primary btn-lg nice-button background-color">
               <p class="text-color">Log out</p>
             </button>
           </form>
