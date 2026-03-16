@@ -8,6 +8,7 @@ My Profile
 
 {% block header_block %}
 {% endblock %} {% block body_block %}
+<div id="status-message"></div>
 <div class="text-center m-4">
   <h2>My Profile</h2>
 </div>
@@ -68,27 +69,15 @@ My Profile
           </div>
 
           <div class="col">
-            Instruments
-            <div class="form-check">
-              <input
-                class="form-check-input"
-                type="checkbox"
-                value="guitar"
-                id="guitar"
-                name="guitar"
-              />
-              <label class="form-check-label" for="guitar">Guitar</label>
-            </div>
-            <div class="form-check">
-              <input
-                class="form-check-input"
-                type="checkbox"
-                value="bass"
-                id="bass"
-                name="bass"
-              />
-              <label class="form-check-label" for="bass">Bass</label>
-            </div>
+            <label class="form-label">Instruments</label>
+            <select class="form-control" id="profile-instruments" name="instruments">
+              <option value="">Select instrument</option>
+              <option value="Guitar"  {% if user.profile.instruments == 'Guitar' %}selected{% endif %}>Guitar</option>
+              <option value="Bass"    {% if user.profile.instruments == 'Bass' %}selected{% endif %}>Bass</option>
+              <option value="Drums"   {% if user.profile.instruments == 'Drums' %}selected{% endif %}>Drums</option>
+              <option value="Vocals"  {% if user.profile.instruments == 'Vocals' %}selected{% endif %}>Vocals</option>
+              <option value="Other"   {% if user.profile.instruments == 'Other' %}selected{% endif %}>Other</option>
+            </select>
           </div>
 
           <div class="col">
@@ -113,17 +102,20 @@ My Profile
                   </button>
                 </div>
               </div>
-              <div class="media-list">
-                <div class="media-item">
-                  <span>https://example.com</span>
-                  <button
-                    type="button"
-                    class="btn btn-primary btn-sm nice-button primary-color"
+              <ul id="media-links-list">
+                {% for link in media_links %}
+                  <li>
+                    <a href="{{ link.url }}" target="_blank">{{ link.url }}</a>
+                  <button 
+                    type="button" 
+                    data-media-id="{{ link.id }}"
+                    class="delete-media-btn btn btn-sm nice-button primary-color"
                   >
                     Delete
                   </button>
-                </div>
-              </div>
+                  </li>
+                {% endfor %}
+              </ul>
             </div>
           </div>
         </div>
@@ -132,8 +124,9 @@ My Profile
           <div class="col">
             <p>Press here to update profile</p>
             <button
+              id="update-profile-btn"
               class="btn btn-primary btn-lg nice-button primary-color"
-              type="submit"
+              type="button"
             >
               Update
             </button>
@@ -141,6 +134,7 @@ My Profile
           <div class="col">
             <p>Press here to delete account</p>
             <button
+              id="delete-account-btn"
               type="button"
               class="btn btn-primary btn-lg nice-button primary-color"
             >
@@ -152,4 +146,7 @@ My Profile
     </form>
   </div>
 </div>
+
+{% block scripts_block %}
+    <script src="{% static 'find_my_gig/js/dashboard.js' %}"></script>
 {% endblock %}
