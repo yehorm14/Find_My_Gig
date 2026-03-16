@@ -12,11 +12,13 @@ Login
 {% block body_block %}
 <div class="row justify-content-center">
   <div class="col-4">
-    <form method="POST" action="">
+    <form id="login-form" method="POST" action="">
       {% csrf_token %}
 
       {% if form.errors %}
-        <p>Username or password was incorrect. Please try again.</p>
+        <div id="login-error-message">
+          <p>Username or password was incorrect. Please try again.</p>
+        </div>
       {% endif %}
 
       {% if next %}
@@ -24,13 +26,16 @@ Login
       {% endif %}
 
       <div class="mb-3">
-        <label for="username" class="form-label">Username</label>
-        <input type="text" class="form-control" id="username" name="username" required />
+        <label for="login-username" class="form-label">Username</label>
+        <input type="text" class="form-control" id="login-username" name="username" required />
+        <span id="login-username-error" class="field-error"></span>
       </div>
 
       <div class="mb-3">
-        <label for="password" class="form-label">Password</label>
-        <input type="password" class="form-control" id="password" name="password" required />
+        <label for="login-password" class="form-label">Password</label>
+        <input type="password" class="form-control" id="login-password" name="password" required />
+        <button type="button" id="toggle-login-password" class="btn btn-sm btn-secondary mt-1">Show</button>
+        <span id="login-password-error" class="field-error"></span>
       </div>
 
       <div class="my-4">
@@ -51,4 +56,8 @@ Login
     </form>
   </div>
 </div>
+{% endblock %}
+
+{% block scripts_block %}
+    <script src="{% static 'find_my_gig/js/auth.js' %}"></script>
 {% endblock %}
