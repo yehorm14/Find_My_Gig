@@ -8,6 +8,8 @@ List a Gig
 
 {% block header_block %}
 {% endblock %} {% block body_block %}
+<div id="status-message"></div>
+
 <div class="text-center m-4">
   <h2>List a Gig</h2>
 </div>
@@ -21,7 +23,7 @@ List a Gig
       <div class="row justify-content-center m-4">
         <div class="col text-center">
           <div class="row m-4">
-            <label for="listingTitle" class="form-label" id="listingTitle" name="title" required
+            <label for="listingTitle" class="form-label" id="gig-title" name="title" required
               >Title of Listing</label
             >
             <input
@@ -33,13 +35,14 @@ List a Gig
           </div>
           <div class="row m-4">
             <label for="position" class="form-label">Position</label>
-            <select class="form-select" id="position" name="position" required>
+            <select class="form-select" id="gig-position" name="position" required>
               <option value="">Select an instrument</option>
               <option value="guitar">Guitar</option>
               <option value="bass">Bass</option>
               <option value="drums">Drums</option>
               <option value="piano">Piano</option>
               <option value="vocals">Vocals</option>
+              <option value="other">Other</option>
             </select>
           </div>
           <div class="row m-4">
@@ -59,7 +62,7 @@ List a Gig
             <label for="description" class="form-label">Description</label>
             <textarea
               class="form-control"
-              id="description"
+              id="gig-description"
               rows="5"
               name="description"
               required
@@ -70,7 +73,7 @@ List a Gig
             <input
               type="text"
               class="form-control"
-              id="location"
+              id="gig-location"
               name="location"
               required
             />
@@ -80,7 +83,8 @@ List a Gig
 
       <div class="row justify-content-center my-5">
         <button
-          type="submit"
+          type="button"
+          if="create-gig-btn"
           class="btn btn-primary btn-lg nice-button primary-color"
         >
           List
@@ -89,4 +93,7 @@ List a Gig
     </form>
   </div>
 </div>
+{% endblock %}
+{% block scripts_block %}
+    <script src="{% static 'find_my_gig/js/dashboard.js' %}"></script>
 {% endblock %}
