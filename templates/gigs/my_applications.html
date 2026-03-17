@@ -10,6 +10,7 @@ My Applications
 {% endblock %}
 
 {% block body_block %}
+<div id="status-message"></div>
 <div class="text-center m-4">
   <h2>My Applications</h2>
 </div>
@@ -19,14 +20,14 @@ My Applications
 <div class="row justify-content-center">
   <div class="col mx-5">
     <div class="listings-container">
-      <!--add for loop here for application in applications -->
+      {% for application in applications %}
         <div class="listing-card m-2">
             <div class="row">
                 <div class="col">
                     <h4> {{ application.gig.title }}</h4>
-                    <p>Posted by: {{ application.gig.author }}</p>
-                    <p>Position: {{ application.gig.position }}</p>
-                    <p>Date: {{ application.gig.date }}</p>
+                    <p>Posted by: {{ application.gig.band_name }}</p>
+                    <p>Position: {{ application.gig.req_instruments }}</p>
+                    <p>Date: {{ application.gig.deadline}}</p>
                 </div>
 
                 <div class="col">
@@ -44,17 +45,25 @@ My Applications
                 </div>
 
                 <div class="col-3 d-flex flex-column align-items-center text-center justify-content-center">
-                    <button href="" class="btn btn-primary nice-button background-color w-100 my-2">
-                        <p class="m-3 mx-5">Revoke Application</p>
+                    <button type="button"
+                             class="withdraw-application-btn btn btn-primary nice-button background-color w-100 my-2"
+                             data-gig-id="{{ application.gig.id }}">
+                    <p class="m-3 mx-5">Revoke Application</p>
                     </button>
 
-                    <button href="" class="btn btn-primary nice-button background-color w-100 my-2">
-                        <p class="m-3 mx-5">Review</p>
+                    <button type="button"
+                            data-url="{% url 'gigs:gig_detail' application.gig.id %}"
+                            class="btn btn-primary nice-button background-color w-100 my-2">
+                    <p class="m-3 mx-5">Review</p>
                     </button>
                 </div>
             </div>
         </div>
+        {% endfor %}
     </div>
     </div>
 </div>
+{% endblock %}
+{% block scripts_block %}
+    <script src="{% static 'find_my_gig/js/dashboard.js' %}"></script>
 {% endblock %}
