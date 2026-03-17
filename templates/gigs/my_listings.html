@@ -10,23 +10,65 @@ My Listings
 {% endblock %}
 
 {% block body_block %}
+<div id="status-message"></div>
 <div class="text-center m-4">
   <h2>My Listings</h2>
 </div>
 
 <hr class="mx-5">
 
+<div class="row justify-content-center m-4">
+  <div class="col-8">
+    <h4>Create New Listing</h4>
+    <div class="mb-3">
+      <label for="gig-title" class="form-label">Title</label>
+      <input type="text" class="form-control" id="gig-title" placeholder="Title of listing" />
+    </div>
+
+     <div class="mb-3">
+      <label for="gig-position" class="form-label">Position</label>
+      <select class="form-control" id="gig-position">
+        <option value="">Select position</option>
+        <option value="Guitar">Guitar</option>
+        <option value="Drums">Drums</option>
+        <option value="Vocals">Vocals</option>
+        <option value="Bass">Bass</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label for="gig-date" class="form-label">Date</label>
+      <input type="date" class="form-control" id="gig-date" />
+    </div>
+
+    <div class="mb-3">
+      <label for="gig-description" class="form-label">Description</label>
+      <textarea class="form-control" id="gig-description" rows="4" placeholder="Tell musicians about the gig..."></textarea>
+    </div>
+
+    <div class="mb-3">
+      <label for="gig-location" class="form-label">Location</label>
+      <input type="text" class="form-control" id="gig-location" placeholder="Location" />
+    </div>
+
+    <button type="button" id="create-gig-btn"
+            class="btn btn-primary nice-button primary-color">
+      Create
+    </button>
+  </div>
+</div>
+
 <div class="row justify-content-center">
   <div class="col mx-5">
-    <div class="listings-container">
-      <!--for loop for gig in gigs-->
+    <div id="my-listings-list" class="listings-container">
+      {% for gig in listings %}
         <div class="listing-card m-2">
             <div class="row">
                 <div class="col">
                     <h4>{{ gig.title }}</h4>
-                    <p>Posted by: {{ gig.author }}</p>
-                    <p>Position: {{ gig.position }}</p>
-                    <p>Date: {{ gig.date }}</p>
+                    <p>Position: {{ gig.req_instruments }}</p>
+                    <p>Date: {{ gig.deadline }}</p>
                 </div>
 
                 <div class="col">
@@ -44,17 +86,19 @@ My Listings
                 </div>
 
                 <div class="col-3 d-flex flex-column align-items-center text-center justify-content-center">
-                    <button href="" class="btn btn-primary nice-button background-color w-100 my-2">
-                        <p class="m-3 mx-5">Apply</p>
-                    </button>
-
-                    <button href="" class="btn btn-primary nice-button background-color w-100 my-2">
-                        <p class="m-3 mx-5">Review</p>
+                    <button type="button"
+                            class="delete-listing-btn btn btn-primary nice-button background-color w-100 my-2"
+                            data-lisitngs-id="{{ gig.id }}">
+                    <p class="m-3 mx-5">Delete</p>
                     </button>
                 </div>
             </div>
         </div>
+      {% endfor %}
     </div>
-    </div>
+  </div>
 </div>
+{% endblock %}
+{% block scripts_block %}
+    <script src="{% static 'find_my_gig/js/dashboard.js' %}"></script>
 {% endblock %}
