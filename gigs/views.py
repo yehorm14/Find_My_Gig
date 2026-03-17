@@ -18,14 +18,11 @@ def clean_search_query(query):
 def fuzzy_match_instrument(user_typo):
     """If the user spells 'gutar', this function guesses they meant 'guitar' and fixes it!"""
     valid_instruments = ['guitar', 'drums', 'vocals', 'piano', 'bass']
-    
-    # get_close_matches tries to find the closest valid word. 
-    # n=1 means we only want the top guess. cutoff=0.5 means it must be at least a 50% match.
     best_guesses = difflib.get_close_matches(user_typo, valid_instruments, n=1, cutoff=0.5)
     
     if best_guesses:
         return best_guesses[0]
-    return user_typo # If it can't figure it out, just return what they typed.
+    return user_typo
 
 
 # ==========================================
@@ -34,32 +31,27 @@ def fuzzy_match_instrument(user_typo):
 
 def home(request):
     """Handles the main landing page (/)"""
-    # 'context' is the dictionary we use to pass Python data directly into our HTML file
     context = {'welcome_message': 'Welcome to Find My Gig!'}
-    # Tell Django exactly which HTML file in the templates folder to show the user
     return render(request, 'gigs/home.html', context)
 
 def gig_listings(request):
     """Handles the Gig Listings page and the Search/Filter logic (/gigs/)"""
     
-    # 1. THE CATCHER: Look at the URL and grab the search terms the user typed in
     raw_instrument = request.GET.get('instrument', '')
     cleaned_instrument = clean_search_query(raw_instrument)
-    
     location_query = clean_search_query(request.GET.get('location', ''))
     date_query = request.GET.get('date', '') 
     sort_by = request.GET.get('sort', '')
 
-    # 2. THE SPELLCHECKER: Fix the instrument typo if they made one
     search_term = fuzzy_match_instrument(cleaned_instrument) if cleaned_instrument else ''
 
-    # 3. THE MOCK DATABASE: Fake data until we hook up our real SQLite database
+    # THE MOCK DATABASE
     mock_gigs = [
         {'id': 1, 'title': 'Drummer needed for a new band', 'band_name': 'Name TBC', 'instrument': 'drums', 'location': 'glasgow', 'deadline': '2026-03-15', 'description': 'Seeking a talented drummer...'},
         {'id': 2, 'title': 'Guitarist Needed Urgently!', 'band_name': 'Swim School', 'instrument': 'guitar', 'location': 'edinburgh', 'deadline': '2026-02-25', 'description': 'Current Guitarist injured...'}
     ]
 
-    # 4. THE FILTERING FUNNEL: Throw away gigs that don't match the user's search
+    # THE FILTERING FUNNEL
     if search_term:
         mock_gigs = [gig for gig in mock_gigs if search_term in gig['instrument']]
     if location_query:
@@ -67,13 +59,12 @@ def gig_listings(request):
     if date_query:
         mock_gigs = [gig for gig in mock_gigs if gig['deadline'] == date_query]
 
-    # 5. THE SORTER: Order the remaining gigs alphabetically or by date
+    # THE SORTER
     if sort_by == 'name':
         mock_gigs = sorted(mock_gigs, key=lambda k: k['title'])
     elif sort_by == 'date':
         mock_gigs = sorted(mock_gigs, key=lambda k: k['deadline'])
 
-    # 6. PACKAGE AND SEND: Put all the finished data into the context dictionary and send it to the HTML file
     context = {
         'gigs': mock_gigs,
         'selected_instrument': raw_instrument, 
@@ -87,7 +78,6 @@ def gig_listings(request):
 
 def gig_detail(request, gig_id):
     """Handles clicking on a single gig to see more details (/gigs/<id>/)"""
-    # Note: gig_id was passed in automatically by the urls.py file!
     context = {
         'gig_id': gig_id,
         'title': 'Guitarist Needed Urgently!',
@@ -132,26 +122,48 @@ def band_profile(request, id):
 
 def create_gig(request):
     """Handles the form where bands can list a new gig (/gigs/create/)"""
-    # If the user clicked "Submit" on the form, redirect them back to the gig listings page
     if request.method == 'POST':
         return redirect(reverse('gigs:gig_listings'))
-    
-    # If they just navigated to the page, show them the empty HTML form
     return render(request, 'gigs/create_gig.html')
+
+
+# ==========================================
+# --- USER PORTAL VIEWS ---
+# ==========================================
+
+def dashboard(request):
+    """Handles the user dashboard navigation page"""
+    return render(request, 'gigs/dashboard.html')
+
+def my_applications(request):
+    """Shows the gigs a user has applied to"""
+    return render(request, 'gigs/my_applications.html')
+
+def my_listings(request):
+    """Shows the gigs a user has posted"""
+    return render(request, 'gigs/my_listings.html')
+
+def my_profile(request):
+    """Shows the user's editable profile settings"""
+    return render(request, 'gigs/my_profile.html')
+
+
+# ==========================================
+# --- AUTHENTICATION & SIGNUP VIEWS ---
+# ==========================================
 
 def signup_choice(request):
     if request.user.is_authenticated:
         return redirect('gigs:home')
     
     if request.method == 'POST':
-        # Uses the radio buttons entered on signup.html page
         user_type = request.POST.get('user_type')
 
         if user_type == 'musician':
             return redirect('gigs:musician_signup')
         elif user_type == 'band':
             return redirect('gigs:band_signup')
-        # Could add an error redirect if user is neither band or musician
+            
     return render(request, 'gigs/signup.html')
 
 @transaction.atomic
@@ -170,7 +182,7 @@ def musician_signup(request):
             musician.save()
 
             login(request, user)
-            redirect('gigs:home')
+            return redirect('gigs:home')
     else: 
         user_form = UserSignUpForm()
         profile_form = MusicianProfileForm()

@@ -20,7 +20,7 @@ urlpatterns = [
     path('musicians/<int:id>/', views.musician_profile, name='musician_profile'),
     path('bands/<int:id>/', views.band_profile, name='band_profile'),
 
-    # --- USER PORTAL  ---
+    # --- USER PORTAL ---
     path('dashboard/', views.dashboard, name='dashboard'),
     path('my-applications/', views.my_applications, name='my_applications'),
     path('my-listings/', views.my_listings, name='my_listings'),
