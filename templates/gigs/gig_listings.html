@@ -10,6 +10,8 @@ Gigs
 {% endblock %}
 
 {% block body_block %}
+
+<div id="status-message"></div>
 <div class="text-center m-4">
   <h2>Gigs</h2>
 </div>
@@ -18,29 +20,36 @@ Gigs
 
 <div class="row justify-content-end">
   <div class="col-auto m-3 mx-5">
-        <select class="form-select" id="filter" name="filter">
-            <option value="">Filter by</option>
-            <option value="date">Date</option>
-            <option value="location">Location</option>
-            <option value="instrument">Instrument</option>
+        <select class="form-select" id="filter-instrument" name="filter">
+          <option value="">Filter by Instrument</option>
+          <option value="Guitar">Guitar</option>
+          <option value="Drums">Drums</option>
+          <option value="Vocals">Vocals</option>
+          <option value="Bass">Bass</option>
+          <option value="Other">Other</option>
         </select>
-    </div>
+  </div>
+  <div class="col-auto m-3">
+    <button type="button" id="filter-btn" class="btn btn-primary nice-button primary-color">
+      Filter
+    </button>
+  </div>
 </div>
 
 <div class="row justify-content-center">
   <div class="col mx-5">
-    <div class="listings-container">
-      <!-- add for loop here -->
+    <div id="gigs-list" class="listings-container">
+      {% for gig in gigs %}
         <div class="listing-card m-2">
             <div class="row">
               <div class="col">
-                <a href="" class="site-title">
+                <a href="{% url 'gigs:gig_detail' gig.id %}" class="site-title">
                   <h4>{{ gig.title }}</h4>
                 </a>
-                    <p>Posted by: {{ gig.author }}</p>
-                    <p>Position: {{ gig.position }}</p>
-                    <p>Date: {{ gig.date }}</p>
-                </div>
+                <p>Posted by: {{ gig.band_name }}</p>
+                <p>Position: {{ gig.req_instruments }}</p>
+                <p>Date: {{ gig.deadline }}</p>
+              </div>
 
                 <div class="col">
                   <p>Description: {{ gig.description }}</p>
@@ -57,17 +66,32 @@ Gigs
                 </div>
 
                 <div class="col-3 d-flex flex-column align-items-center text-center justify-content-center">
-                    <button href="" class="btn btn-primary nice-button background-color w-100 my-2">
-                        <p class="m-3 mx-5">Apply</p>
+                    <button type="button" 
+                            class="apply-btn btn btn-primary nice-button background-color w-100 my-2"
+                            data-gig-id="{{ gig.id }}">
+                    <p class="m-3 mx-5">Apply</p>
                     </button>
 
-                    <button href="" class="btn btn-primary nice-button background-color w-100 my-2">
-                        <p class="m-3 mx-5">Review</p>
+                    <button type="button" 
+                            class="bookmark-btn btn btn-primary nice-button background-color w-100 my-2"
+                            data-gig-id="{{ gig.id }}">
+                    <p class="m-3 mx-5">Bookmark</p>
+                    </button>
+
+                    <button type="button"
+                            data-url = "{% url 'gigs:gig_detail' gig.id %}"
+                            onclick="window.location.href=this.dataset.url"
+                            class="btn btn-primary nice-button background-color w-100 my-2">
+                    <p class="m-3 mx-5">Review</p>
                     </button>
                 </div>
             </div>
         </div>
+      {% endfor %}
     </div>
-    </div>
+  </div>
 </div>
+{% endblock %}
+{% block scripts_block %}
+    <script src="{% static 'find_my_gig/js/gigs.js' %}"></script>
 {% endblock %}
