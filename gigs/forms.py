@@ -13,7 +13,7 @@ class UserSignUpForm(UserCreationForm):
 class MusicianProfileForm(forms.ModelForm):
     class Meta:
         model = Musician
-        fields = ['instruments', 'bio', 'profile_picture', 'media_link', 'location']
+        fields = ['instruments', 'bio', 'age', 'profile_picture', 'media_link', 'location']
 
 class BandProfileForm(forms.ModelForm):
     class Meta:
