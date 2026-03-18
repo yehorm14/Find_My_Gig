@@ -40,22 +40,25 @@
           {% if user.is_authenticated %}
             Logged in as: {{ user.username }}
           {% else %}
-            Logged in as: Unknown
+            Currenlty not logged in
           {% endif %}
         </div>
 
         <div class="row justify-content-end">
           <div class="col text-end">
-            <a href="/dashboard/my-applications/" class="btn btn-primary nice-button background-color">My Applications</a>
-            <a href="/dashboard/my-profile/" class="btn btn-primary nice-button background-color">My Profile</a>
-        
-            <form id="logout-form" method="POST" action="/logout/" style="display:inline;">
-              {% csrf_token %}
-              <button id="sign-out-btn" class="btn btn-primary nice-button background-color">
-                Sign Out
-              </button>
-            </form>
-
+            {% if user.is_authenticated %}
+              <a href="{% url 'gigs:my_applications' %}" class="btn btn-primary nice-button background-color">My Applications</a>
+              <a href="{% url 'gigs:my_profile' %}" class="btn btn-primary nice-button background-color">My Profile</a>
+              <form id="logout-form" method="POST" action="{% url 'gigs:logout' %}" style="display:inline;">
+                {% csrf_token %}
+                <button id="sign-out-btn" class="btn btn-primary nice-button background-color">
+                  Sign Out
+                </button>
+              </form>
+            {% else %}
+              <a href="{% url 'gigs:login' %}" class="btn btn-primary nice-button background-color">Sign In</a>
+              <a href="{% url 'gigs:signup' %}" class="btn btn-primary nice-button background-color">Sign Up</a>
+            {% endif %}
           </div>
         </div>
       </div>

@@ -241,9 +241,12 @@ textarea:focus {
 .bookmark-btn {
     background-color: var(--primary-color);
     color: var(--text-color);
+    border-color: var(--primary-color);
 }
+
 .bookmarked-btn {
     background-color: var(--highlight-color);
     color: var(--background-color);
+    border-color: var(--highlight-color);
 }
 
