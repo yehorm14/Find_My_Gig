@@ -28,8 +28,6 @@ urlpatterns = [
 
     # -- AUTHENTICATION AND SIGNUPS --
     path('signup/', views.signup_choice, name='signup'),
-    path('signup/musician/', views.musician_signup, name='musician_signup'),
-    path('signup/band/', views.band_signup, name='band_signup'),
 
     # -- LOGIN/LOGOUT --
     path(

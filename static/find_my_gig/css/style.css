@@ -180,3 +180,70 @@ textarea:focus {
     width: 50%;
     height: auto;
 }
+.field-error {
+    display: none;
+    color: #e74c3c;
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+@keyframes shake {
+    0%,100% { transform: translateX(0); }
+    25%      { transform: translateX(-8px); }
+    75%      { transform: translateX(8px); }
+}
+.form-shake {
+    animation: shake 0.5s ease;
+}
+
+.radio-selected {
+    font-weight: bold;
+    background-color: var(--highlight-color);
+    color: var(--background-color);
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.status-success {
+    display: none;
+    padding: 10px;
+    border-radius: 4px;
+    font-weight: bold;
+    background: #1a3a1a;
+    color: #5cb85c;
+    margin-bottom: 10px;
+}
+.status-error {
+    display: none;
+    padding: 10px;
+    border-radius: 4px;
+    font-weight: bold;
+    background: #3a1a1a;
+    color: #e74c3c;
+    margin-bottom: 10px;
+}
+
+.pending-label {
+    color: var(--highlight-color);
+    font-size: 12px;
+    margin: 0 6px;
+}
+
+.apply-btn {
+    background-color: var(--highlight-color);
+    color: var(--background-color);
+}
+.withdraw-btn {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.bookmark-btn {
+    background-color: var(--primary-color);
+    color: var(--text-color);
+}
+.bookmarked-btn {
+    background-color: var(--highlight-color);
+    color: var(--background-color);
+}
+

@@ -170,51 +170,6 @@ def signup_choice(request):
             
     return render(request, 'gigs/signup.html')
 
-@transaction.atomic
-def musician_signup(request):
-    if request.user.is_authenticated:
-        return redirect('gigs:home')
-    
-    if request.method == 'POST':
-        user_form = UserSignUpForm(request.POST)
-        profile_form = MusicianProfileForm(request.POST, request.FILES)
-
-        if user_form.is_valid() and profile_form.is_valid():
-            user = user_form.save()
-            musician = profile_form.save(commit=False)
-            musician.user = user
-            musician.save()
-
-            login(request, user)
-            return redirect('gigs:home')
-    else: 
-        user_form = UserSignUpForm()
-        profile_form = MusicianProfileForm()
-    
-    return render(request, 'gigs/signup_musician.html', {'user_form': user_form,'profile_form': profile_form,})
-
-@transaction.atomic
-def band_signup(request):
-    if request.user.is_authenticated:
-        return redirect('gigs:home')
-
-    if request.method == 'POST':
-        user_form = UserSignUpForm(request.POST)
-        profile_form = BandProfileForm(request.POST, request.FILES)
-
-        if user_form.is_valid() and profile_form.is_valid():
-            user = user_form.save()
-            band = profile_form.save(commit=False)
-            band.user = user
-            band.save()
-
-            login(request, user)
-            return redirect('gigs:home')
-    else:
-        user_form = UserSignUpForm()
-        profile_form = BandProfileForm()
-
-    return render(request, 'gigs/signup_band.html', {'user_form': user_form,'profile_form': profile_form,})
 
 @login_required
 def update_profile(request):

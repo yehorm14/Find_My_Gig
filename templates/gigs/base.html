@@ -37,7 +37,11 @@
 
       <div class="col m-4">
         <div class="row justify-content-end m-4">
-          Logged in as: {{ user.username }}<!--backend username-->
+          {% if user.is_authenticated %}
+            Logged in as: {{ user.username }}
+          {% else %}
+            Logged in as: Unknown
+          {% endif %}
         </div>
 
         <div class="row justify-content-end">
