@@ -61,8 +61,9 @@
       </div>
 
       <div class="col-auto mx-4">
+        {% if user.is_authenticated %}
         <img src="{{ user.profile.profile_pic.url }}" class="profile-pic">
-      </div>
+        {% endif %} 
     </div>
     {% endblock %}
 
