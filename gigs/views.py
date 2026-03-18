@@ -147,17 +147,26 @@ def my_profile(request):
 # --- AUTHENTICATION & SIGNUP VIEWS ---
 # ==========================================
 
+@transaction.atomic
 def signup_choice(request):
     if request.user.is_authenticated:
         return redirect('gigs:home')
     
     if request.method == 'POST':
         user_type = request.POST.get('user_type')
+        user_form = UserSignUpForm(request.POST)
 
-        if user_type == 'musician':
-            return redirect('gigs:musician_signup')
-        elif user_type == 'band':
-            return redirect('gigs:band_signup')
+        if user_form.is_valid():
+            user = user_form.save()
+            if user_type == 'musician':
+                Musician.objects.create(user=user)
+            elif user_type == 'band':
+                Band.objects.create(user=user)
+            
+            login(request, user)
+            return redirect('gigs:my_profile')
+
+        return render(request, 'gigs/signup.html', {'user_form': user_form})
             
     return render(request, 'gigs/signup.html')
 

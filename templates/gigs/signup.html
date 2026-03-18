@@ -1,5 +1,4 @@
 {% extends 'gigs/base.html' %}
-
 {% load static %}
 
 {% block title_block %}
@@ -12,7 +11,9 @@ Sign Up
 {% block body_block %}
 <div class="row justify-content-center">
   <div class="col-4 my-4">
-    <form method="POST" action="">
+    <h2>Sign Up</h2>
+
+    <form id="sign-up-form" method="POST" action="">
       {% csrf_token %}
 
       {% if error_message %}
@@ -20,34 +21,53 @@ Sign Up
       {% endif %}
 
       <div class="mb-3">
+        <label class="form-label">Account Type</label>
         <div class="form-check form-check-inline">
-          <input
-            class="form-check-input"
-            type="radio"
-            name="user_type"
-            id="band"
-            value="band"
-          />
-          <label class="form-check-label" for="band">Band</label>
+          <input class="form-check-input" type="radio"
+                 name="user_type" id="radio-band" value="band" />
+          <label class="form-check-label" for="radio-band">Band</label>
         </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio"
+                 name="user_type" id="radio-musician" value="musician" checked />
+          <label class="form-check-label" for="radio-musician">Musician</label>
+        </div>
+        <span id="account-type-error" class="field-error"></span>
+      </div>
 
-        <div class="form-check form-check-inline">
-          <input
-            class="form-check-input"
-            type="radio"
-            name="user_type"
-            id="musician"
-            value="musician"
-            checked
-          />
-          <label class="form-check-label" for="musician">Musician</label>
-        </div>
+      <div class="mb-3">
+        <label for="username" class="form-label">Username</label>
+        <input type="text" class="form-control" id="username" name="username" required />
+        <span id="username-error" class="field-error"></span>
+      </div>
+
+      <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <input type="email" class="form-control" id="email" name="email" required />
+        <span id="email-error" class="field-error"></span>
+      </div>
+
+      <div class="mb-3">
+        <label for="password" class="form-label">Password</label>
+        <input type="password" class="form-control" id="password" name="password1" required />
+        <span id="password-error" class="field-error"></span>
+      </div>
+
+      <div class="mb-3">
+        <label for="confirm-password" class="form-label">Confirm Password</label>
+        <input type="password" class="form-control" id="confirm-password" name="password2" required />
+        <span id="confirm-password-error" class="field-error"></span>
       </div>
 
       <button type="submit" class="btn btn-primary nice-button primary-color mb-5">
-        Continue
+        Sign Up
       </button>
+
     </form>
   </div>
 </div>
+{% endblock %}
+
+{% block scripts_block %}
+    <script src="{% static 'find_my_gig/js/auth.js' %}"></script>
 {% endblock %}
