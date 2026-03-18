@@ -3,6 +3,7 @@ from django.urls import reverse
 from django.contrib.auth import login
 from django.db import transaction
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 
 # IMPORT THE MODELS and FORMS
 from gigs.models import Musician, Band, Listing, Application, Review
@@ -83,7 +84,11 @@ def gig_listings(request):
 def gig_detail(request, gig_id):
     """Pulls a specific gig from the database using its ID."""
     gig = get_object_or_404(Listing, id=gig_id)
-    return render(request, 'gigs/gig_detail.html', {'gig': gig})
+    return render(request, 'gigs/gig_detail.html', {
+        'gig': gig,
+        'has_applied': False,
+        'is_bookmarked': False,
+    })
 
 def musicians_list(request):
     """Shows all musicians registered in the database."""
@@ -201,3 +206,49 @@ def band_signup(request):
         profile_form = BandProfileForm()
 
     return render(request, 'gigs/signup_band.html', {'user_form': user_form,'profile_form': profile_form,})
+
+@login_required
+def update_profile(request):
+    if request.method == 'POST':
+        return JsonResponse({'success': True})
+    return redirect('gigs:my_profile')
+
+@login_required
+def delete_account(request):
+    if request.method == 'POST':
+        return JsonResponse({'success': True})
+
+@login_required
+def create_gig_listing(request):
+    if request.method == 'POST':
+        return JsonResponse({
+            'success': True,
+            'listing': {
+                'id': 1,
+                'title': 'Test',
+                'req_instruments': 'Guitar',
+                'deadline': '2026-04-01',
+                'location': 'Glasgow'
+            }
+        })
+
+@login_required
+def delete_listing(request, listing_id):
+    if request.method == 'POST':
+        return JsonResponse({'success': True})
+
+def apply_gig(request, gig_id):
+    if request.method == 'POST':
+        return JsonResponse({'success': True})
+
+def withdraw_gig(request, gig_id):
+    if request.method == 'POST':
+        return JsonResponse({'success': True})
+
+def save_gig(request, gig_id):
+    if request.method == 'POST':
+        return JsonResponse({'success': True})
+
+def unsave_gig(request, gig_id):
+    if request.method == 'POST':
+        return JsonResponse({'success': True})

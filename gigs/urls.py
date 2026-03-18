@@ -22,9 +22,9 @@ urlpatterns = [
 
     # --- USER PORTAL ---
     path('dashboard/', views.dashboard, name='dashboard'),
-    path('my-applications/', views.my_applications, name='my_applications'),
-    path('my-listings/', views.my_listings, name='my_listings'),
-    path('my-profile/', views.my_profile, name='my_profile'),
+    path('dashboard/my-applications/', views.my_applications, name='my_applications'),
+    path('dashboard/my-listings/', views.my_listings, name='my_listings'),
+    path('dashboard/my-profile/', views.my_profile, name='my_profile'),
 
     # -- AUTHENTICATION AND SIGNUPS --
     path('signup/', views.signup_choice, name='signup'),
