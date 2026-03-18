@@ -1,7 +1,11 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.contrib.auth import login
 from django.db import transaction
+from django.contrib.auth.decorators import login_required
+
+# IMPORT THE MODELS and FORMS
+from gigs.models import Musician, Band, Listing, Application, Review
 from gigs.forms import UserSignUpForm, MusicianProfileForm, BandProfileForm
 import difflib
 
@@ -10,7 +14,7 @@ import difflib
 # ==========================================
 
 def clean_search_query(query):
-    """Takes whatever the user typed in the search bar, removes extra spaces, and makes it lowercase so our search doesn't break."""
+    """Takes whatever the user typed in the search bar, removes extra spaces, and makes it lowercase."""
     if query:
         return query.strip().lower()
     return ''
@@ -18,14 +22,11 @@ def clean_search_query(query):
 def fuzzy_match_instrument(user_typo):
     """If the user spells 'gutar', this function guesses they meant 'guitar' and fixes it!"""
     valid_instruments = ['guitar', 'drums', 'vocals', 'piano', 'bass']
-    
-    # get_close_matches tries to find the closest valid word. 
-    # n=1 means we only want the top guess. cutoff=0.5 means it must be at least a 50% match.
     best_guesses = difflib.get_close_matches(user_typo, valid_instruments, n=1, cutoff=0.5)
     
     if best_guesses:
         return best_guesses[0]
-    return user_typo # If it can't figure it out, just return what they typed.
+    return user_typo
 
 
 # ==========================================
@@ -34,50 +35,44 @@ def fuzzy_match_instrument(user_typo):
 
 def home(request):
     """Handles the main landing page (/)"""
-    # 'context' is the dictionary we use to pass Python data directly into our HTML file
     context = {'welcome_message': 'Welcome to Find My Gig!'}
-    # Tell Django exactly which HTML file in the templates folder to show the user
     return render(request, 'gigs/home.html', context)
 
 def gig_listings(request):
-    """Handles the Gig Listings page and the Search/Filter logic (/gigs/)"""
+    """Handles the Gig Listings page using real database data."""
     
-    # 1. THE CATCHER: Look at the URL and grab the search terms the user typed in
+    # Start with all listings from the database
+    gigs_queryset = Listing.objects.all()
+
+    # GET parameters for filtering
     raw_instrument = request.GET.get('instrument', '')
-    cleaned_instrument = clean_search_query(raw_instrument)
-    
     location_query = clean_search_query(request.GET.get('location', ''))
     date_query = request.GET.get('date', '') 
     sort_by = request.GET.get('sort', '')
 
-    # 2. THE SPELLCHECKER: Fix the instrument typo if they made one
-    search_term = fuzzy_match_instrument(cleaned_instrument) if cleaned_instrument else ''
-
-    # 3. THE MOCK DATABASE: Fake data until we hook up our real SQLite database
-    mock_gigs = [
-        {'id': 1, 'title': 'Drummer needed for a new band', 'band_name': 'Name TBC', 'instrument': 'drums', 'location': 'glasgow', 'deadline': '2026-03-15', 'description': 'Seeking a talented drummer...'},
-        {'id': 2, 'title': 'Guitarist Needed Urgently!', 'band_name': 'Swim School', 'instrument': 'guitar', 'location': 'edinburgh', 'deadline': '2026-02-25', 'description': 'Current Guitarist injured...'}
-    ]
-
-    # 4. THE FILTERING FUNNEL: Throw away gigs that don't match the user's search
+    # Filter by instrument (using fuzzy match)
+    search_term = fuzzy_match_instrument(clean_search_query(raw_instrument)) if raw_instrument else ''
     if search_term:
-        mock_gigs = [gig for gig in mock_gigs if search_term in gig['instrument']]
+        gigs_queryset = gigs_queryset.filter(req_instruments__icontains=search_term)
+
+    # Filter by location
     if location_query:
-        mock_gigs = [gig for gig in mock_gigs if location_query in gig['location']]
+        gigs_queryset = gigs_queryset.filter(location__icontains=location_query)
+
+    # Filter by date
     if date_query:
-        mock_gigs = [gig for gig in mock_gigs if gig['deadline'] == date_query]
+        gigs_queryset = gigs_queryset.filter(deadline=date_query)
 
-    # 5. THE SORTER: Order the remaining gigs alphabetically or by date
+    # Sorting logic
     if sort_by == 'name':
-        mock_gigs = sorted(mock_gigs, key=lambda k: k['title'])
+        gigs_queryset = gigs_queryset.order_by('title')
     elif sort_by == 'date':
-        mock_gigs = sorted(mock_gigs, key=lambda k: k['deadline'])
+        gigs_queryset = gigs_queryset.order_by('deadline')
 
-    # 6. PACKAGE AND SEND: Put all the finished data into the context dictionary and send it to the HTML file
     context = {
-        'gigs': mock_gigs,
+        'gigs': gigs_queryset,
         'selected_instrument': raw_instrument, 
-        'corrected_instrument': search_term if search_term != cleaned_instrument else None,
+        'corrected_instrument': search_term if search_term != clean_search_query(raw_instrument) else None,
         'selected_location': location_query, 
         'selected_date': date_query,
         'current_sort': sort_by
@@ -86,72 +81,79 @@ def gig_listings(request):
     return render(request, 'gigs/gig_listings.html', context)
 
 def gig_detail(request, gig_id):
-    """Handles clicking on a single gig to see more details (/gigs/<id>/)"""
-    # Note: gig_id was passed in automatically by the urls.py file!
-    context = {
-        'gig_id': gig_id,
-        'title': 'Guitarist Needed Urgently!',
-        'band_name': 'Swim School',
-        'instrument': 'Guitar',
-        'deadline': '25/02/2026',
-        'location': 'King Tuts, Glasgow',
-        'description': 'Current Guitarist is injured, need an urgent replacement.',
-    }
-    return render(request, 'gigs/gig_detail.html', context)
+    """Pulls a specific gig from the database using its ID."""
+    gig = get_object_or_404(Listing, id=gig_id)
+    return render(request, 'gigs/gig_detail.html', {'gig': gig})
 
 def musicians_list(request):
-    """Handles the directory showing all musicians on the site (/musicians/)"""
-    mock_musicians = [
-        {'id': 1, 'name': 'Jack Daniel', 'instrument': 'Drums', 'location': 'Edinburgh'},
-        {'id': 2, 'name': 'John William', 'instrument': 'Guitar', 'location': 'Glasgow, Scotland'}
-    ]
-    return render(request, 'gigs/musicians_list.html', {'musicians': mock_musicians})
+    """Shows all musicians registered in the database."""
+    musicians = Musician.objects.all()
+    return render(request, 'gigs/musicians_list.html', {'musicians': musicians})
 
 def musician_profile(request, id):
-    """Handles clicking on a single musician to view their profile (/musicians/<id>/)"""
-    context = {
-        'musician_id': id, 
-        'name': 'Jack Daniel', 
-        'age': 34,
-        'location': 'Edinburgh',
-        'instruments': 'Drums',
-        'bio': 'I was in a band for 3 years before leaving to explore new options.',
-        'media_link': 'youtube.com/@JackDoesDrums'
-    }
-    return render(request, 'gigs/musician_profile.html', context)
+    """Pulls a specific musician's profile from the database."""
+    musician = get_object_or_404(Musician, id=id)
+    return render(request, 'gigs/musician_profile.html', {'musician': musician})
 
 def band_profile(request, id):
-    """Handles clicking on a single band to view their profile (/bands/<id>/)"""
-    context = {
-        'band_id': id, 
-        'name': 'Soul Shatterers', 
-        'location': 'Glasgow',
-        'bio': 'The Soul Shatterers are a rock band based in Glasgow. They have been established for a year now.'
-    }
-    return render(request, 'gigs/band_profile.html', context)
+    """Pulls a specific band's profile from the database."""
+    band = get_object_or_404(Band, id=id)
+    return render(request, 'gigs/band_profile.html', {'band': band})
 
 def create_gig(request):
-    """Handles the form where bands can list a new gig (/gigs/create/)"""
-    # If the user clicked "Submit" on the form, redirect them back to the gig listings page
+    """Handles the form where bands can list a new gig."""
     if request.method == 'POST':
         return redirect(reverse('gigs:gig_listings'))
-    
-    # If they just navigated to the page, show them the empty HTML form
     return render(request, 'gigs/create_gig.html')
+
+
+# ==========================================
+# --- USER PORTAL VIEWS ---
+# ==========================================
+
+@login_required
+def dashboard(request):
+    """Handles the user dashboard navigation page."""
+    return render(request, 'gigs/dashboard.html')
+
+@login_required
+def my_applications(request):
+    """Shows only the applications created by the logged-in user."""
+    user_applications = Application.objects.filter(applicant=request.user)
+    return render(request, 'gigs/my_applications.html', {'applications': user_applications})
+
+@login_required
+def my_listings(request):
+    """Shows only the gigs posted by the logged-in user's band."""
+    try:
+        band = request.user.band
+        listings = Listing.objects.filter(band=band)
+    except Band.DoesNotExist:
+        listings = []
+    return render(request, 'gigs/my_listings.html', {'listings': listings})
+
+@login_required
+def my_profile(request):
+    """Shows the user's editable profile settings."""
+    return render(request, 'gigs/my_profile.html')
+
+
+# ==========================================
+# --- AUTHENTICATION & SIGNUP VIEWS ---
+# ==========================================
 
 def signup_choice(request):
     if request.user.is_authenticated:
         return redirect('gigs:home')
     
     if request.method == 'POST':
-        # Uses the radio buttons entered on signup.html page
         user_type = request.POST.get('user_type')
 
         if user_type == 'musician':
             return redirect('gigs:musician_signup')
         elif user_type == 'band':
             return redirect('gigs:band_signup')
-        # Could add an error redirect if user is neither band or musician
+            
     return render(request, 'gigs/signup.html')
 
 @transaction.atomic
@@ -170,7 +172,7 @@ def musician_signup(request):
             musician.save()
 
             login(request, user)
-            redirect('gigs:home')
+            return redirect('gigs:home')
     else: 
         user_form = UserSignUpForm()
         profile_form = MusicianProfileForm()
