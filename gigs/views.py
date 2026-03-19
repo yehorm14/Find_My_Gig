@@ -36,7 +36,7 @@ def fuzzy_match_instrument(user_typo):
 def home(request):
     """Handles the main landing page (/)"""
     context = {'welcome_message': 'Welcome to Find My Gig!'}
-    return render(request, 'gigs/home.html', context)
+    return render(request, 'gigs/band_review.html', context)
 
 def gig_listings(request):
     """Handles the Gig Listings page using real database data."""
