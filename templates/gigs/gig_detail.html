@@ -7,9 +7,11 @@
 
 {% block header_block %}
 {% endblock %} {% block body_block %}
+<div id="gig-detail-status"></div>
+
 <div class="text-center m-4">
   <h2>{{ gig.title }}</h2>
-  <h5>{{ gig.author }}</h5>
+  <h5>{{ gig.band_name }}</h5>
 </div>
 
 <hr class="mx-5" />
@@ -18,13 +20,40 @@
 
 <div class="row justify-content-center">
   <div class="col-4 text-center">
-    <p>{{ gig.position }}</p>
-    <p>{{ gig.description }}</p>
+    <h5>{{ gig.band.name }}</h5>
+    <p>Position: {{ gig.req_instruments }}</p>
+    <p>Description: {{ gig.description }}</p>
   </div>
 
   <div class="col-4 text-center">
-    <p>{{ gig.location }}</p>
+    <p>Location: {{ gig.location }}</p>
     <p>insert google maps pic here</p>
   </div>
 </div>
+
+<div class="row justify-content-center m-4">
+  <div class="col-auto">
+    <button type="button"
+            id="gig-detail-apply-btn"
+            class="btn btn-primary nice-button background-color"
+            data-gig-id="{{ gig.id }}"
+            data-applied="{{ has_applied|yesno:'true,false' }}">
+      {% if has_applied %}Withdraw{% else %}Apply{% endif %}
+    </button>
+  </div>
+
+  <div class="col-auto">
+    <button type="button"
+            id="gig-detail-bookmark-btn"
+            class="btn btn-primary nice-button background-color"
+            data-gig-id="{{ gig.id }}"
+            data-bookmarked="{{ is_bookmarked|yesno:'true,false' }}">
+      {% if is_bookmarked %}Bookmarked{% else %}Bookmark{% endif %}
+    </button>
+  </div>
+</div>
+
+{% endblock %}
+{% block scripts_block %}
+    <script src="{% static 'find_my_gig/js/gigs.js' %}"></script>
 {% endblock %}
