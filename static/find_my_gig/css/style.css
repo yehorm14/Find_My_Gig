@@ -187,6 +187,11 @@ textarea:focus {
     margin-top: 4px;
 }
 
+.star-rating {
+    direction: rtl;
+    display: inline-block;
+    cursor: pointer;
+
 @keyframes shake {
     0%,100% { transform: translateX(0); }
     25%      { transform: translateX(-8px); }
@@ -196,6 +201,7 @@ textarea:focus {
     animation: shake 0.5s ease;
 }
 
+.star-rating input {
 .radio-selected {
     font-weight: bold;
     background-color: var(--highlight-color);
@@ -223,12 +229,22 @@ textarea:focus {
     margin-bottom: 10px;
 }
 
+.star-rating label {
+    color: #ddd;
+    font-size: 24px;
+    padding: 0 2px;
+    cursor: pointer;
+    transition: all 0.2s ease;
 .pending-label {
     color: var(--highlight-color);
     font-size: 12px;
     margin: 0 6px;
 }
 
+.star-rating label:hover,
+.star-rating label:hover~label,
+.star-rating input:checked~label {
+    color: #ffc107;
 .apply-btn {
     background-color: var(--highlight-color);
     color: var(--background-color);
@@ -249,4 +265,3 @@ textarea:focus {
     color: var(--background-color);
     border-color: var(--highlight-color);
 }
-

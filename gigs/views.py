@@ -24,7 +24,7 @@ def fuzzy_match_instrument(user_typo):
     """If the user spells 'gutar', this function guesses they meant 'guitar' and fixes it!"""
     valid_instruments = ['guitar', 'drums', 'vocals', 'piano', 'bass']
     best_guesses = difflib.get_close_matches(user_typo, valid_instruments, n=1, cutoff=0.5)
-    
+
     if best_guesses:
         return best_guesses[0]
     return user_typo
@@ -37,18 +37,18 @@ def fuzzy_match_instrument(user_typo):
 def home(request):
     """Handles the main landing page (/)"""
     context = {'welcome_message': 'Welcome to Find My Gig!'}
-    return render(request, 'gigs/home.html', context)
+    return render(request, 'gigs/band_review.html', context)
 
 def gig_listings(request):
     """Handles the Gig Listings page using real database data."""
-    
+
     # Start with all listings from the database
     gigs_queryset = Listing.objects.all()
 
     # GET parameters for filtering
     raw_instrument = request.GET.get('instrument', '')
     location_query = clean_search_query(request.GET.get('location', ''))
-    date_query = request.GET.get('date', '') 
+    date_query = request.GET.get('date', '')
     sort_by = request.GET.get('sort', '')
 
     # Filter by instrument (using fuzzy match)
@@ -72,13 +72,13 @@ def gig_listings(request):
 
     context = {
         'gigs': gigs_queryset,
-        'selected_instrument': raw_instrument, 
+        'selected_instrument': raw_instrument,
         'corrected_instrument': search_term if search_term != clean_search_query(raw_instrument) else None,
-        'selected_location': location_query, 
+        'selected_location': location_query,
         'selected_date': date_query,
         'current_sort': sort_by
     }
-    
+
     return render(request, 'gigs/gig_listings.html', context)
 
 def gig_detail(request, gig_id):
@@ -146,7 +146,7 @@ def my_profile(request):
     except:
         profile = request.user.band
         profile_type = 'band'
-    
+
     return render(request, 'gigs/my_profile.html', {
         'profile': profile,
         'profile_type': profile_type
@@ -161,7 +161,7 @@ def my_profile(request):
 def signup_choice(request):
     if request.user.is_authenticated:
         return redirect('gigs:home')
-    
+
     if request.method == 'POST':
         user_type = request.POST.get('user_type')
         user_form = UserSignUpForm(request.POST)
@@ -172,12 +172,12 @@ def signup_choice(request):
                 Musician.objects.create(user=user)
             elif user_type == 'band':
                 Band.objects.create(user=user)
-            
+
             login(request, user)
             return redirect('gigs:my_profile')
 
         return render(request, 'gigs/signup.html', {'user_form': user_form})
-            
+
     return render(request, 'gigs/signup.html')
 
 
