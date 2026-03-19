@@ -40,9 +40,9 @@ Musicians
 
           <div class="col">
             <a href="{% url 'gigs:musician_profile' musician.id %}" class="subtle-link">
-              <h4>Name: {{ musician.user.name }}</h4>
+              <h4>Name: {{ musician.user }}</h4>
             </a>
-            <p>Instruments: {{ musician.instrument }}</p>
+            <p>Instruments: {{ musician.instruments }}</p>
             <p>Age: {{ musician.age }}</p>
           </div>
 
