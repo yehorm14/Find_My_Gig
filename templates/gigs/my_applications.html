@@ -24,15 +24,15 @@ My Applications
         <div class="listing-card m-2">
             <div class="row">
                 <div class="col">
-                    <h4> {{ application.gig.title }}</h4>
-                    <p>Posted by: {{ application.gig.band_name }}</p>
-                    <p>Position: {{ application.gig.req_instruments }}</p>
-                    <p>Date: {{ application.gig.deadline}}</p>
+                    <h4> {{ application.listing.title }}</h4>
+                    <p>Posted by: {{ application.listing.band_name }}</p>
+                    <p>Position: {{ application.lisiting.req_instruments }}</p>
+                    <p>Date: {{ application.listing.deadline}}</p>
                 </div>
 
                 <div class="col">
-                  <p>Description: {{ application.gig.description }}</p>
-                  <p>Location: {{ application.gig.location }}</p>
+                  <p>Description: {{ application.listing.description }}</p>
+                  <p>Location: {{ application.listing.location }}</p>
                 </div>
 
                 <div class="col-3">
@@ -47,8 +47,8 @@ My Applications
                 <div class="col-3 d-flex flex-column align-items-center text-center justify-content-center">
                     <button type="button"
                              class="withdraw-application-btn btn btn-primary nice-button background-color w-100 my-2"
-                             data-gig-id="{{ application.gig.id }}">
-                    <p class="m-3 mx-5">Revoke Application</p>
+                             data-gig-id="{{ application.listing.id }}">
+                    <p class="m-3 mx-5">withdraw</p>
                     </button>
 
                     <button type="button"

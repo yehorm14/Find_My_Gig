@@ -46,7 +46,7 @@ Gigs
                 <a href="{% url 'gigs:gig_detail' gig.id %}" class="site-title">
                   <h4>{{ gig.title }}</h4>
                 </a>
-                <p>Posted by: {{ gig.band_name }}</p>
+                <p>Posted by: {{ gig.band.name }}</p>
                 <p>Position: {{ gig.req_instruments }}</p>
                 <p>Date: {{ gig.deadline }}</p>
               </div>

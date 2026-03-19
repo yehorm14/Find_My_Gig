@@ -140,7 +140,17 @@ def my_listings(request):
 @login_required
 def my_profile(request):
     """Shows the user's editable profile settings."""
-    return render(request, 'gigs/my_profile.html')
+    try:
+        profile = request.user.musician
+        profile_type = 'musician'
+    except:
+        profile = request.user.band
+        profile_type = 'band'
+    
+    return render(request, 'gigs/my_profile.html', {
+        'profile': profile,
+        'profile_type': profile_type
+    })
 
 
 # ==========================================
