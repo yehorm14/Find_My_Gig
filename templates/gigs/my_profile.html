@@ -8,6 +8,7 @@ My Profile
 
 {% block header_block %}
 {% endblock %} {% block body_block %}
+<div id="status-message"></div>
 <div class="text-center m-4">
   <h2>My Profile</h2>
 </div>
@@ -21,37 +22,39 @@ My Profile
       <div class="row justify-content-center m-4">
         <div class="col text-center">
           <label for="username" class="form-label">Username</label>
-          <input type="text" class="form-control" id="username" name="username" value="backend add here" required />
+          <input type="text" class="form-control" id="profile-username" name="username" value="{{ user.username }}" required />
         </div>
 
         <div class="col text-center">
           <label for="firstname" class="form-label">Firstname</label>
-          <input type="text" class="form-control" id="firstname" name="firstname" value="backend add here" required />
+          <input type="text" class="form-control" id="firstname" name="firstname" value="{{ user.first_name }}" required />
         </div>
 
         <div class="col text-center">
           <label for="surname" class="form-label">Surname</label>
-          <input type="text" class="form-control" id="surname" name="surname" value="backend add" required />
+          <input type="text" class="form-control" id="surname" name="surname" value="{{ user.last_name }}" required />
         </div>
 
+        {% if profile_type == 'musician' %}
         <div class="col text-center">
-          <label for="age" class="form-label">Age</label>
-          <input type="text" class="form-control" id="age" name="age" value="backend add" required />
+          <label for="profile-age" class="form-label">Age</label>
+          <input type="text" class="form-control" id="profile-age" name="age"
+                 value="{{ profile.age }}" required />
         </div>
+        {% endif %}
       </div>
 
       <div class="row justify-content-center m-4">
         <div class="col text-center">
-          <!--backend people do magic here pls-->
           <label for="profile-pic-upload" class="profile-pic-label">
-            <img
+            <img id="profile-picture-preview"
               src="{% static 'find_my_gig/images/pfp-placeholder.png' %}"
               class="profile-pic"
             />
           </label>
           <input
             type="file"
-            id="profile-pic-upload"
+            id="profile-picture-input"
             accept="image/*"
             style="display: none"
           />
@@ -59,60 +62,27 @@ My Profile
           <p>Click to update</p>
         </div>
 
-        <div class="col text-center m-4">
-          <h4>Media:</h4>
-          <div class="row justify-content-center mb-3">
-            <div class="col-8">
-              <input
-                type="text"
-                class="form-control"
-                id="media-link"
-                name="media-link"
-                placeholder="Paste link here"
-              />
-            </div>
-            <div class="col-auto">
-              <button
-                type="button"
-                class="btn btn-primary nice-button primary-color"
-              >
-                Add
-              </button>
-            </div>
-          </div>
-        </div>
-
         <div class="row justify-content-center m-4">
           <div class="col">
             <div class="mb-3">
               <label for="about" class="form-label">About</label>
-              <textarea class="form-control" id="about" rows="5">{{ user.profile.about }}</textarea>
+              <textarea class="form-control" id="profile-about" rows="5">{{profile.bio }}</textarea>
             </div>
           </div>
 
+          {% if profile_type == 'musician' %}
           <div class="col">
-            Instruments
-            <div class="form-check">
-              <input
-                class="form-check-input"
-                type="checkbox"
-                value="guitar"
-                id="guitar"
-                name="guitar"
-              />
-              <label class="form-check-label" for="guitar">Guitar</label>
-            </div>
-            <div class="form-check">
-              <input
-                class="form-check-input"
-                type="checkbox"
-                value="bass"
-                id="bass"
-                name="bass"
-              />
-              <label class="form-check-label" for="bass">Bass</label>
-            </div>
+            <label class="form-label">Instruments</label>
+            <select class="form-control" id="profile-instruments" name="instruments">
+              <option value="">Select instrument</option>
+              <option value="Guitar" {% if profile.instruments == 'Guitar' %}selected{% endif %}>Guitar</option>
+              <option value="Bass"   {% if profile.instruments == 'Bass'   %}selected{% endif %}>Bass</option>
+              <option value="Drums"  {% if profile.instruments == 'Drums'  %}selected{% endif %}>Drums</option>
+              <option value="Vocals" {% if profile.instruments == 'Vocals' %}selected{% endif %}>Vocals</option>
+              <option value="Other"  {% if profile.instruments == 'Other'  %}selected{% endif %}>Other</option>
+            </select>
           </div>
+          {% endif %}
 
           <div class="col">
             <div class="mb-3">
@@ -122,29 +92,34 @@ My Profile
                   <input
                     type="text"
                     class="form-control"
+                    id="media-link-input"
                     placeholder="Paste link here"
                   />
                 </div>
                 <div class="col-auto">
                   <button
                     type="button"
+                    id="add-media-btn"
                     class="btn btn-primary nice-button primary-color"
                   >
                     Add
                   </button>
                 </div>
               </div>
-              <div class="media-list">
-                <div class="media-item">
-                  <span>https://example.com</span>
-                  <button
-                    type="button"
-                    class="btn btn-primary btn-sm nice-button primary-color"
+              <ul id="media-links-list">
+                {% for link in media_links %}
+                  <li>
+                    <a href="{{ link.url }}" target="_blank">{{ link.url }}</a>
+                  <button 
+                    type="button" 
+                    data-media-id="{{ link.id }}"
+                    class="delete-media-btn btn btn-sm nice-button primary-color"
                   >
                     Delete
                   </button>
-                </div>
-              </div>
+                  </li>
+                {% endfor %}
+              </ul>
             </div>
           </div>
         </div>
@@ -153,8 +128,9 @@ My Profile
           <div class="col">
             <p>Press here to update profile</p>
             <button
+              id="update-profile-btn"
               class="btn btn-primary btn-lg nice-button primary-color"
-              type="submit"
+              type="button"
             >
               Update
             </button>
@@ -162,6 +138,7 @@ My Profile
           <div class="col">
             <p>Press here to delete account</p>
             <button
+              id="delete-account-btn"
               type="button"
               class="btn btn-primary btn-lg nice-button primary-color"
             >
@@ -173,4 +150,7 @@ My Profile
     </form>
   </div>
 </div>
+
+{% block scripts_block %}{% endblock %}
+    <script src="{% static 'find_my_gig/js/dashboard.js' %}"></script>
 {% endblock %}

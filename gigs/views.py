@@ -3,6 +3,7 @@ from django.urls import reverse
 from django.contrib.auth import login
 from django.db import transaction
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 
 # IMPORT THE MODELS and FORMS
 from gigs.models import Musician, Band, Listing, Application, Review
@@ -83,7 +84,11 @@ def gig_listings(request):
 def gig_detail(request, gig_id):
     """Pulls a specific gig from the database using its ID."""
     gig = get_object_or_404(Listing, id=gig_id)
-    return render(request, 'gigs/gig_detail.html', {'gig': gig})
+    return render(request, 'gigs/gig_detail.html', {
+        'gig': gig,
+        'has_applied': False,
+        'is_bookmarked': False,
+    })
 
 def musicians_list(request):
     """Shows all musicians registered in the database."""
@@ -135,69 +140,89 @@ def my_listings(request):
 @login_required
 def my_profile(request):
     """Shows the user's editable profile settings."""
-    return render(request, 'gigs/my_profile.html')
+    try:
+        profile = request.user.musician
+        profile_type = 'musician'
+    except:
+        profile = request.user.band
+        profile_type = 'band'
+    
+    return render(request, 'gigs/my_profile.html', {
+        'profile': profile,
+        'profile_type': profile_type
+    })
 
 
 # ==========================================
 # --- AUTHENTICATION & SIGNUP VIEWS ---
 # ==========================================
 
+@transaction.atomic
 def signup_choice(request):
     if request.user.is_authenticated:
         return redirect('gigs:home')
     
     if request.method == 'POST':
         user_type = request.POST.get('user_type')
+        user_form = UserSignUpForm(request.POST)
 
-        if user_type == 'musician':
-            return redirect('gigs:musician_signup')
-        elif user_type == 'band':
-            return redirect('gigs:band_signup')
+        if user_form.is_valid():
+            user = user_form.save()
+            if user_type == 'musician':
+                Musician.objects.create(user=user)
+            elif user_type == 'band':
+                Band.objects.create(user=user)
+            
+            login(request, user)
+            return redirect('gigs:my_profile')
+
+        return render(request, 'gigs/signup.html', {'user_form': user_form})
             
     return render(request, 'gigs/signup.html')
 
-@transaction.atomic
-def musician_signup(request):
-    if request.user.is_authenticated:
-        return redirect('gigs:home')
-    
+
+@login_required
+def update_profile(request):
     if request.method == 'POST':
-        user_form = UserSignUpForm(request.POST)
-        profile_form = MusicianProfileForm(request.POST, request.FILES)
+        return JsonResponse({'success': True})
+    return redirect('gigs:my_profile')
 
-        if user_form.is_valid() and profile_form.is_valid():
-            user = user_form.save()
-            musician = profile_form.save(commit=False)
-            musician.user = user
-            musician.save()
-
-            login(request, user)
-            return redirect('gigs:home')
-    else: 
-        user_form = UserSignUpForm()
-        profile_form = MusicianProfileForm()
-    
-    return render(request, 'gigs/signup_musician.html', {'user_form': user_form,'profile_form': profile_form,})
-
-@transaction.atomic
-def band_signup(request):
-    if request.user.is_authenticated:
-        return redirect('gigs:home')
-
+@login_required
+def delete_account(request):
     if request.method == 'POST':
-        user_form = UserSignUpForm(request.POST)
-        profile_form = BandProfileForm(request.POST, request.FILES)
+        return JsonResponse({'success': True})
 
-        if user_form.is_valid() and profile_form.is_valid():
-            user = user_form.save()
-            band = profile_form.save(commit=False)
-            band.user = user
-            band.save()
+@login_required
+def create_gig_listing(request):
+    if request.method == 'POST':
+        return JsonResponse({
+            'success': True,
+            'listing': {
+                'id': 1,
+                'title': 'Test',
+                'req_instruments': 'Guitar',
+                'deadline': '2026-04-01',
+                'location': 'Glasgow'
+            }
+        })
 
-            login(request, user)
-            return redirect('gigs:home')
-    else:
-        user_form = UserSignUpForm()
-        profile_form = BandProfileForm()
+@login_required
+def delete_listing(request, listing_id):
+    if request.method == 'POST':
+        return JsonResponse({'success': True})
 
-    return render(request, 'gigs/signup_band.html', {'user_form': user_form,'profile_form': profile_form,})
+def apply_gig(request, gig_id):
+    if request.method == 'POST':
+        return JsonResponse({'success': True})
+
+def withdraw_gig(request, gig_id):
+    if request.method == 'POST':
+        return JsonResponse({'success': True})
+
+def save_gig(request, gig_id):
+    if request.method == 'POST':
+        return JsonResponse({'success': True})
+
+def unsave_gig(request, gig_id):
+    if request.method == 'POST':
+        return JsonResponse({'success': True})

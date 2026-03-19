@@ -30,7 +30,8 @@ Musicians
 <div class="row justify-content-center">
   <div class="col-5 mx-5">
     <div class="listings-container">
-      <!-- add for loop here for musician in musicians-->
+
+      {% for musician in musicians %}
       <div class="listing-card m-2">
         <div class="row">
             <div class="col-auto">
@@ -38,10 +39,10 @@ Musicians
             </div>
 
           <div class="col">
-            <a href="" class="subtle-link">
-              <h4>Name {{ musician.name }}</h4>
+            <a href="{% url 'gigs:musician_profile' musician.id %}" class="subtle-link">
+              <h4>Name: {{ musician.user }}</h4>
             </a>
-            <p>Instruments: {{ musician.instrument }}</p>
+            <p>Instruments: {{ musician.instruments }}</p>
             <p>Age: {{ musician.age }}</p>
           </div>
 
@@ -49,12 +50,16 @@ Musicians
             class="col-3 d-flex flex-column align-items-center text-center justify-content-center"
           >
 
-            <button class="btn btn-primary nice-button background-color w-100 h-30vh my-2 d-flex align-items-center justify-content-center py-3">
+            <button 
+                type="button"
+                data-url="{% url 'gigs:musician_profile' musician.id %}"
+                class="btn btn-primary nice-button background-color w-100 h-30vh my-2 d-flex align-items-center justify-content-center py-3">
                 Review
             </button>
           </div>
         </div>
       </div>
+      {% endfor %}
     </div>
   </div>
 </div>
