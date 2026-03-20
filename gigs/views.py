@@ -84,10 +84,19 @@ def gig_listings(request):
 def gig_detail(request, gig_id):
     """Pulls a specific gig from the database using its ID."""
     gig = get_object_or_404(Listing, id=gig_id)
+    has_applied = False
+    is_bookmarked = False
+
+    if request.user.is_authenticated:
+        has_applied = Application.objects.filter(
+            applicant=request.user, 
+            listing=gig
+        ).exists()
+
     return render(request, 'gigs/gig_detail.html', {
         'gig': gig,
-        'has_applied': False,
-        'is_bookmarked': False,
+        'has_applied': has_applied,
+        'is_bookmarked': is_bookmarked,
     })
 
 def musicians_list(request):
@@ -213,10 +222,21 @@ def delete_listing(request, listing_id):
 
 def apply_gig(request, gig_id):
     if request.method == 'POST':
+        if not request.user.is_authenticated:
+            return JsonResponse({'success': False, 'error': 'not_logged_in'})
+        
+        listing = get_object_or_404(Listing, id=gig_id)
+        
+        if Application.objects.filter(applicant=request.user, listing=listing).exists():
+            return JsonResponse({'success': False, 'error': 'already_applied'})
+        
+        Application.objects.create(applicant=request.user, listing=listing)
         return JsonResponse({'success': True})
 
 def withdraw_gig(request, gig_id):
     if request.method == 'POST':
+        listing = get_object_or_404(Listing, id=gig_id)
+        Application.objects.filter(applicant=request.user, listing=listing).delete()
         return JsonResponse({'success': True})
 
 def save_gig(request, gig_id):

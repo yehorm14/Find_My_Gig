@@ -21,12 +21,12 @@ My Applications
   <div class="col mx-5">
     <div class="listings-container">
       {% for application in applications %}
-        <div class="listing-card m-2">
+        <div class="application-card listing-card m-2">
             <div class="row">
                 <div class="col">
                     <h4> {{ application.listing.title }}</h4>
-                    <p>Posted by: {{ application.listing.band_name }}</p>
-                    <p>Position: {{ application.lisiting.req_instruments }}</p>
+                    <p>Posted by: {{ application.listing.band.name }}</p>
+                    <p>Position: {{ application.listing.req_instruments }}</p>
                     <p>Date: {{ application.listing.deadline}}</p>
                 </div>
 
@@ -52,7 +52,7 @@ My Applications
                     </button>
 
                     <button type="button"
-                            data-url="{% url 'gigs:gig_detail' application.gig.id %}"
+                            data-url="{% url 'gigs:gig_detail' application.listing.id %}"
                             class="btn btn-primary nice-button background-color w-100 my-2">
                     <p class="m-3 mx-5">Review</p>
                     </button>

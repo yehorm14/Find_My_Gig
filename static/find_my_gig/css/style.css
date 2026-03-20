@@ -182,7 +182,7 @@ textarea:focus {
 }
 .field-error {
     display: none;
-    color: #e74c3c;
+    color: #e74c3c !important;
     font-size: 12px;
     margin-top: 4px;
 }
@@ -191,6 +191,7 @@ textarea:focus {
     direction: rtl;
     display: inline-block;
     cursor: pointer;
+}
 
 @keyframes shake {
     0%,100% { transform: translateX(0); }
@@ -202,6 +203,9 @@ textarea:focus {
 }
 
 .star-rating input {
+    display: none;
+}
+
 .radio-selected {
     font-weight: bold;
     background-color: var(--highlight-color);
@@ -210,13 +214,14 @@ textarea:focus {
     border-radius: 4px;
 }
 
+
 .status-success {
     display: none;
     padding: 10px;
     border-radius: 4px;
     font-weight: bold;
-    background: #1a3a1a;
-    color: #5cb85c;
+    background: #1a3a1a !important;
+    color: #5cb85c !important;
     margin-bottom: 10px;
 }
 .status-error {
@@ -224,8 +229,8 @@ textarea:focus {
     padding: 10px;
     border-radius: 4px;
     font-weight: bold;
-    background: #3a1a1a;
-    color: #e74c3c;
+    background: #3a1a1a !important;
+    color: #e74c3c !important;
     margin-bottom: 10px;
 }
 
@@ -235,6 +240,7 @@ textarea:focus {
     padding: 0 2px;
     cursor: pointer;
     transition: all 0.2s ease;
+}
 .pending-label {
     color: var(--highlight-color);
     font-size: 12px;
@@ -245,23 +251,20 @@ textarea:focus {
 .star-rating label:hover~label,
 .star-rating input:checked~label {
     color: #ffc107;
-.apply-btn {
-    background-color: var(--highlight-color);
-    color: var(--background-color);
-}
-.withdraw-btn {
-    background-color: #e74c3c;
-    color: white;
 }
 
-.bookmark-btn {
-    background-color: var(--primary-color);
-    color: var(--text-color);
-    border-color: var(--primary-color);
+.apply-btn {
+    background-color: var(--highlight-color)!important;
+    color: var(--background-color)!important;
+}
+
+.withdraw-btn {
+    background-color: #e74c3c  !important;
+    color: white  !important;
 }
 
 .bookmarked-btn {
-    background-color: var(--highlight-color);
-    color: var(--background-color);
-    border-color: var(--highlight-color);
+    background-color: var(--highlight-color)  !important;
+    color: var(--background-color)  !important;
+    border-color: var(--highlight-color)  !important;
 }
