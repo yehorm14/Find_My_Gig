@@ -50,18 +50,6 @@ body {
     --bs-btn-active-bg: var(--highlight-color);
 }
 
-.form-control {
-    background-color: var(--primary-color);
-    color: var(--text-color);
-    border: none;
-}
-.form-control:focus {
-    background-color: var(--primary-color);
-    color: var(--text-color);
-    border: none;
-    box-shadow: none;
-}
-
 .form-check-input {
     background-color: var(--primary-color);
     border-color: var(--text-color);
@@ -100,26 +88,24 @@ body {
 }
 
 textarea {
-    background-color: var(--primary-color);
-    color: var(--text-color);
     resize: vertical;
 }
 
 textarea:focus {
-    background-color: var(--primary-color);
-    color: var(--text-color);
+    background-color: var(--primary-color) !important;
+    color: var(--text-color) !important;
     box-shadow: none;
 }
 
 .form-select {
-    background-color: var(--primary-color);
-    color: var(--text-color);
+    background-color: var(--primary-color) !important;
+    color: var(--text-color) !important;
     border: none;
 }
 
 .form-select:focus {
-    background-color: var(--primary-color);
-    color: var(--text-color);
+    background-color: var(--primary-color) !important;
+    color: var(--text-color) !important;
     box-shadow: none;
 }
 
@@ -268,3 +254,4 @@ textarea:focus {
     color: var(--background-color)  !important;
     border-color: var(--highlight-color)  !important;
 }
+

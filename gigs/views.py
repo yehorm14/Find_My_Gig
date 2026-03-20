@@ -2,8 +2,11 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.contrib.auth import login
 from django.db import transaction
+from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+import json
+
 
 # IMPORT THE MODELS and FORMS
 from gigs.models import Musician, Band, Listing, Application, Review
@@ -193,7 +196,54 @@ def signup_choice(request):
 @login_required
 def update_profile(request):
     if request.method == 'POST':
+        user = request.user
+        
+        if request.content_type and 'multipart' in request.content_type:
+            username = request.POST.get('username')
+            firstname = request.POST.get('firstname')
+            surname = request.POST.get('surname')
+            bio = request.POST.get('about')
+            age = request.POST.get('age')
+            instruments = request.POST.get('instruments')
+            picture = request.FILES.get('profile_picture')
+        else:
+            data = json.loads(request.body)
+            username = data.get('username')
+            firstname = data.get('firstname')
+            surname = data.get('surname')
+            bio = data.get('about')
+            age = data.get('age')
+            instruments = data.get('instruments')
+            picture = None
+
+        if User.objects.exclude(pk=user.pk).filter(username=username).exists():
+            return JsonResponse({'success': False, 'error': 'username_taken'})
+        user.username = username
+        user.first_name = firstname
+        user.last_name = surname
+        user.save()
+
+    
+        try:
+            profile = user.musician
+            profile.bio = bio
+            profile.age = age
+            profile.instruments = instruments
+            if picture:
+                profile.profile_picture = picture
+            profile.save()
+        except:
+            try:
+                profile = user.band
+                profile.bio = bio
+                if picture:
+                    profile.profile_picture = picture
+                profile.save()
+            except:
+                pass
+
         return JsonResponse({'success': True})
+    
     return redirect('gigs:my_profile')
 
 @login_required
