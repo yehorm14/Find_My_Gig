@@ -13,6 +13,10 @@ urlpatterns = [
     # --- GIGS ROUTING ---
     path('gigs/', views.gig_listings, name='gig_listings'),
     path('gigs/<int:gig_id>/', views.gig_detail, name='gig_detail'),
+    path('gigs/<int:gig_id>/apply/', views.apply_gig, name='apply_gig'),
+    path('gigs/<int:gig_id>/withdraw/', views.withdraw_gig, name='withdraw_gig'),
+    path('gigs/<int:gig_id>/save/', views.save_gig, name='save_gig'),
+    path('gigs/<int:gig_id>/unsave/', views.unsave_gig, name='unsave_gig'),
     path('gigs/create/', views.create_gig, name='create_gig'),
 
     # --- USER PROFILES ROUTING ---
@@ -25,6 +29,11 @@ urlpatterns = [
     path('dashboard/my-applications/', views.my_applications, name='my_applications'),
     path('dashboard/my-listings/', views.my_listings, name='my_listings'),
     path('dashboard/my-profile/', views.my_profile, name='my_profile'),
+    path('dashboard/my-profile/update/', views.update_profile, name='update_profile'),
+    path('dashboard/my-profile/delete-account/', views.delete_account, name='delete_account'),
+    path('dashboard/my-listings/create/', views.create_gig_listing, name='create_gig_listing'),
+    path('dashboard/my-listings/<int:listing_id>/delete/', views.delete_listing, name='delete_listing'),
+
 
     # -- AUTHENTICATION AND SIGNUPS --
     path('signup/', views.signup_choice, name='signup'),

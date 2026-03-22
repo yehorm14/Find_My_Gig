@@ -7,7 +7,9 @@ My Profile
 {% endblock %}
 
 {% block header_block %}
-{% endblock %} {% block body_block %}
+{% endblock %} 
+
+{% block body_block %}
 <div id="status-message"></div>
 <div class="text-center m-4">
   <h2>My Profile</h2>
@@ -100,7 +102,7 @@ My Profile
                   <button
                     type="button"
                     id="add-media-btn"
-                    class="btn btn-primary nice-button primary-color"
+                    class="btn btn-primary nice-button"
                   >
                     Add
                   </button>
@@ -129,7 +131,7 @@ My Profile
             <p>Press here to update profile</p>
             <button
               id="update-profile-btn"
-              class="btn btn-primary btn-lg nice-button primary-color"
+              class="btn btn-primary btn-lg nice-button"
               type="button"
             >
               Update
@@ -140,7 +142,7 @@ My Profile
             <button
               id="delete-account-btn"
               type="button"
-              class="btn btn-primary btn-lg nice-button primary-color"
+              class="btn btn-primary btn-lg nice-button"
             >
               Delete Account
             </button>
@@ -151,6 +153,8 @@ My Profile
   </div>
 </div>
 
-{% block scripts_block %}{% endblock %}
+{% block scripts_block %}
     <script src="{% static 'find_my_gig/js/dashboard.js' %}"></script>
+{% endblock %}
+
 {% endblock %}
