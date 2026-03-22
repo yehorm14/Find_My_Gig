@@ -1,8 +1,11 @@
+import logging
+import requests
 from django.db import models
 from django.contrib.auth.models import User
-from django.template.defaultfilters import slugify
+from django.conf import settings
 
-# Create your models here.
+logger = logging.getLogger(__name__)
+
 class Musician(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     instruments = models.CharField(max_length=100)
@@ -33,16 +36,41 @@ class Listing(models.Model):
     is_urgent = models.BooleanField()
     description = models.TextField(max_length=1000, default="No description provided.") 
     location = models.CharField(max_length=100, default="TBC") 
+    bookmarks = models.ManyToManyField(User, related_name='saved_gigs', blank=True)
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        # 1. Logic to check if geocoding is needed
+        if self.location and not self.latitude:
+            try:
+                api_key = settings.GOOGLE_MAPS_API_KEY
+                url = f"https://maps.googleapis.com/maps/api/geocode/json?address={self.location}&key={api_key}"
+                
+                response = requests.get(url, timeout=5).json()
+
+                if response.get('status') == 'OK':
+                    geometry = response['results'][0]['geometry']['location']
+                    self.latitude = geometry['lat']
+                    self.longitude = geometry['lng']
+                else:
+                    error_msg = response.get('error_message', 'No specific error message provided')
+                    logger.error(f"Geocoding failed for '{self.location}': {response.get('status')} - {error_msg}")
+            
+            except requests.exceptions.RequestException as e:
+                logger.error(f"Network error during geocoding for '{self.location}': {e}")
+
+        # 2. Save the instance
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.title
-
 
 class Application(models.Model):
     applicant = models.ForeignKey(User, on_delete=models.CASCADE, related_name="applications_sent")
     listing = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name="applications_received")
     date_applied = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=20, default='Pending') # Can be Pending, Accepted, Rejected
+    status = models.CharField(max_length=20, default='Pending')
 
     def __str__(self):
         return f"{self.applicant.username} applied to {self.listing.title}"
