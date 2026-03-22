@@ -6,6 +6,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 import json
+from django.conf import settings
+
 
 
 # IMPORT THE MODELS and FORMS
@@ -79,7 +81,8 @@ def gig_listings(request):
         'corrected_instrument': search_term if search_term != clean_search_query(raw_instrument) else None,
         'selected_location': location_query,
         'selected_date': date_query,
-        'current_sort': sort_by
+        'current_sort': sort_by,
+        'google_maps_api_key': settings.GOOGLE_MAPS_API_KEY
     }
 
     return render(request, 'gigs/gig_listings.html', context)

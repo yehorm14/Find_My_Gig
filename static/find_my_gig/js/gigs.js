@@ -340,3 +340,29 @@ function updateGigsList(gigs) {
         });
     }
 }
+
+
+// ==========================================
+//             GOOGLE MAPS LOGIC 
+// ==========================================
+function initMap() {
+    const mapElements = document.querySelectorAll('.gig-mini-map');
+
+    mapElements.forEach((mapDiv) => {
+        const lat = parseFloat(mapDiv.getAttribute('data-lat'));
+        const lng = parseFloat(mapDiv.getAttribute('data-lng'));
+        const title = mapDiv.getAttribute('data-title');
+
+        const location = { lat: lat, lng: lng };
+
+        const map = new google.maps.Map(mapDiv, {
+            zoom: 14,
+            center: location,
+            disableDefaultUI: true 
+        });
+
+        new google.maps.Marker({ position: location, map: map, title: title });
+    });
+}
+
+window.initMap = initMap;
