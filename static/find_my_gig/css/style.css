@@ -221,11 +221,3 @@ textarea:focus, .form-select:focus {
     background-color: var(--highlight-color) !important;
 }
 
-#delete-account-btn {
-    background-color: #e74c3c !important;
-    color: white !important;
-}
-
-#delete-account-btn:hover {
-    background-color: #c0392b !important;
-}
