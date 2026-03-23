@@ -16,6 +16,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
+            const firstname = document.getElementById('firstname')?.value.trim() || '';   // ADD
+            const surname = document.getElementById('surname')?.value.trim() || ''; 
+            const bandName = document.getElementById('band-name')?.value.trim() || '';
             const profileAbout = document.getElementById('profile-about')?.value.trim() || '';
             const profileAge = document.getElementById('profile-age')?.value || '';
             const profileInstruments = document.getElementById('profile-instruments')?.value || '';
@@ -25,6 +28,9 @@ document.addEventListener('DOMContentLoaded', function () {
             if (hasPicture){
                 const formData = new FormData();
                 formData.append('username', username);
+                formData.append('firstname', firstname);
+                formData.append('surname', surname);
+                formData.append('band_name', bandName);
                 formData.append('about', profileAbout);
                 formData.append('age', profileAge);
                 formData.append('instruments', profileInstruments);
@@ -55,6 +61,9 @@ document.addEventListener('DOMContentLoaded', function () {
             } else {
                 const profileData = {
                     username: username,
+                    firstname: firstname,   
+                    surname: surname, 
+                    band_name: bandName,
                     about: profileAbout,
                     age: profileAge,
                     instruments: profileInstruments,

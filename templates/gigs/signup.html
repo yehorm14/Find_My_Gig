@@ -24,12 +24,14 @@ Sign Up
         <label class="form-label">Account Type</label>
         <div class="form-check form-check-inline">
           <input class="form-check-input" type="radio"
-                 name="user_type" id="radio-band" value="band" />
+                 name="user_type" id="radio-band" value="band" 
+                 onclick="document.getElementById('band-name-field').style.display='block'" />
           <label class="form-check-label" for="radio-band">Band</label>
         </div>
         <div class="form-check form-check-inline">
           <input class="form-check-input" type="radio"
-                 name="user_type" id="radio-musician" value="musician" checked />
+                 name="user_type" id="radio-musician" value="musician" checked
+                 onclick="document.getElementById('band-name-field').style.display='none'" />
           <label class="form-check-label" for="radio-musician">Musician</label>
         </div>
         <span id="account-type-error" class="field-error"></span>
@@ -39,6 +41,12 @@ Sign Up
         <label for="username" class="form-label">Username</label>
         <input type="text" class="form-control" id="username" name="username" required />
         <span id="username-error" class="field-error"></span>
+      </div>
+
+      <div class="mb-3" id="band-name-field" style="display: none;">
+        <label for="band-name" class="form-label">Band Name</label>
+        <input type="text" class="form-control" id="band-name" name="band_name" />
+        <span id="band-name-error" class="field-error"></span>
       </div>
 
       <div class="mb-3">
@@ -58,6 +66,16 @@ Sign Up
         <input type="password" class="form-control" id="confirm-password" name="password2" required />
         <span id="confirm-password-error" class="field-error"></span>
       </div>
+
+      {% if user_form.errors %}
+        <div class="alert alert-danger">
+          {% for field, errors in user_form.errors.items %}
+            {% for error in errors %}
+              <p>{{ field }}: {{ error }}</p>
+            {% endfor %}
+          {% endfor %}
+        </div>
+      {% endif %}
 
       <button type="submit" class="btn btn-primary nice-button primary-color mb-5">
         Sign Up

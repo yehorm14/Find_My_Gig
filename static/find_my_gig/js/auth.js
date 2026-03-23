@@ -9,8 +9,9 @@ document.addEventListener('DOMContentLoaded', function () {
         const musicianRadio = document.getElementById('radio-musician');
 
         if (bandRadio && musicianRadio) {
+
             [bandRadio, musicianRadio].forEach(function (radio) {
-                radio.addEventListener('change', function () {
+                radio.addEventListener('click', function () {
                     bandRadio.parentElement.classList.remove('radio-selected');
                     musicianRadio.parentElement.classList.remove('radio-selected');
                     this.parentElement.classList.add('radio-selected');
@@ -50,6 +51,14 @@ document.addEventListener('DOMContentLoaded', function () {
             if (bandRadio && musicianRadio) {
                 if (!bandRadio.checked && !musicianRadio.checked) {
                     showFieldError('account-type-error', 'Please select Band or Musician');
+                    hasError = true;
+                }
+            }
+
+            if (bandRadio.checked) {
+                const bandName = document.getElementById('band-name').value.trim();
+                if (bandName === '') {
+                    showFieldError('band-name-error', 'Please enter your band name');
                     hasError = true;
                 }
             }
