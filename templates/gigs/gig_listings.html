@@ -56,22 +56,30 @@ Gigs
                     📍 <span class="gig-accent-text">{{ gig.location }}</span>
                 </p>
 
-                <div class="mt-auto d-flex justify-content-between align-items-center pt-3" style="border-top: 1px solid #2a2a35;">
-                    <small class="text-muted-custom">
-                        ⏳ {{ gig.deadline|date:"M d, Y" }}
-                    </small>
-                    <a href="{% url 'gigs:gig_detail' gig.id %}" class="btn btn-outline-light btn-sm rounded-pill px-4">
+                <div class="mt-auto pt-3" style="border-top: 1px solid #2a2a35;">
+                    
+                    <a href="{% url 'gigs:gig_detail' gig.id %}" class="btn btn-outline-light w-100 rounded-pill mb-2">
                         View Details
-                    <button type="button" 
-                            class="bookmark-btn btn btn-primary nice-button background-color w-100 my-2"
-                            data-gig-id="{{ gig.id }}">
-                        Bookmark
-                    </button>
-
-                    <a href="{% url 'gigs:submit_review' gig.id %}" 
-                        class="btn btn-primary nice-button background-color review-link w-100 my-2">
-                          Review
                     </a>
+
+                    <div class="d-flex gap-2 mb-3">
+                        <button type="button" 
+                                class="bookmark-btn btn apply-btn rounded-pill w-50"
+                                data-gig-id="{{ gig.id }}">
+                            ★ Bookmark
+                        </button>
+
+                        <a href="{% url 'gigs:submit_review' gig.id %}" 
+                        class="btn btn-outline-secondary rounded-pill w-50">
+                            Review
+                        </a>
+                    </div>
+
+                    <div class="text-center">
+                        <small class="text-muted-custom">
+                            ⏳ Deadline: {{ gig.deadline|date:"M d, Y" }}
+                        </small>
+                    </div>
                 </div>
 
             </div>

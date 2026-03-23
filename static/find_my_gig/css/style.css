@@ -1,255 +1,195 @@
+/* ==========================================================================
+   1. VARIABLES & RESET
+   ========================================================================== */
 :root {
-    --primary-color: #1e1e24;       
-    --background-color: #121212;    
-    --highlight-color: #00ffaa;     
-    --darker-highlight-color: #00cc88; 
-    --text-color: #e0e0e0;          
-    --text-muted: #888899;          
+    --bg-dark: #121212;
+    --card-bg: #1e1e24;
+    --neon-cyan: #00ffaa;
+    --neon-cyan-dark: #00cc88;
+    --neon-red: #ff4757;
+    --text-main: #e0e0e0;
+    --text-muted: #888899;
+    --border-dim: #2a2a35;
+    --transition-fast: 0.2s ease;
 }
 
-/* --- Base Styles --- */
 body {
-    background-color: var(--background-color);
-    color: var(--text-color);
+    background-color: var(--bg-dark);
+    color: var(--text-main);
     min-height: 100vh;
     margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-.primary-color { background-color: var(--primary-color); }
-.background-color { background-color: var(--background-color); }
-.text-color { color: var(--text-color); }
+/* ==========================================================================
+   2. UTILITIES
+   ========================================================================== */
+.primary-color { background-color: var(--card-bg); }
+.background-color { background-color: var(--bg-dark); }
+.text-color { color: var(--text-main); }
+.gig-accent-text { color: var(--neon-cyan); font-weight: bold; }
+.text-muted-custom { color: var(--text-muted); }
+.uppercase-label { text-transform: uppercase; letter-spacing: 0.05rem; font-size: 0.75rem; font-weight: 700; }
 
-.home-title { margin-top: 8vh; }
-.home-discover { margin-bottom: 50%; }
-.home-button { min-width: 200px; max-width: 300px; }
-
-/* --- Buttons & Links --- */
-.nice-button {
-    max-width: 200px;
-    width: 100%;
-    border: none;
-    color: #000; 
-    font-weight: 600;
-    border-radius: 50rem; 
-}
-
-.btn-primary {
-    --bs-btn-hover-bg: var(--darker-highlight-color);
-    --bs-btn-active-bg: var(--highlight-color);
-}
-
+/* ==========================================================================
+   3. BUTTONS & LINKS
+   ========================================================================== */
 .site-title {
-    color: var(--text-color);
+    color: var(--text-main);
     text-decoration: none;
-    display: inline-block;
     font-weight: 700;
+    transition: color var(--transition-fast);
 }
 
-.site-title:hover {
-    color: var(--highlight-color);
-}
+.site-title:hover { color: var(--neon-cyan); }
 
 .subtle-link {
-    color: var(--highlight-color);
+    color: var(--neon-cyan);
     text-decoration: none;
     font-size: 0.95rem;
     font-weight: 500;
-    transition: opacity 0.2s;
+    transition: opacity var(--transition-fast);
 }
 
-.subtle-link:hover {
-    opacity: 0.8;
-    color: var(--highlight-color);
-    text-decoration: underline;
+.subtle-link:hover { opacity: 0.8; text-decoration: underline; }
+
+/* Base Button Styles */
+.nice-button, .apply-btn, .bookmarked-btn {
+    border-radius: 50rem;
+    font-weight: 600;
+    transition: transform var(--transition-fast), background-color var(--transition-fast);
 }
 
 .apply-btn, .bookmarked-btn {
-    background-color: var(--highlight-color) !important;
-    color: #000 !important; /* High contrast */
-    font-weight: bold;
+    background-color: var(--neon-cyan) !important;
+    color: #000 !important;
     border: none !important;
 }
+
 .apply-btn:hover, .bookmarked-btn:hover {
-    background-color: var(--darker-highlight-color) !important;
+    background-color: var(--neon-cyan-dark) !important;
+    transform: translateY(-2px);
 }
 
 .withdraw-btn {
-    background-color: #ff4757 !important;
+    background-color: var(--neon-red) !important;
     color: white !important;
     border: none !important;
     font-weight: bold;
 }
 
-/* --- Form Elements --- */
-.form-check-input {
-    background-color: var(--primary-color);
-    border-color: #4a4a5a;
+/* ==========================================================================
+   4. COMPONENTS (CARDS & CONTAINERS)
+   ========================================================================== */
+.listing-card, .dashboard-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-dim);
+    border-radius: 12px;
+    padding: 20px;
+    color: var(--text-main);
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
 }
 
-.form-check-input:checked {
-    background-color: var(--highlight-color);
-    border-color: var(--highlight-color);
+/* The "Lift" Effect */
+.listing-card:hover, .dashboard-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 255, 170, 0.15);
+    border-color: var(--neon-cyan);
 }
 
-textarea { resize: vertical; }
-textarea:focus, .form-select:focus, .form-control:focus {
-    background-color: #2a2a35 !important;
-    color: var(--text-color) !important;
-    border-color: var(--highlight-color) !important;
-    box-shadow: 0 0 0 0.25rem rgba(0, 255, 170, 0.25) !important;
-}
+.gig-title { color: #ffffff; font-weight: 600; font-size: 1.25rem; }
 
-.form-select, .form-control {
-    background-color: var(--primary-color) !important;
-    color: var(--text-color) !important;
-    border: 1px solid #2a2a35;
-}
-
-/* --- Listing Cards & Containers --- */
+/* Listings Container Scrollbar */
 .listings-container {
     height: 70vh;
     overflow-y: auto;
-    border: 1px solid #2a2a35;
+    border: 1px solid var(--border-dim);
     border-radius: 12px;
     padding: 15px;
-    background-color: rgba(30, 30, 36, 0.5); 
+    background-color: rgba(30, 30, 36, 0.5);
 }
 
+.listings-container::-webkit-scrollbar { width: 8px; }
+.listings-container::-webkit-scrollbar-track { background: var(--bg-dark); border-radius: 10px; }
+.listings-container::-webkit-scrollbar-thumb { background: #4a4a5a; border-radius: 10px; }
+.listings-container::-webkit-scrollbar-thumb:hover { background: var(--neon-cyan); }
 
-.listings-container::-webkit-scrollbar {
-    width: 8px;
-}
-.listings-container::-webkit-scrollbar-track {
-    background: var(--background-color); 
-    border-radius: 10px;
-}
-.listings-container::-webkit-scrollbar-thumb {
-    background: #4a4a5a; 
-    border-radius: 10px;
-}
-.listings-container::-webkit-scrollbar-thumb:hover {
-    background: var(--highlight-color); 
-}
+/* Badges */
+.badge-urgent { background-color: var(--neon-red); color: white; }
+.badge-instrument { background-color: #373748; color: var(--text-main); border: 1px solid #4a4a5a; }
 
-.listing-card {
-    background-color: var(--primary-color);
-    border-radius: 12px; 
-    padding: 20px;
-    margin-bottom: 20px;
-    color: var(--text-color);
-    border: 1px solid #2a2a35;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+/* ==========================================================================
+   5. FORMS & INPUTS
+   ========================================================================== */
+.form-select, .form-control {
+    background-color: var(--card-bg) !important;
+    color: var(--text-main) !important;
+    border: 1px solid var(--border-dim);
 }
 
-.listing-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0, 255, 170, 0.15); 
-    border-color: var(--highlight-color);
+.form-select:focus, .form-control:focus {
+    background-color: #2a2a35 !important;
+    border-color: var(--neon-cyan) !important;
+    box-shadow: 0 0 0 0.25rem rgba(0, 255, 170, 0.25) !important;
 }
 
-.gig-title {
-    color: #ffffff;
-    font-weight: 600;
-    font-size: 1.25rem;
-}
-.gig-accent-text {
-    color: var(--highlight-color);
-    font-weight: bold;
-}
-.text-muted-custom {
-    color: var(--text-muted);
-}
+.form-check-input { background-color: var(--card-bg); border-color: #4a4a5a; }
+.form-check-input:checked { background-color: var(--neon-cyan); border-color: var(--neon-cyan); }
 
-/* Custom Badges */
-.badge-urgent {
-    background-color: #ff4757; 
-    color: white;
-}
-.badge-instrument {
-    background-color: #373748;
-    color: #e0e0e0;
-    border: 1px solid #4a4a5a;
-}
-
-/* --- GOOGLE MAPS STYLES (For Details Page) --- */
-.gig-mini-map {
-    height: 350px; 
+/* ==========================================================================
+   6. SPECIALIZED UI (MAPS, STARS, PROFILE)
+   ========================================================================== */
+.gig-mini-map, .map-placeholder {
+    height: 350px;
     width: 100%;
     border-radius: 12px;
-    background-color: var(--primary-color);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-    border: 1px solid #2a2a35;
+    background-color: var(--card-bg);
 }
 
-.map-placeholder {
-    background-color: var(--primary-color);
-    height: 350px; 
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-muted);
-    border: 1px dashed #4a4a5a; 
-}
+.gig-mini-map { border: 1px solid var(--border-dim); box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
+.map-placeholder { border: 1px dashed #4a4a5a; display: flex; align-items: center; justify-content: center; color: var(--text-muted); }
 
-/* --- Profile & Dashboard --- */
 .profile-pic {
     width: 120px;
     height: 120px;
     object-fit: cover;
-    border-radius: 50%; 
-    border: 3px solid var(--highlight-color);
+    border-radius: 50%;
+    border: 3px solid var(--neon-cyan);
 }
-
-.dashboard-card {
-    background-color: var(--primary-color);
-    border-radius: 12px;
-    border: 1px solid #2a2a35;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-    cursor: pointer;
-    width: 100%; 
-    max-width: 500px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    color: var(--text-color);
-    align-items: center;
-    padding: 30px;
-    margin: 10px auto;
-}
-
-.dashboard-card:hover { 
-    transform: translateY(-5px); 
-    box-shadow: 0 8px 25px rgba(0, 255, 170, 0.15);
-    border-color: var(--highlight-color);
-}
-.dashboard-card:hover h5 { color: var(--highlight-color); }
 
 .dashboard-icon {
     filter: brightness(0) saturate(100%) invert(67%) sepia(87%) saturate(1469%) hue-rotate(113deg) brightness(101%) contrast(102%);
     width: 40%;
-    height: auto;
     margin-bottom: 15px;
 }
 
-/* --- Rating & Misc --- */
-.star-rating { direction: rtl; display: inline-block; cursor: pointer; }
+/* Star Rating */
+.star-rating { direction: rtl; display: inline-block; }
 .star-rating input { display: none; }
-.star-rating label {
-    color: #4a4a5a; 
-    font-size: 28px;
-    padding: 0 2px;
-    cursor: pointer;
-    transition: color 0.2s ease;
+.star-rating label { color: #4a4a5a; font-size: 28px; padding: 0 2px; cursor: pointer; transition: color var(--transition-fast); }
+.star-rating label:hover, .star-rating label:hover~label, .star-rating input:checked~label { color: var(--neon-cyan); }
+
+/* ==========================================================================
+   7. PAGE FRAGMENTS (NAVBAR, DETAILS)
+   ========================================================================== */
+.navbar { border-bottom: 1px solid var(--border-dim); }
+.border-accent { border-color: var(--neon-cyan) !important; }
+
+.detail-label {
+    text-transform: uppercase;
+    letter-spacing: 0.05rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    
+    color: var(--text-muted);
+    display: block;
+    margin-bottom: 4px;
 }
 
-.star-rating label:hover,
-.star-rating label:hover~label,
-.star-rating input:checked~label {
-    color: var(--highlight-color); 
-}
+.description-text { line-height: 1.7; color: var(--text-main); }
+.action-border { border-top: 1px solid var(--border-dim); margin-top: 2rem; padding-top: 1rem; }
 
+/* Animations */
 @keyframes shake {
     0%, 100% { transform: translateX(0); }
     25% { transform: translateX(-8px); }
@@ -257,35 +197,14 @@ textarea:focus, .form-select:focus, .form-control:focus {
 }
 .form-shake { animation: shake 0.5s ease; }
 
+/* Status Messages */
 .status-success, .status-error {
     display: none;
     padding: 12px;
     border-radius: 8px;
     font-weight: bold;
     margin-bottom: 15px;
+    border: 1px solid;
 }
-
-.status-success { background: rgba(0, 204, 136, 0.1) !important; color: var(--highlight-color) !important; border: 1px solid var(--highlight-color); }
-.status-error { background: rgba(255, 71, 87, 0.1) !important; color: #ff4757 !important; border: 1px solid #ff4757; }
-
-.field-error {
-    display: none;
-    color: #ff4757 !important;
-    font-size: 13px;
-    margin-top: 5px;
-}
-
-.review-link {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-    height: 54px; 
-    border-radius: 8px;
-    transition: background-color 0.2s, color 0.2s;
-}
-
-.review-link:hover {
-    color: #000;
-    background-color: var(--highlight-color) !important;
-}
+.status-success { background: rgba(0, 255, 170, 0.1); color: var(--neon-cyan); border-color: var(--neon-cyan); }
+.status-error { background: rgba(255, 71, 87, 0.1); color: var(--neon-red); border-color: var(--neon-red); }
