@@ -1,0 +1,31 @@
+{% extends 'gigs/base.html' %}
+{% load static %}
+
+{% block title_block %}
+{{ musician.name }}
+{% endblock %}
+
+{% block header_block %}
+{% endblock %} {% block body_block %}
+<div class="text-center m-4">
+  <h2>{{ musician.name }}</h2>
+</div>
+
+<hr class="mx-5" />
+
+<p class="text-center">{{ gig.date }}</p>
+
+<div class="row justify-content-center">
+  <div class="col-4 text-center">
+    <!--you can add more band detail info here if wanted-->
+    <p>{{ musician.description }}</p>
+    <p>{{ musician.age }}</p>
+    <p>{{ musician.instruments }}</p>
+  </div>
+
+  <div class="col-4 text-center">
+    <p>{{ gig.location }}</p>
+    <p>insert google maps pic here</p>
+  </div>
+</div>
+{% endblock %}

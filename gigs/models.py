@@ -15,6 +15,23 @@ class Musician(models.Model):
     media_link = models.URLField(blank=True)
     location = models.CharField(max_length=100)
 
+    @property
+    def community_badge(self):
+        """
+        Dynamically calculates the user's community badge based on 
+        the number of reviews they have submitted.
+        """
+        review_count = self.user.reviews_written.count()
+        
+        if review_count >= 20:
+            return {'level': 'Gold', 'color': '#FFD700', 'text': 'Gold Reviewer 🏆'}
+        elif review_count >= 10:
+            return {'level': 'Silver', 'color': '#C0C0C0', 'text': 'Silver Reviewer 🥈'}
+        elif review_count >= 5:
+            return {'level': 'Bronze', 'color': '#CD7F32', 'text': 'Bronze Reviewer 🥉'}
+        
+        return None
+
     def __str__(self):
         return self.user.username
 
@@ -24,6 +41,23 @@ class Band(models.Model):
     location = models.CharField(max_length=100)
     bio = models.CharField(max_length=500)
     profile_picture = models.ImageField(upload_to='profile_images', blank=True, default='profile_images/pfp-placeholder.png')
+
+    @property
+    def community_badge(self):
+        """
+        Dynamically calculates the user's community badge based on 
+        the number of reviews they have submitted.
+        """
+        review_count = self.user.reviews_written.count()
+        
+        if review_count >= 20:
+            return {'level': 'Gold', 'color': '#FFD700', 'text': 'Gold Reviewer 🏆'}
+        elif review_count >= 10:
+            return {'level': 'Silver', 'color': '#C0C0C0', 'text': 'Silver Reviewer 🥈'}
+        elif review_count >= 5:
+            return {'level': 'Bronze', 'color': '#CD7F32', 'text': 'Bronze Reviewer 🥉'}
+        
+        return None
 
     def __str__(self):
         return self.name
@@ -44,7 +78,7 @@ class Listing(models.Model):
         # 1. Logic to check if geocoding is needed
         if self.location and not self.latitude:
             try:
-                api_key = settings.GOOGLE_MAPS_API_KEY
+                api_key = settings.GOOGLE_MAPS_BACKEND_KEY
                 url = f"https://maps.googleapis.com/maps/api/geocode/json?address={self.location}&key={api_key}"
                 
                 response = requests.get(url, timeout=5).json()

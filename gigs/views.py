@@ -1,3 +1,5 @@
+import logging
+import json
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.contrib.auth import login,logout
@@ -5,15 +7,14 @@ from django.db import transaction
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-import json
 from django.conf import settings
-
-
 
 # IMPORT THE MODELS and FORMS
 from gigs.models import Musician, Band, Listing, Application, Review, MediaLink
 from gigs.forms import UserSignUpForm, MusicianProfileForm, BandProfileForm
-import difflib
+
+# Set up a logger for tracking issues in production
+logger = logging.getLogger(__name__)
 
 # ==========================================
 # --- HELPER FUNCTIONS ---
@@ -25,16 +26,6 @@ def clean_search_query(query):
         return query.strip().lower()
     return ''
 
-def fuzzy_match_instrument(user_typo):
-    """If the user spells 'gutar', this function guesses they meant 'guitar' and fixes it!"""
-    valid_instruments = ['guitar', 'drums', 'vocals', 'piano', 'bass']
-    best_guesses = difflib.get_close_matches(user_typo, valid_instruments, n=1, cutoff=0.5)
-
-    if best_guesses:
-        return best_guesses[0]
-    return user_typo
-
-
 # ==========================================
 # --- CORE VIEWS ---
 # ==========================================
@@ -45,65 +36,66 @@ def home(request):
     return render(request, 'gigs/home.html', context)
 
 def gig_listings(request):
-    """Handles the Gig Listings page using real database data."""
-
-    # Start with all listings from the database
+    """
+    Handles the Gig Listings page using real database data.
+    Filters by exact instrument (dropdown) and fuzzy location (free-text).
+    """
     gigs_queryset = Listing.objects.all()
 
     # GET parameters for filtering
-    raw_instrument = request.GET.get('instrument', '')
+    instrument_filter = request.GET.get('instrument', '')
     location_query = clean_search_query(request.GET.get('location', ''))
     date_query = request.GET.get('date', '')
     sort_by = request.GET.get('sort', '')
 
-    # Filter by instrument (using fuzzy match)
-    search_term = fuzzy_match_instrument(clean_search_query(raw_instrument)) if raw_instrument else ''
-    if search_term:
-        gigs_queryset = gigs_queryset.filter(req_instruments__icontains=search_term)
+    # 1. Filter by Instrument (Exact match from the dropdown)
+    if instrument_filter:
+        gigs_queryset = gigs_queryset.filter(req_instruments__icontains=instrument_filter)
 
-    # Filter by location
+    # 2. Filter by Location (Free-text search from the input box)
     if location_query:
         gigs_queryset = gigs_queryset.filter(location__icontains=location_query)
 
-    # Filter by date
+    # 3. Filter by Date
     if date_query:
         gigs_queryset = gigs_queryset.filter(deadline=date_query)
 
-    # Sorting logic
+    # 4. Sorting logic
     if sort_by == 'name':
         gigs_queryset = gigs_queryset.order_by('title')
     elif sort_by == 'date':
         gigs_queryset = gigs_queryset.order_by('deadline')
+    else:
+        # Default sort by deadline (most urgent first)
+        gigs_queryset = gigs_queryset.order_by('deadline')
 
     context = {
         'gigs': gigs_queryset,
-        'selected_instrument': raw_instrument,
-        'corrected_instrument': search_term if search_term != clean_search_query(raw_instrument) else None,
+        'selected_instrument': instrument_filter,
         'selected_location': location_query,
         'selected_date': date_query,
         'current_sort': sort_by,
-        'google_maps_api_key': settings.GOOGLE_MAPS_API_KEY
     }
 
     return render(request, 'gigs/gig_listings.html', context)
 
 def gig_detail(request, gig_id):
-    """Pulls a specific gig from the database using its ID."""
-    gig = get_object_or_404(Listing, id=gig_id)
+    listing = get_object_or_404(Listing, id=gig_id)
+    
     has_applied = False
     is_bookmarked = False
-
     if request.user.is_authenticated:
-        has_applied = Application.objects.filter(
-            applicant=request.user, 
-            listing=gig
-        ).exists()
+        has_applied = listing.applications_received.filter(applicant=request.user).exists()
+        is_bookmarked = listing.bookmarks.filter(id=request.user.id).exists()
 
-    return render(request, 'gigs/gig_detail.html', {
-        'gig': gig,
+    context = {
+        'listing': listing, 
         'has_applied': has_applied,
         'is_bookmarked': is_bookmarked,
-    })
+        'google_maps_frontend_key': settings.GOOGLE_MAPS_FRONTEND_KEY, 
+    }
+    
+    return render(request, 'gigs/gig_detail.html', context)
 
 def musicians_list(request):
     """Shows all musicians registered in the database."""
