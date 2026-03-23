@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
-from django.contrib.auth import login
+from django.contrib.auth import login,logout
 from django.db import transaction
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
@@ -264,7 +264,13 @@ def update_profile(request):
 @login_required
 def delete_account(request):
     if request.method == 'POST':
+        user = request.user
+        print(f"Deleting user: {user.username} (id: {user.id})")
+        logout(request)
+        user.delete()
+        print("User deleted")
         return JsonResponse({'success': True})
+    return JsonResponse({'success': False})
 
 @login_required
 def create_gig_listing(request):
