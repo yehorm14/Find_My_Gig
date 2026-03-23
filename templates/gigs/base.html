@@ -47,7 +47,11 @@
         <div class="row justify-content-end">
           <div class="col text-end">
             {% if user.is_authenticated %}
-              <a href="{% url 'gigs:my_applications' %}" class="btn btn-primary nice-button background-color">My Applications</a>
+              {% if profile_type == 'musician' %}
+                <a href="{% url 'gigs:my_applications' %}" class="btn btn-primary nice-button background-color">My Applications</a>
+              {% elif profile_type == 'band' %}
+                <a href="{% url 'gigs:my_listings' %}" class="btn btn-primary nice-button background-color">My Listings</a>
+              {% endif %}
               <a href="{% url 'gigs:my_profile' %}" class="btn btn-primary nice-button background-color">My Profile</a>
               <form id="logout-form" method="POST" action="{% url 'gigs:logout' %}" style="display:inline;">
                 {% csrf_token %}

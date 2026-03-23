@@ -158,9 +158,12 @@ def my_profile(request):
     try:
         profile = request.user.musician
         profile_type = 'musician'
-    except:
-        profile = request.user.band
-        profile_type = 'band'
+    except Musician.DoesNotExist:
+        try:
+            profile = request.user.band
+            profile_type = 'band'
+        except Band.DoesNotExist:
+            return redirect('gigs:home')
 
     return render(request, 'gigs/my_profile.html', {
         'profile': profile,
