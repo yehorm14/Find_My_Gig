@@ -50,6 +50,14 @@
             data-bookmarked="{{ is_bookmarked|yesno:'true,false' }}">
       {% if is_bookmarked %}Bookmarked{% else %}Bookmark{% endif %}
     </button>
+
+  </div>
+  <div class="col-auto">
+    {% if user.is_authenticated and has_applied %}
+      <a href="{% url 'gigs:submit_review' gig.id %}" class="btn btn-primary nice-button background-color">
+      Leave a Review
+      </a>
+    {% endif %}
   </div>
 </div>
 

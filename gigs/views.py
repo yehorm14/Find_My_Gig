@@ -110,10 +110,10 @@ def musicians_list(request):
     musicians = Musician.objects.all()
     return render(request, 'gigs/musicians_list.html', {'musicians': musicians})
 
-def musician_profile(request, id):
+def musician_detail(request, id):
     """Pulls a specific musician's profile from the database."""
     musician = get_object_or_404(Musician, id=id)
-    return render(request, 'gigs/musician_profile.html', {'musician': musician})
+    return render(request, 'gigs/musician_detail.html', {'musician': musician})
 
 def band_profile(request, id):
     """Pulls a specific band's profile from the database."""
@@ -317,3 +317,52 @@ def save_gig(request, gig_id):
 def unsave_gig(request, gig_id):
     if request.method == 'POST':
         return JsonResponse({'success': True})
+
+@login_required
+def submit_review(request, gig_id):
+    gig = get_object_or_404(Listing, id=gig_id)
+    
+    if request.method == 'POST':
+        rating = request.POST.get('rating')
+        comment = request.POST.get('feedback')
+        reviewee = gig.band.user
+
+        if not rating:
+            return render(request, 'gigs/gig_review.html', {
+                'gig': gig,
+                'error': 'Please select a rating'
+            })
+
+        Review.objects.create(
+            reviewer=request.user,
+            reviewee=reviewee,
+            rating=int(rating),
+            comment=comment
+        )
+        return redirect('gigs:gig_detail', gig_id=gig_id)
+
+    return render(request, 'gigs/gig_review.html', {'gig': gig})
+
+@login_required
+def submit_musician_review(request, musician_id):
+    musician = get_object_or_404(Musician, id=musician_id)
+
+    if request.method == 'POST':
+        rating = request.POST.get('rating')
+        comment = request.POST.get('feedback')
+
+        if not rating:
+            return render(request, 'gigs/musician_review.html', {
+                'musician': musician,
+                'error': 'Please select a rating'
+            })
+
+        Review.objects.create(
+            reviewer=request.user,
+            reviewee=musician.user,
+            rating=int(rating),
+            comment=comment
+        )
+        return redirect('gigs:musician_profile', id=musician_id)
+
+    return render(request, 'gigs/musician_review.html', {'musician': musician})
