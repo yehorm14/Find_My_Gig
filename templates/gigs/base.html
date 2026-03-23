@@ -1,76 +1,59 @@
 {% load static %}
-
 <!doctype html>
-
-<html>
-  <head lang="en">
+<html lang="en">
+  <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
       rel="stylesheet"
-      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
-      crossorigin="anonymous"
     />
     <link href="{% static 'find_my_gig/css/style.css' %}" rel="stylesheet" />
-    <title>{% block title_block %} {% endblock %}</title>
+    <title>{% block title_block %}{% endblock %} | Find My Gig</title>
   </head>
 
   <body class="{% if user.is_authenticated %}user-logged-in{% endif %}">
     
-    {% block header_block %}
-    <div class="m-4">
-      <h1>
-        <a href="/" class="site-title">Find My Gig</a>
-      </h1>
-    </div>
-    {% endblock%}
-
-    {% block header_detailed %}
-    <div class="row align-items-center primary-color">
-      <div class="col-auto">
-        <div class="m-4">
-          <h1>
-            <a href="/" class="site-title">Find My Gig</a>
-          </h1>
-        </div>
-      </div>
-
-      <div class="col m-4">
-        <div class="row justify-content-end m-4">
+    {% block navbar %}
+    <nav class="navbar navbar-expand-lg primary-color py-3">
+      <div class="container-fluid px-4 px-md-5">
+        <a class="navbar-brand site-title h1 mb-0" href="/">Find My Gig</a>
+        
+        <div class="d-flex align-items-center ms-auto text-end">
+          <div class="me-3">
+            <div class="small text-muted mb-1">
+              {% if user.is_authenticated %}
+                Logged in as: <strong>{{ user.username }}</strong>
+              {% else %}
+                Currently not logged in
+              {% endif %}
+            </div>
+            
+            <div class="d-flex gap-2 justify-content-end">
+              {% if user.is_authenticated %}
+                <a href="{% url 'gigs:my_applications' %}" class="btn btn-sm btn-outline-light rounded-pill px-3">Applications</a>
+                <a href="{% url 'gigs:my_profile' %}" class="btn btn-sm btn-outline-light rounded-pill px-3">Profile</a>
+                <form method="POST" action="{% url 'gigs:logout' %}" style="display:inline;">
+                  {% csrf_token %}
+                  <button class="btn btn-sm btn-outline-danger rounded-pill px-3">Sign Out</button>
+                </form>
+              {% else %}
+                <a href="{% url 'gigs:login' %}" class="btn btn-sm apply-btn rounded-pill px-4">Sign In</a>
+                <a href="{% url 'gigs:signup' %}" class="btn btn-sm btn-outline-light rounded-pill px-4">Sign Up</a>
+              {% endif %}
+            </div>
+          </div>
+          
           {% if user.is_authenticated %}
-            Logged in as: {{ user.username }}
-          {% else %}
-            Currenlty not logged in
+            <img src="{{ user.profile.profile_pic.url }}" class="profile-pic border border-2 border-accent" style="width: 50px; height: 50px;">
           {% endif %}
         </div>
-
-        <div class="row justify-content-end">
-          <div class="col text-end">
-            {% if user.is_authenticated %}
-              <a href="{% url 'gigs:my_applications' %}" class="btn btn-primary nice-button background-color">My Applications</a>
-              <a href="{% url 'gigs:my_profile' %}" class="btn btn-primary nice-button background-color">My Profile</a>
-              <form id="logout-form" method="POST" action="{% url 'gigs:logout' %}" style="display:inline;">
-                {% csrf_token %}
-                <button id="sign-out-btn" class="btn btn-primary nice-button background-color">
-                  Sign Out
-                </button>
-              </form>
-            {% else %}
-              <a href="{% url 'gigs:login' %}" class="btn btn-primary nice-button background-color">Sign In</a>
-              <a href="{% url 'gigs:signup' %}" class="btn btn-primary nice-button background-color">Sign Up</a>
-            {% endif %}
-          </div>
-        </div>
       </div>
-
-      <div class="col-auto mx-4">
-        {% if user.is_authenticated %}
-        <img src="{{ user.profile.profile_pic.url }}" class="profile-pic">
-        {% endif %} 
-    </div>
+    </nav>
     {% endblock %}
 
     {% block body_block %} {% endblock%}
+
     <script src="{% static 'find_my_gig/js/utils.js' %}"></script>
     <script src="{% static 'find_my_gig/js/navbar.js' %}"></script>
     {% block scripts_block %}{% endblock %}
