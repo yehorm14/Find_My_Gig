@@ -50,12 +50,10 @@ Musicians
             class="col-3 d-flex flex-column align-items-center text-center justify-content-center"
           >
 
-            <button 
-                type="button"
-                data-url="{% url 'gigs:musician_profile' musician.id %}"
-                class="btn btn-primary nice-button background-color w-100 h-30vh my-2 d-flex align-items-center justify-content-center py-3">
-                Review
-            </button>
+            <a href="{% url 'gigs:submit_musician_review' musician.id %}"
+              class="btn btn-primary nice-button background-color w-100 h-30vh my-2 d-flex align-items-center justify-content-center py-3">
+              Review
+            </a>
           </div>
         </div>
       </div>

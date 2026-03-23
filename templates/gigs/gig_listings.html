@@ -62,6 +62,15 @@ Gigs
                     </small>
                     <a href="{% url 'gigs:gig_detail' gig.id %}" class="btn btn-outline-light btn-sm rounded-pill px-4">
                         View Details
+                    <button type="button" 
+                            class="bookmark-btn btn btn-primary nice-button background-color w-100 my-2"
+                            data-gig-id="{{ gig.id }}">
+                        Bookmark
+                    </button>
+
+                    <a href="{% url 'gigs:submit_review' gig.id %}" 
+                        class="btn btn-primary nice-button background-color review-link w-100 my-2">
+                          Review
                     </a>
                 </div>
 
