@@ -55,17 +55,20 @@ My Profile
 
       <div class="row justify-content-center m-4">
         <div class="col text-center">
-          <label for="profile-pic-upload" class="profile-pic-label">
+          <label for="profile-pic-input" class="profile-pic-label">
             <img id="profile-picture-preview"
-              src="{% static 'find_my_gig/images/pfp-placeholder.png' %}"
+              src="{% if profile.profile_picture  %}{{ profile.profile_picture.url }}{% else %}{% static 'find_my_gig/images/pfp-placeholder.png' %}{% endif %}"
               class="profile-pic"
+              onclick="document.getElementById('profile-picture-input').click()"
+              style="cursor: pointer;"
             />
           </label>
           <input
             type="file"
             id="profile-picture-input"
+            name="profile_picture"
             accept="image/*"
-            style="display: none"
+            style="display:none"
           />
 
           <p>Click to update</p>
