@@ -31,7 +31,9 @@
   </div>
 </div>
 
+{% if user.is_authenticated %}
 <div class="row justify-content-center m-4">
+  {% if profile_type == 'musician' %}
   <div class="col-auto">
     <button type="button"
             id="gig-detail-apply-btn"
@@ -53,13 +55,15 @@
 
   </div>
   <div class="col-auto">
-    {% if user.is_authenticated and has_applied %}
+    {% if has_applied %}
       <a href="{% url 'gigs:submit_review' gig.id %}" class="btn btn-primary nice-button background-color">
       Leave a Review
       </a>
     {% endif %}
   </div>
+  {% endif %}
 </div>
+{% endif %}
 
 {% endblock %}
 {% block scripts_block %}

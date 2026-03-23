@@ -22,7 +22,7 @@ My Profile
     <form method="POST" action="" enctype="multipart/form-data">
       {% csrf_token %}
       <div class="row justify-content-center m-4">
-        <div class="col text-center">
+        <div class="col-4 text-center">
           <label for="username" class="form-label">Username</label>
           <input type="text" class="form-control" id="profile-username" name="username" value="{{ user.username }}" required />
         </div>
@@ -47,10 +47,12 @@ My Profile
       </div>
 
       {% if profile_type == 'band' %}
-        <div class="col text-center">
+      <div class="row justify-content-center m-4">
+        <div class="col-4 text-center">
           <label for="band-name" class="form-label">Band Name</label>
           <input type="text" class="form-control" id="band-name" name="band_name" value="{{ profile.name }}" />
         </div>
+      </div>
       {% endif %}
 
       <div class="row justify-content-center m-4">
