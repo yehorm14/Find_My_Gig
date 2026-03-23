@@ -11,10 +11,11 @@ Gigs
 {% block body_block %}
 <div id="status-message"></div>
 
-<div class="container mt-5">
+<div class="container mt-5 px-4 px-md-5">
+    
     <div class="row align-items-center mb-4">
         <div class="col-md-6">
-            <h2 class="mb-0" style="font-weight: 700;">Discover Gigs</h2>
+            <h2 class="mb-0" style="font-weight: 800; font-size: 2.2rem;">Discover Gigs</h2>
         </div>
         <div class="col-md-6 d-flex justify-content-md-end mt-3 mt-md-0">
             <select class="form-select w-auto me-2" id="filter-instrument" name="filter">
@@ -31,11 +32,11 @@ Gigs
         </div>
     </div>
 
-    <hr class="mb-4" style="border-color: #2a2a35;">
+    <hr class="mb-5" style="border-color: #2a2a35; opacity: 1;">
 
     <div id="gigs-list" class="row">
         {% for gig in gigs %}
-        <div class="col-md-6 col-lg-4 d-flex align-items-stretch">
+        <div class="col-md-6 col-lg-4 d-flex align-items-stretch mb-4">
             <div class="listing-card w-100 d-flex flex-column">
                 
                 <div class="d-flex justify-content-between align-items-center mb-3">
