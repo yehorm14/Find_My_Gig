@@ -20,19 +20,22 @@ Gigs
 
 <div class="row justify-content-end">
   <div class="col-auto m-3 mx-5">
-        <select class="form-select" id="filter-instrument" name="filter">
-          <option value="">Filter by Instrument</option>
-          <option value="Guitar">Guitar</option>
-          <option value="Drums">Drums</option>
-          <option value="Vocals">Vocals</option>
-          <option value="Bass">Bass</option>
-          <option value="Other">Other</option>
-        </select>
+    <select class="form-select" id="filter-instrument" name="filter">
+      <option value="">Filter by Instrument</option>
+      <option value="Guitar" {% if selected_instrument == 'Guitar' %} selected {% endif %} >Guitar</option>
+      <option value="Drums" {% if selected_instrument == 'Drums' %} selected {% endif %} >Drums</option>
+      <option value="Vocals" {% if selected_instrument == 'Vocals' %} selected {% endif %} >Vocals</option>
+      <option value="Bass" {% if selected_instrument == 'Bass' %} selected {% endif %} >Bass</option>
+      <option value="Other" {% if selected_instrument == 'Other' %} selected {% endif %} >Other</option>
+    </select>
   </div>
   <div class="col-auto m-3">
     <button type="button" id="filter-btn" class="btn btn-primary nice-button primary-color">
       Filter
     </button>
+  </div>
+  <div class="col-auto m-3">
+    <a href="/gigs/" class="btn btn-primary nice-button primary-color">Clear</a>
   </div>
 </div>
 

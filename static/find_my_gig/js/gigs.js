@@ -274,38 +274,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // FILTER - /gigs/
-    const filterBtn = document.getElementById('filter-btn');
-
-    if (filterBtn) {
-        filterBtn.addEventListener('click', function () {
-
-            const instrumentFilter = document.getElementById('filter-instrument')?.value || '';
-
-            const params = new URLSearchParams();
-
-            if (instrumentFilter) params.append('instrument', instrumentFilter);
-
-            fetch(`/gigs/?${params.toString()}`, {
-                method: 'GET',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(function (response) {
-                return response.json();
-            })
-            .then(function (data) {
-                if (data.gigs) {
-                    updateGigsList(data.gigs);
-                }
-            })
-            .catch(function () {
-                console.log('Filter backend not ready yet');
-            });
-        });
-    }
-
 });
 
 

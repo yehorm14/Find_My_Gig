@@ -108,7 +108,11 @@ def gig_detail(request, gig_id):
 def musicians_list(request):
     """Shows all musicians registered in the database."""
     musicians = Musician.objects.all()
-    return render(request, 'gigs/musicians_list.html', {'musicians': musicians})
+    raw_instrument = request.GET.get('instrument', '')
+    search_term = fuzzy_match_instrument(clean_search_query(raw_instrument)) if raw_instrument else ''
+    if search_term:
+        musicians = musicians.filter(instruments__icontains=search_term)
+    return render(request, 'gigs/musicians_list.html', {'musicians': musicians, 'selected_instrument': raw_instrument})
 
 def musician_detail(request, id):
     """Pulls a specific musician's profile from the database."""
