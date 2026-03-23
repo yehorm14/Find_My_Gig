@@ -68,17 +68,20 @@ Gigs
               </div>
 
               <div class="col-md-3 d-flex flex-column align-items-center text-center justify-content-center">
+                {% if user.is_authenticated and profile_type == 'musician' %}
                     <button type="button" 
                             class="apply-btn btn btn-primary nice-button background-color w-100 my-2"
                             data-gig-id="{{ gig.id }}">
                         Apply
                     </button>
 
+
                     <button type="button" 
                             class="bookmark-btn btn btn-primary nice-button background-color w-100 my-2"
                             data-gig-id="{{ gig.id }}">
                         Bookmark
                     </button>
+                {% endif %}
 
                     <a href="{% url 'gigs:submit_review' gig.id %}" 
                         class="btn btn-primary nice-button background-color review-link w-100 my-2">

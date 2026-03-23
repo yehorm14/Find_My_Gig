@@ -35,7 +35,7 @@
   <div class="col-auto">
     <button type="button"
             id="gig-detail-apply-btn"
-            class="btn btn-primary nice-button background-color"
+            class="btn {% if has_applied %}btn-danger{% else %}btn-primary{% endif %} nice-button background-color"
             data-gig-id="{{ gig.id }}"
             data-applied="{{ has_applied|yesno:'true,false' }}">
       {% if has_applied %}Withdraw{% else %}Apply{% endif %}
