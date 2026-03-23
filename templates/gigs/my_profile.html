@@ -26,7 +26,8 @@ My Profile
           <label for="username" class="form-label">Username</label>
           <input type="text" class="form-control" id="profile-username" name="username" value="{{ user.username }}" required />
         </div>
-
+        
+        {% if profile_type == 'musician' %}
         <div class="col text-center">
           <label for="firstname" class="form-label">Firstname</label>
           <input type="text" class="form-control" id="firstname" name="firstname" value="{{ user.first_name }}" required />
@@ -37,7 +38,6 @@ My Profile
           <input type="text" class="form-control" id="surname" name="surname" value="{{ user.last_name }}" required />
         </div>
 
-        {% if profile_type == 'musician' %}
         <div class="col text-center">
           <label for="profile-age" class="form-label">Age</label>
           <input type="text" class="form-control" id="profile-age" name="age"
@@ -45,6 +45,13 @@ My Profile
         </div>
         {% endif %}
       </div>
+
+      {% if profile_type == 'band' %}
+        <div class="col text-center">
+          <label for="band-name" class="form-label">Band Name</label>
+          <input type="text" class="form-control" id="band-name" name="band_name" value="{{ profile.name }}" />
+        </div>
+      {% endif %}
 
       <div class="row justify-content-center m-4">
         <div class="col text-center">
@@ -68,7 +75,7 @@ My Profile
           <div class="col">
             <div class="mb-3">
               <label for="about" class="form-label">About</label>
-              <textarea class="form-control" id="profile-about" rows="5">{{profile.bio }}</textarea>
+              <textarea class="form-control" name="about" id="profile-about" rows="5">{{profile.bio }}</textarea>
             </div>
           </div>
 

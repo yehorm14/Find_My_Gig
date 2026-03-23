@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
-from django.contrib.auth import login
+from django.contrib.auth import login,logout
 from django.db import transaction
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
@@ -110,10 +110,10 @@ def musicians_list(request):
     musicians = Musician.objects.all()
     return render(request, 'gigs/musicians_list.html', {'musicians': musicians})
 
-def musician_profile(request, id):
+def musician_detail(request, id):
     """Pulls a specific musician's profile from the database."""
     musician = get_object_or_404(Musician, id=id)
-    return render(request, 'gigs/musician_profile.html', {'musician': musician})
+    return render(request, 'gigs/musician_detail.html', {'musician': musician})
 
 def band_profile(request, id):
     """Pulls a specific band's profile from the database."""
@@ -177,16 +177,25 @@ def signup_choice(request):
     if request.user.is_authenticated:
         return redirect('gigs:home')
 
+    user_form = UserSignUpForm()
+
     if request.method == 'POST':
         user_type = request.POST.get('user_type')
         user_form = UserSignUpForm(request.POST)
+
+        if user_type not in ('musician', 'band'):
+            return render(request, 'gigs/signup.html', {
+                'user_form': user_form,
+                'error_message': 'Please select an account type.'
+            })
 
         if user_form.is_valid():
             user = user_form.save()
             if user_type == 'musician':
                 Musician.objects.create(user=user)
             elif user_type == 'band':
-                Band.objects.create(user=user)
+                band_name = request.POST.get('band_name', '').strip()
+                Band.objects.create(user=user, name=band_name)
 
             login(request, user)
             return redirect('gigs:my_profile')
@@ -222,11 +231,10 @@ def update_profile(request):
         if User.objects.exclude(pk=user.pk).filter(username=username).exists():
             return JsonResponse({'success': False, 'error': 'username_taken'})
         user.username = username
-        user.first_name = firstname
-        user.last_name = surname
+        user.first_name = firstname or ''
+        user.last_name = surname or ''
         user.save()
 
-    
         try:
             profile = user.musician
             profile.bio = bio
@@ -235,14 +243,18 @@ def update_profile(request):
             if picture:
                 profile.profile_picture = picture
             profile.save()
-        except:
+
+        except Musician.DoesNotExist:
             try:
                 profile = user.band
                 profile.bio = bio
+                band_name = data.get('band_name') if not 'multipart' in request.content_type else request.POST.get('band_name')
+                if band_name:
+                    profile.name = band_name
                 if picture:
                     profile.profile_picture = picture
                 profile.save()
-            except:
+            except Band.DoesNotExist:
                 pass
 
         return JsonResponse({'success': True})
@@ -252,7 +264,13 @@ def update_profile(request):
 @login_required
 def delete_account(request):
     if request.method == 'POST':
+        user = request.user
+        print(f"Deleting user: {user.username} (id: {user.id})")
+        logout(request)
+        user.delete()
+        print("User deleted")
         return JsonResponse({'success': True})
+    return JsonResponse({'success': False})
 
 @login_required
 def create_gig_listing(request):
@@ -299,3 +317,52 @@ def save_gig(request, gig_id):
 def unsave_gig(request, gig_id):
     if request.method == 'POST':
         return JsonResponse({'success': True})
+
+@login_required
+def submit_review(request, gig_id):
+    gig = get_object_or_404(Listing, id=gig_id)
+    
+    if request.method == 'POST':
+        rating = request.POST.get('rating')
+        comment = request.POST.get('feedback')
+        reviewee = gig.band.user
+
+        if not rating:
+            return render(request, 'gigs/gig_review.html', {
+                'gig': gig,
+                'error': 'Please select a rating'
+            })
+
+        Review.objects.create(
+            reviewer=request.user,
+            reviewee=reviewee,
+            rating=int(rating),
+            comment=comment
+        )
+        return redirect('gigs:gig_detail', gig_id=gig_id)
+
+    return render(request, 'gigs/gig_review.html', {'gig': gig})
+
+@login_required
+def submit_musician_review(request, musician_id):
+    musician = get_object_or_404(Musician, id=musician_id)
+
+    if request.method == 'POST':
+        rating = request.POST.get('rating')
+        comment = request.POST.get('feedback')
+
+        if not rating:
+            return render(request, 'gigs/musician_review.html', {
+                'musician': musician,
+                'error': 'Please select a rating'
+            })
+
+        Review.objects.create(
+            reviewer=request.user,
+            reviewee=musician.user,
+            rating=int(rating),
+            comment=comment
+        )
+        return redirect('gigs:musician_profile', id=musician_id)
+
+    return render(request, 'gigs/musician_review.html', {'musician': musician})

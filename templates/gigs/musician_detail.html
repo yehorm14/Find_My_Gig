@@ -1,0 +1,46 @@
+{% extends 'gigs/base.html' %}
+{% load static %}
+
+{% block title_block %}
+{{ musician.user.username }}
+{% endblock %}
+
+{% block header_block %}
+{% endblock %} {% block body_block %}
+<div class="text-center m-4">
+  <h2>{{ musician.user.first_name }} {{ musician.user.last_name }}</h2>
+  <p class="text-muted">@{{ musician.user.username }}</p>
+</div>
+
+<hr class="mx-5" />
+
+<p class="text-center">{{ gig.date }}</p>
+
+<div class="row justify-content-center">
+  <div class="col-4 text-center">
+    <img src="{% static 'find_my_gig/images/pfp-placeholder.png' %}" class="profile-pic" />
+    <p><strong>Age:</strong> {{ musician.age }}</p>
+    <p><strong>Instruments:</strong> {{ musician.instruments }}</p>
+    <p><strong>Location:</strong> {{ musician.location }}</p>
+    {% if musician.bio %}
+      <p><strong>About:</strong> {{ musician.bio }}</p>
+    {% endif %}
+    {% if musician.media_link %}
+      <p><strong>Media:</strong> <a href="{{ musician.media_link }}" target="_blank">{{ musician.media_link }}</a></p>
+    {% endif %}
+  </div>
+
+  <div class="col-4 text-center">
+    <p>{{ gig.location }}</p>
+    <p>insert google maps pic here</p>
+  </div>
+
+  <div class="col-auto"></div>
+    {% if user.is_authenticated %}
+      <a href="{% url 'gigs:submit_musician_review' musician.id %}" class="btn btn-primary nice-button background-color review-link w-100 my-2">
+        Leave a Review
+      </a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

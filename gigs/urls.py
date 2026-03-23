@@ -18,10 +18,12 @@ urlpatterns = [
     path('gigs/<int:gig_id>/save/', views.save_gig, name='save_gig'),
     path('gigs/<int:gig_id>/unsave/', views.unsave_gig, name='unsave_gig'),
     path('gigs/create/', views.create_gig, name='create_gig'),
+    path('gigs/<int:gig_id>/gig_review/', views.submit_review, name='submit_review'),
+    path('musicians/<int:musician_id>/review/', views.submit_musician_review, name='submit_musician_review'),
 
     # --- USER PROFILES ROUTING ---
     path('musicians/', views.musicians_list, name='musicians_list'),
-    path('musicians/<int:id>/', views.musician_profile, name='musician_profile'),
+    path('musicians/<int:id>/', views.musician_detail, name='musician_profile'),
     path('bands/<int:id>/', views.band_profile, name='band_profile'),
 
     # --- USER PORTAL ---
