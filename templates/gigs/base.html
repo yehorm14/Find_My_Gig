@@ -69,8 +69,20 @@
 
       <div class="col-auto mx-4">
         {% if user.is_authenticated %}
-        <img src="{{ user.profile.profile_pic.url }}" class="profile-pic">
-        {% endif %} 
+          {% if profile_type == 'musician' %}
+            {% if user.musician.profile_picture %}
+              <img src="{{ user.musician.profile_picture.url }}" class="profile-pic">
+            {% else %}
+              <img src="{% static 'find_my_gig/images/pfp-placeholder.png' %}" class="profile-pic">
+            {% endif %}
+          {% elif profile_type == 'band' %}
+            {% if user.band.profile_picture %}
+              <img src="{{ user.band.profile_picture.url }}" class="profile-pic">
+            {% else %}
+              <img src="{% static 'find_my_gig/images/pfp-placeholder.png' %}" class="profile-pic">
+            {% endif %}
+          {% endif %}
+        {% endif %}
     </div>
     {% endblock %}
 

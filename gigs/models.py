@@ -11,7 +11,7 @@ class Musician(models.Model):
     instruments = models.CharField(max_length=100)
     bio = models.CharField(max_length=500)
     age = models.IntegerField(null=True, blank=True)
-    profile_picture = models.ImageField(upload_to='profile_images', blank=True)
+    profile_picture = models.ImageField(upload_to='profile_images', blank=True, default='profile_images/pfp-placeholder.png')
     media_link = models.URLField(blank=True)
     location = models.CharField(max_length=100)
 
@@ -23,7 +23,7 @@ class Band(models.Model):
     name = models.CharField(max_length=50)
     location = models.CharField(max_length=100)
     bio = models.CharField(max_length=500)
-    profile_picture = models.ImageField(upload_to='profile_images', blank=True)
+    profile_picture = models.ImageField(upload_to='profile_images', blank=True, default='profile_images/pfp-placeholder.png')
 
     def __str__(self):
         return self.name

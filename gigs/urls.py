@@ -1,6 +1,8 @@
 from django.urls import path, reverse_lazy
 from gigs import views
 from django.contrib.auth import views as auth_views
+from django.conf import settings
+from django.conf.urls.static import static
 
 # This is our "namespace". If we ever add another app (like 'accounts'), 
 # this stops Django from confusing 'gigs:home' with 'accounts:home'.
@@ -82,4 +84,4 @@ urlpatterns = [
         ),
         name='password_reset_complete',
     ),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
