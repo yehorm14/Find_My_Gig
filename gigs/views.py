@@ -11,7 +11,7 @@ from django.conf import settings
 
 
 # IMPORT THE MODELS and FORMS
-from gigs.models import Musician, Band, Listing, Application, Review
+from gigs.models import Musician, Band, Listing, Application, Review, MediaLink
 from gigs.forms import UserSignUpForm, MusicianProfileForm, BandProfileForm
 import difflib
 
@@ -158,16 +158,19 @@ def my_profile(request):
     try:
         profile = request.user.musician
         profile_type = 'musician'
+        media_links = profile.media_links.all()
     except Musician.DoesNotExist:
         try:
             profile = request.user.band
             profile_type = 'band'
+            media_links = []
         except Band.DoesNotExist:
             return redirect('gigs:home')
 
     return render(request, 'gigs/my_profile.html', {
         'profile': profile,
-        'profile_type': profile_type
+        'profile_type': profile_type,
+        'media_links': media_links
     })
 
 
@@ -221,6 +224,8 @@ def update_profile(request):
             age = request.POST.get('age')
             instruments = request.POST.get('instruments')
             picture = request.FILES.get('profile_picture')
+            media_links_json = request.POST.get('media_links')
+            delete_media_json = request.POST.get('delete_media')
         else:
             data = json.loads(request.body)
             username = data.get('username')
@@ -230,6 +235,8 @@ def update_profile(request):
             age = data.get('age')
             instruments = data.get('instruments')
             picture = None
+            media_links_json = data.get('media_links')
+            delete_media_json = data.get('delete_media')
 
         if User.objects.exclude(pk=user.pk).filter(username=username).exists():
             return JsonResponse({'success': False, 'error': 'username_taken'})
@@ -246,6 +253,15 @@ def update_profile(request):
             if picture:
                 profile.profile_picture = picture
             profile.save()
+
+            if media_links_json:
+                new_links = json.loads(media_links_json) if isinstance(media_links_json, str) else media_links_json
+                for url in new_links:
+                    MediaLink.objects.create(musician=profile, url=url)
+
+            if delete_media_json:
+                ids_to_delete = json.loads(delete_media_json) if isinstance(delete_media_json, str) else delete_media_json
+                MediaLink.objects.filter(id__in=ids_to_delete).delete()
 
         except Musician.DoesNotExist:
             try:

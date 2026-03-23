@@ -83,3 +83,10 @@ class Review(models.Model):
 
     def __str__(self):
         return self.comment
+
+class MediaLink(models.Model):
+    musician = models.ForeignKey(Musician, on_delete=models.CASCADE, related_name='media_links')
+    url = models.URLField()
+
+    def __str__(self):
+        return self.url

@@ -98,6 +98,7 @@ My Profile
           </div>
           {% endif %}
 
+          {% if profile_type == 'musician' %}
           <div class="col">
             <div class="mb-3">
               <label class="form-label">Media Links</label>
@@ -136,6 +137,7 @@ My Profile
               </ul>
             </div>
           </div>
+          {% endif %}
         </div>
 
         <div class="row justify-content-center m-4">
@@ -165,8 +167,7 @@ My Profile
   </div>
 </div>
 
+{% endblock %}
 {% block scripts_block %}
     <script src="{% static 'find_my_gig/js/dashboard.js' %}"></script>
-{% endblock %}
-
 {% endblock %}
