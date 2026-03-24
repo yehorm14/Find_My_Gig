@@ -128,7 +128,14 @@ def musicians_list(request):
 def musician_detail(request, id):
     """Pulls a specific musician's profile from the database."""
     musician = get_object_or_404(Musician, id=id)
-    return render(request, 'gigs/musician_detail.html', {'musician': musician})
+    reviews = Review.objects.filter(
+        reviewee=musician.user
+    ).order_by('-id')
+    context = {
+        'musician': musician,
+        'reviews': reviews,
+    }
+    return render(request, 'gigs/musician_detail.html', context)
 
 def band_profile(request, id):
     """Pulls a specific band's profile from the database."""
@@ -288,7 +295,7 @@ def update_profile(request):
             firstname = data.get('firstname')
             surname = data.get('surname')
             bio = data.get('about')
-            age = data.get('age')
+            age = request.POST.get('age')
             instruments = data.get('instruments')
             picture = None
             media_links_json = data.get('media_links')
