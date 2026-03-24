@@ -19,7 +19,7 @@ urlpatterns = [
     path('gigs/<int:gig_id>/withdraw/', views.withdraw_gig, name='withdraw_gig'),
     path('gigs/<int:gig_id>/save/', views.save_gig, name='save_gig'),
     path('gigs/<int:gig_id>/unsave/', views.unsave_gig, name='unsave_gig'),
-    path('gigs/create/', views.create_gig, name='create_gig'),
+    path('gigs/create/', views.create_gig_listing, name='create_gig'),
     path('gigs/<int:gig_id>/gig_review/', views.submit_review, name='submit_review'),
     path('musicians/<int:musician_id>/review/', views.submit_musician_review, name='submit_musician_review'),
 

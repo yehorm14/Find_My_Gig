@@ -135,11 +135,52 @@ def band_profile(request, id):
     band = get_object_or_404(Band, id=id)
     return render(request, 'gigs/band_profile.html', {'band': band})
 
-def create_gig(request):
-    """Handles the form where bands can list a new gig."""
+@login_required
+def create_gig_listing(request):
     if request.method == 'POST':
-        return redirect(reverse('gigs:gig_listings'))
-    return render(request, 'gigs/create_gig.html')
+        try:
+            band = request.user.band
+        except Band.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'not_a_band'})
+
+        data = json.loads(request.body)
+        title = data.get('title', '').strip()
+        req_instruments = data.get('req_instruments', '').strip()
+        deadline = data.get('date', '')
+        description = data.get('description', '').strip()
+        location = data.get('location', '').strip()
+
+        if not all([title, req_instruments, deadline, description, location]):
+            return JsonResponse({'success': False, 'error': 'missing_fields'})
+
+        listing = Listing.objects.create(
+            band=band,
+            title=title,
+            req_instruments=req_instruments,
+            deadline=deadline,
+            description=description,
+            location=location,
+            is_urgent=False
+        )
+
+        return JsonResponse({
+            'success': True,
+            'listing': {
+                'id': listing.id,
+                'title': listing.title,
+                'req_instruments': listing.req_instruments,
+                'deadline': str(listing.deadline),
+                'location': listing.location,
+                'description': listing.description,
+            }
+        })
+    try:
+        band = request.user.band
+        listings = Listing.objects.filter(band=band)
+    except Band.DoesNotExist:
+        listings = []
+
+    return render(request, 'gigs/my_listings.html', {'listings': listings})
 
 
 # ==========================================
@@ -306,19 +347,6 @@ def delete_account(request):
         return JsonResponse({'success': True})
     return JsonResponse({'success': False})
 
-@login_required
-def create_gig_listing(request):
-    if request.method == 'POST':
-        return JsonResponse({
-            'success': True,
-            'listing': {
-                'id': 1,
-                'title': 'Test',
-                'req_instruments': 'Guitar',
-                'deadline': '2026-04-01',
-                'location': 'Glasgow'
-            }
-        })
 
 @login_required
 def delete_listing(request, listing_id):
