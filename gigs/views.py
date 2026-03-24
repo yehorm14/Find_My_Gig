@@ -8,9 +8,10 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.conf import settings
+import difflib
 
 # IMPORT THE MODELS and FORMS
-from gigs.models import Musician, Band, Listing, Application, Review
+from gigs.models import Musician, Band, Listing, Application, Review, MediaLink
 from gigs.forms import UserSignUpForm, MusicianProfileForm, BandProfileForm
 
 # Set up a logger for tracking issues in production
@@ -25,6 +26,17 @@ def clean_search_query(query):
     if query:
         return query.strip().lower()
     return ''
+
+def fuzzy_match_instrument(user_typo):
+    """If the user spells 'gutar', this function guesses they meant 'guitar' and fixes it!"""
+    valid_instruments = ['guitar', 'drums', 'vocals', 'piano', 'bass']
+    best_guesses = difflib.get_close_matches(user_typo, valid_instruments, n=1, cutoff=0.5)
+
+    if best_guesses:
+        return best_guesses[0]
+    return user_typo
+
+
 
 # ==========================================
 # --- CORE VIEWS ---
@@ -68,9 +80,16 @@ def gig_listings(request):
     else:
         # Default sort by deadline (most urgent first)
         gigs_queryset = gigs_queryset.order_by('deadline')
+    
+    applied_gig_ids = []
+    if request.user.is_authenticated:
+        applied_gig_ids = Application.objects.filter(
+            applicant=request.user
+        ).values_list('listing_id', flat=True)
 
     context = {
         'gigs': gigs_queryset,
+        'applied_gig_ids': applied_gig_ids,
         'selected_instrument': instrument_filter,
         'selected_location': location_query,
         'selected_date': date_query,
@@ -100,7 +119,11 @@ def gig_detail(request, gig_id):
 def musicians_list(request):
     """Shows all musicians registered in the database."""
     musicians = Musician.objects.all()
-    return render(request, 'gigs/musicians_list.html', {'musicians': musicians})
+    raw_instrument = request.GET.get('instrument', '')
+    search_term = fuzzy_match_instrument(clean_search_query(raw_instrument)) if raw_instrument else ''
+    if search_term:
+        musicians = musicians.filter(instruments__icontains=search_term)
+    return render(request, 'gigs/musicians_list.html', {'musicians': musicians, 'selected_instrument': raw_instrument})
 
 def musician_detail(request, id):
     """Pulls a specific musician's profile from the database."""
@@ -112,11 +135,52 @@ def band_profile(request, id):
     band = get_object_or_404(Band, id=id)
     return render(request, 'gigs/band_profile.html', {'band': band})
 
-def create_gig(request):
-    """Handles the form where bands can list a new gig."""
+@login_required
+def create_gig_listing(request):
     if request.method == 'POST':
-        return redirect(reverse('gigs:gig_listings'))
-    return render(request, 'gigs/create_gig.html')
+        try:
+            band = request.user.band
+        except Band.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'not_a_band'})
+
+        data = json.loads(request.body)
+        title = data.get('title', '').strip()
+        req_instruments = data.get('req_instruments', '').strip()
+        deadline = data.get('date', '')
+        description = data.get('description', '').strip()
+        location = data.get('location', '').strip()
+
+        if not all([title, req_instruments, deadline, description, location]):
+            return JsonResponse({'success': False, 'error': 'missing_fields'})
+
+        listing = Listing.objects.create(
+            band=band,
+            title=title,
+            req_instruments=req_instruments,
+            deadline=deadline,
+            description=description,
+            location=location,
+            is_urgent=False
+        )
+
+        return JsonResponse({
+            'success': True,
+            'listing': {
+                'id': listing.id,
+                'title': listing.title,
+                'req_instruments': listing.req_instruments,
+                'deadline': str(listing.deadline),
+                'location': listing.location,
+                'description': listing.description,
+            }
+        })
+    try:
+        band = request.user.band
+        listings = Listing.objects.filter(band=band)
+    except Band.DoesNotExist:
+        listings = []
+
+    return render(request, 'gigs/my_listings.html', {'listings': listings})
 
 
 # ==========================================
@@ -150,13 +214,19 @@ def my_profile(request):
     try:
         profile = request.user.musician
         profile_type = 'musician'
-    except:
-        profile = request.user.band
-        profile_type = 'band'
+        media_links = profile.media_links.all()
+    except Musician.DoesNotExist:
+        try:
+            profile = request.user.band
+            profile_type = 'band'
+            media_links = []
+        except Band.DoesNotExist:
+            return redirect('gigs:home')
 
     return render(request, 'gigs/my_profile.html', {
         'profile': profile,
-        'profile_type': profile_type
+        'profile_type': profile_type,
+        'media_links': media_links
     })
 
 
@@ -210,6 +280,8 @@ def update_profile(request):
             age = request.POST.get('age')
             instruments = request.POST.get('instruments')
             picture = request.FILES.get('profile_picture')
+            media_links_json = request.POST.get('media_links')
+            delete_media_json = request.POST.get('delete_media')
         else:
             data = json.loads(request.body)
             username = data.get('username')
@@ -219,6 +291,8 @@ def update_profile(request):
             age = data.get('age')
             instruments = data.get('instruments')
             picture = None
+            media_links_json = data.get('media_links')
+            delete_media_json = data.get('delete_media')
 
         if User.objects.exclude(pk=user.pk).filter(username=username).exists():
             return JsonResponse({'success': False, 'error': 'username_taken'})
@@ -235,6 +309,15 @@ def update_profile(request):
             if picture:
                 profile.profile_picture = picture
             profile.save()
+
+            if media_links_json:
+                new_links = json.loads(media_links_json) if isinstance(media_links_json, str) else media_links_json
+                for url in new_links:
+                    MediaLink.objects.create(musician=profile, url=url)
+
+            if delete_media_json:
+                ids_to_delete = json.loads(delete_media_json) if isinstance(delete_media_json, str) else delete_media_json
+                MediaLink.objects.filter(id__in=ids_to_delete).delete()
 
         except Musician.DoesNotExist:
             try:
@@ -264,19 +347,6 @@ def delete_account(request):
         return JsonResponse({'success': True})
     return JsonResponse({'success': False})
 
-@login_required
-def create_gig_listing(request):
-    if request.method == 'POST':
-        return JsonResponse({
-            'success': True,
-            'listing': {
-                'id': 1,
-                'title': 'Test',
-                'req_instruments': 'Guitar',
-                'deadline': '2026-04-01',
-                'location': 'Glasgow'
-            }
-        })
 
 @login_required
 def delete_listing(request, listing_id):

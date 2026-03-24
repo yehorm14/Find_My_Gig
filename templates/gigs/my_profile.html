@@ -22,7 +22,7 @@ My Profile
     <form method="POST" action="" enctype="multipart/form-data">
       {% csrf_token %}
       <div class="row justify-content-center m-4">
-        <div class="col text-center">
+        <div class="col-4 text-center">
           <label for="username" class="form-label">Username</label>
           <input type="text" class="form-control" id="profile-username" name="username" value="{{ user.username }}" required />
         </div>
@@ -47,25 +47,30 @@ My Profile
       </div>
 
       {% if profile_type == 'band' %}
-        <div class="col text-center">
+      <div class="row justify-content-center m-4">
+        <div class="col-4 text-center">
           <label for="band-name" class="form-label">Band Name</label>
           <input type="text" class="form-control" id="band-name" name="band_name" value="{{ profile.name }}" />
         </div>
+      </div>
       {% endif %}
 
       <div class="row justify-content-center m-4">
         <div class="col text-center">
-          <label for="profile-pic-upload" class="profile-pic-label">
+          <label for="profile-pic-input" class="profile-pic-label">
             <img id="profile-picture-preview"
-              src="{% static 'find_my_gig/images/pfp-placeholder.png' %}"
+              src="{% if profile.profile_picture  %}{{ profile.profile_picture.url }}{% else %}{% static 'find_my_gig/images/pfp-placeholder.png' %}{% endif %}"
               class="profile-pic"
+              onclick="document.getElementById('profile-picture-input').click()"
+              style="cursor: pointer;"
             />
           </label>
           <input
             type="file"
             id="profile-picture-input"
+            name="profile_picture"
             accept="image/*"
-            style="display: none"
+            style="display:none"
           />
 
           <p>Click to update</p>
@@ -93,6 +98,7 @@ My Profile
           </div>
           {% endif %}
 
+          {% if profile_type == 'musician' %}
           <div class="col">
             <div class="mb-3">
               <label class="form-label">Media Links</label>
@@ -131,6 +137,7 @@ My Profile
               </ul>
             </div>
           </div>
+          {% endif %}
         </div>
 
         <div class="row justify-content-center m-4">
@@ -149,7 +156,7 @@ My Profile
             <button
               id="delete-account-btn"
               type="button"
-              class="btn btn-primary btn-lg nice-button"
+              class="btn btn-danger btn-lg nice-button"
             >
               Delete Account
             </button>
@@ -160,8 +167,7 @@ My Profile
   </div>
 </div>
 
+{% endblock %}
 {% block scripts_block %}
     <script src="{% static 'find_my_gig/js/dashboard.js' %}"></script>
-{% endblock %}
-
 {% endblock %}

@@ -119,7 +119,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const addMediaBtn = document.getElementById('add-media-btn');
 
     if (addMediaBtn){
-        addMediaBtn.addEventListener('click', function () {
+        addMediaBtn.addEventListener('click', function (e) {
+            e.preventDefault()
+            e.stopPropagation()
 
             const mediaInput = document.getElementById('media-link-input');
             const mediaUrl = mediaInput?.value.trim();

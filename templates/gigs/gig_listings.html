@@ -61,13 +61,20 @@ Gigs
                     <a href="{% url 'gigs:gig_detail' gig.id %}" class="btn btn-outline-light w-100 rounded-pill mb-2">
                         View Details
                     </a>
-
+                    {% if profile_type == "musician" %}
                     <div class="d-flex gap-2 mb-3">
+                        <button type="button" id="gig-detail-apply-btn"
+                                class="{% if gig.id in applied_gig_ids %}withdraw-btn{% else %}apply-btn{% endif %} btn btn-primary nice-button background-color w-100 my-2"
+                                data-gig-id="{{ gig.id }}">
+                          {% if gig.id in applied_gig_ids %}Withdraw{% else %}Apply{% endif %}
+                        </button>
+
                         <button type="button" 
                                 class="bookmark-btn btn apply-btn rounded-pill w-50"
-                                data-gig-id="{{ gig.id }}">
+                                data-gig-id="{{ listing.id }}">
                             ★ Bookmark
                         </button>
+                    {% endif %}
 
                         <a href="{% url 'gigs:submit_review' gig.id %}" 
                         class="btn btn-outline-secondary rounded-pill w-50">
