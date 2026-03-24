@@ -17,7 +17,7 @@
 <div class="row justify-content-center">
   <div class="col-4 text-center">
     <img src="{% static 'find_my_gig/images/pfp-placeholder.png' %}" class="profile-pic" />
-    {% if musician.age %}
+    {% if musician.age != None %}
     <p><strong>Age:</strong> {{ musician.age }}</p>
     {% endif %}
     {% if musician.instruments %}

@@ -295,7 +295,7 @@ def update_profile(request):
             firstname = data.get('firstname')
             surname = data.get('surname')
             bio = data.get('about')
-            age = data.get('age')
+            age = request.POST.get('age')
             instruments = data.get('instruments')
             picture = None
             media_links_json = data.get('media_links')
