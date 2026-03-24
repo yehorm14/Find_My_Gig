@@ -48,14 +48,13 @@ My Applications
                     <button type="button"
                              class="withdraw-application-btn btn btn-danger nice-button background-color w-100 my-2"
                              data-gig-id="{{ application.listing.id }}">
-                    <p class="m-3 mx-5">Withdraw</p>
+                         Withdraw
                     </button>
 
-                    <button type="button"
-                            data-url="{% url 'gigs:gig_detail' application.listing.id %}"
-                            class="btn btn-primary nice-button background-color w-100 my-2">
-                    <p class="m-3 mx-5">Review</p>
-                    </button>
+                    <a href="{% url 'gigs:gig_detail' application.listing.id %}"
+                       class="btn btn-primary nice-button background-color w-100 my-2 py-2">
+                        View / Review
+                    </a>
                 </div>
             </div>
         </div>

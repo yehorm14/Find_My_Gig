@@ -1,0 +1,50 @@
+{% extends 'gigs/base.html' %}
+{% load static %}
+
+{% block title_block %}
+Band Dashboard | Find My Gig
+{% endblock %}
+
+{% block body_block %}
+<div class="container mt-5 px-4 px-md-5">
+  
+  <div class="text-center mb-5">
+    <h1 class="display-4" style="font-weight: 800; color: #fff;">Band <span class="gig-accent-text">Dashboard</span></h1>
+    <p class="lead text-muted-custom">Post open spots, manage your current listings, and update your profile.</p>
+  </div>
+
+  <div class="row justify-content-center gap-4">
+    
+    <div class="col-md-5 col-lg-3 d-flex align-items-stretch">
+      <a href="{% url 'gigs:create_gig' %}" class="text-decoration-none w-100">
+        <div class="dashboard-card h-100 text-center d-flex flex-column align-items-center justify-content-center p-4">
+          <img src="{% static 'find_my_gig/images/create.svg' %}" class="dashboard-icon mb-4" alt="Create Gig" />
+          <h4 class="mb-2" style="color: #fff; font-weight: 700;">List a Gig</h4>
+          <p class="text-muted-custom mb-0">Post a new gig listing</p>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-md-5 col-lg-3 d-flex align-items-stretch">
+      <a href="{% url 'gigs:my_listings' %}" class="text-decoration-none w-100">
+        <div class="dashboard-card h-100 text-center d-flex flex-column align-items-center justify-content-center p-4">
+          <img src="{% static 'find_my_gig/images/listing-icon.svg' %}" class="dashboard-icon mb-4" alt="My Listings" />
+          <h4 class="mb-2" style="color: #fff; font-weight: 700;">My Listings</h4>
+          <p class="text-muted-custom mb-0">View and manage your listings</p>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-md-5 col-lg-3 d-flex align-items-stretch">
+      <a href="{% url 'gigs:my_profile' %}" class="text-decoration-none w-100">
+        <div class="dashboard-card h-100 text-center d-flex flex-column align-items-center justify-content-center p-4">
+          <img src="{% static 'find_my_gig/images/create.svg' %}" class="dashboard-icon mb-4" alt="My Profile" />
+          <h4 class="mb-2" style="color: #fff; font-weight: 700;">My Profile</h4>
+          <p class="text-muted-custom mb-0">Update your band details</p>
+        </div>
+      </a>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

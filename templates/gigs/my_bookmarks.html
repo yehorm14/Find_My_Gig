@@ -1,0 +1,61 @@
+{% extends 'gigs/base.html' %}
+{% load static %}
+
+{% block title_block %}
+My Bookmarks | Find My Gig
+{% endblock %}
+
+{% block body_block %}
+<div class="container mt-5 px-4 px-md-5">
+  
+  <div class="text-center mb-5">
+    <h1 class="display-4" style="font-weight: 800; color: #fff;">My <span class="gig-accent-text">Bookmarks</span></h1>
+    <p class="lead text-muted-custom">Everything you've saved for later.</p>
+  </div>
+
+  <hr class="mb-5" style="border-color: #2a2a35;">
+
+  <div class="mb-5">
+    <h3 class="mb-4" style="color: #fff; font-weight: 700;">📌 Saved Gigs</h3>
+    <div class="row">
+      {% for gig in saved_gigs %}
+        <div class="col-md-6 col-lg-4 d-flex align-items-stretch mb-4">
+            <div class="listing-card w-100 d-flex flex-column">
+                <h4 class="gig-title mb-1">{{ gig.title }}</h4>
+                <p class="text-muted-custom mb-2">{{ gig.band.name }}</p>
+                <p class="mb-3">📍 <span class="gig-accent-text">{{ gig.location }}</span></p>
+                <div class="mt-auto pt-3 border-top-accent">
+                    <a href="{% url 'gigs:gig_detail' gig.id %}" class="btn btn-outline-light w-100 rounded-pill mb-2">View Details</a>
+                    <button type="button" class="btn btn-outline-danger w-100 rounded-pill unsave-gig-btn" data-gig-id="{{ gig.id }}">Remove Bookmark</button>
+                </div>
+            </div>
+        </div>
+      {% empty %}
+        <div class="col-12"><p class="text-muted-custom">You haven't saved any gigs yet.</p></div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="mb-5">
+    <h3 class="mb-4" style="color: #fff; font-weight: 700;">🎸 Saved Bands</h3>
+    <div class="row">
+      {% for band in saved_bands %}
+        <div class="col-md-6 col-lg-4 d-flex align-items-stretch mb-4">
+            <div class="listing-card w-100 d-flex align-items-center p-3">
+                <img src="{% if band.profile_picture %}{{ band.profile_picture.url }}{% else %}{% static 'find_my_gig/images/pfp-placeholder.png' %}{% endif %}" 
+                     class="profile-pic me-3" style="width: 70px; height: 70px; border-width: 2px;" alt="{{ band.name }}">
+                <div class="flex-grow-1">
+                    <h5 class="mb-1" style="color: #fff;">{{ band.name }}</h5>
+                    <p class="text-muted-custom mb-0" style="font-size: 0.85rem;">📍 {{ band.location }}</p>
+                </div>
+                <a href="{% url 'gigs:band_profile' band.id %}" class="btn apply-btn rounded-pill px-3 py-1 text-uppercase" style="font-size: 0.75rem;">View</a>
+            </div>
+        </div>
+      {% empty %}
+        <div class="col-12"><p class="text-muted-custom">You haven't saved any bands yet.</p></div>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}
