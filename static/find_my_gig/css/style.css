@@ -35,13 +35,36 @@ body {
    3. BUTTONS & LINKS
    ========================================================================== */
 .site-title {
-    color: var(--text-main);
+    color: #ffffff;
     text-decoration: none;
-    font-weight: 700;
-    transition: color var(--transition-fast);
+    font-weight: 900; 
+    letter-spacing: -1px; 
+    font-size: 1.8rem;
+    text-shadow: 0 0 10px rgba(0, 255, 170, 0.2);
+    transition: all var(--transition-fast);
 }
 
-.site-title:hover { color: var(--neon-cyan); }
+.site-title:hover { 
+    color: var(--neon-cyan); 
+    text-shadow: 0 0 15px rgba(0, 255, 170, 0.6); 
+    transform: scale(1.02); 
+}
+
+.nav-status-text {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.nav-username {
+    color: var(--neon-cyan); 
+    font-weight: 800; 
+    font-size: 0.85rem;
+    margin-left: 4px;
+    text-transform: none; 
+    letter-spacing: 0.5px;
+}
 
 .subtle-link {
     color: var(--neon-cyan);
@@ -51,9 +74,11 @@ body {
     transition: opacity var(--transition-fast);
 }
 
-.subtle-link:hover { opacity: 0.8; text-decoration: underline; }
+.subtle-link:hover { 
+    opacity: 0.8; 
+    text-decoration: underline; 
+}
 
-/* Base Button Styles */
 .nice-button, .apply-btn, .bookmarked-btn {
     border-radius: 50rem;
     font-weight: 600;

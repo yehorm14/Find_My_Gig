@@ -15,56 +15,44 @@
   <body class="{% if user.is_authenticated %}user-logged-in{% endif %}">
     
     {% block navbar %}
-    <nav class="navbar navbar-expand-lg primary-color py-3">
+    <nav class="navbar navbar-expand-lg custom-navbar py-3">
       <div class="container-fluid px-4 px-md-5">
-        <a class="navbar-brand site-title h1 mb-0" href="/">Find My Gig</a>
         
-        <div class="d-flex align-items-center ms-auto text-end">
-          <div class="me-3">
-            <div class="small text-muted mb-1">
+        <a class="navbar-brand site-title mb-0" 
+          href="{% if user.is_authenticated %}{% url 'gigs:dashboard' %}{% else %}/{% endif %}">
+          Find My Gig
+        </a>
+              
+        <div class="d-flex align-items-center ms-auto">
+          
+          <div class="text-end me-3">
+            <div class="nav-status-text mb-2">
               {% if user.is_authenticated %}
-                Logged in as: <strong>{{ user.username }}</strong>
+                Logged in as <span class="nav-username">{{ user.username }}</span>
               {% else %}
-                Currently not logged in
+                <span style="font-style: italic;">Currently not logged in</span>
               {% endif %}
             </div>
             
             <div class="d-flex gap-2 justify-content-end">
               {% if user.is_authenticated %}
-                {% if profile_type == 'musician' %}
-                  <a href="{% url 'gigs:my_applications' %}" class="btn btn-sm btn-outline-light rounded-pill px-3">Applications</a>
-                {% elif profile_type == 'band' %}
-                  <a href="{% url 'gigs:my_listings' %}" class="btn btn-primary nice-button background-color">My Listings</a>
-                {% endif %}
-                  <a href="{% url 'gigs:my_profile' %}" class="btn btn-sm btn-outline-light rounded-pill px-3">Profile</a>
-                  <form method="POST" action="{% url 'gigs:logout' %}" style="display:inline;">
-                    {% csrf_token %}
-                    <button class="btn btn-sm btn-outline-danger rounded-pill px-3">Sign Out</button>
-                  </form>
-                {% else %}
-                  <a href="{% url 'gigs:login' %}" class="btn btn-sm apply-btn rounded-pill px-4">Sign In</a>
-                  <a href="{% url 'gigs:signup' %}" class="btn btn-sm btn-outline-light rounded-pill px-4">Sign Up</a>
-                {% endif %}
+                <a href="{% url 'gigs:my_applications' %}" class="btn btn-sm btn-outline-light rounded-pill px-3">Applications</a>
+                <a href="{% url 'gigs:my_profile' %}" class="btn btn-sm btn-outline-light rounded-pill px-3">Profile</a>
+                <form method="POST" action="{% url 'gigs:logout' %}" style="display:inline;">
+                  {% csrf_token %}
+                  <button class="btn btn-sm btn-outline-danger rounded-pill px-3">Sign Out</button>
+                </form>
+              {% else %}
+                <a href="{% url 'gigs:login' %}" class="btn btn-sm apply-btn rounded-pill px-4">Sign In</a>
+                <a href="{% url 'gigs:signup' %}" class="btn btn-sm btn-outline-light rounded-pill px-4">Sign Up</a>
+              {% endif %}
             </div>
           </div>
           
-            {% if user.is_authenticated %}
-              <div class="ms-3">
-                {% if profile_type == 'musician' %}
-                  {% if user.musician.profile_picture %}
-                    <img src="{{ user.musician.profile_picture.url }}" class="profile-pic border border-2 border-accent" style="width: 50px; height: 50px;">
-                  {% else %}
-                    <img src="{% static 'find_my_gig/images/pfp-placeholder.png' %}" class="profile-pic border border-2 border-accent" style="width: 50px; height: 50px;">
-                  {% endif %}
-                {% elif profile_type == 'band' %}
-                  {% if user.band.profile_picture %}
-                    <img src="{{ user.band.profile_picture.url }}" class="profile-pic border border-2 border-accent" style="width: 50px; height: 50px;">
-                  {% else %}
-                    <img src="{% static 'find_my_gig/images/pfp-placeholder.png' %}" class="profile-pic border border-2 border-accent" style="width: 50px; height: 50px;">
-                  {% endif %}
-                {% endif %}
-              </div>
-            {% endif %}
+          {% if user.is_authenticated %}
+            <img src="{{ user.profile.profile_pic.url }}" alt="Profile" class="profile-pic-nav border border-2 border-accent">
+          {% endif %}
+          
         </div>
       </div>
     </nav>

@@ -14,6 +14,7 @@ class Musician(models.Model):
     profile_picture = models.ImageField(upload_to='profile_images', blank=True, default='profile_images/pfp-placeholder.png')
     media_link = models.URLField(blank=True)
     location = models.CharField(max_length=100)
+    bookmarked_bands = models.ManyToManyField('Band', related_name='bookmarked_by_musicians', blank=True)
 
     @property
     def community_badge(self):

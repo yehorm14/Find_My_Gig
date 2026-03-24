@@ -1,0 +1,50 @@
+{% extends 'gigs/base.html' %}
+{% load static %}
+
+{% block title_block %}
+{{ band.name }} | Profile
+{% endblock %}
+
+{% block body_block %}
+<div class="container mt-5 px-4 px-md-5">
+    
+    <nav aria-label="breadcrumb" class="mb-4">
+        <a href="{% url 'gigs:gig_listings' %}" class="subtle-link d-inline-flex align-items-center">
+            ← Back to gigs
+        </a>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="listing-card p-5 text-center">
+                <img src="{% if band.profile_picture %}{{ band.profile_picture.url }}{% else %}{% static 'find_my_gig/images/pfp-placeholder.png' %}{% endif %}" 
+                     class="profile-pic mb-4" 
+                     style="width: 150px; height: 150px;" 
+                     alt="{{ band.name }}">
+                
+                <h1 class="display-5 mb-2" style="font-weight: 800; color: #fff;">{{ band.name }}</h1>
+                <p class="text-muted-custom mb-4">📍 {{ band.location }}</p>
+                
+                <hr class="mb-4" style="border-color: #2a2a35;">
+                
+                <div class="text-start mb-4">
+                    <span class="detail-label">About the Band</span>
+                    <p class="description-text">{{ band.bio }}</p>
+                </div>
+
+                {% if user.is_authenticated and user.musician %}
+                    <div class="mt-4 pt-4 action-border">
+                        <button type="button" id="save-band-btn"
+                                class="btn {% if is_bookmarked %}btn-outline-light{% else %}apply-btn{% endif %} rounded-pill px-5 py-2"
+                                data-band-id="{{ band.id }}"
+                                data-bookmarked="{{ is_bookmarked|yesno:'true,false' }}">
+                          {% if is_bookmarked %}★ Saved to Favorites{% else %}☆ Save Band{% endif %}
+                        </button>
+                    </div>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
