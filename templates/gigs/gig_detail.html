@@ -46,6 +46,7 @@
 
                 <div class="mt-auto pt-4 action-border">
                     <div class="d-flex flex-wrap gap-3">
+                        {% if profile_type == "musician" %}
                         <button type="button" id="gig-detail-apply-btn"
                                 class="btn {% if has_applied %}withdraw-btn{% else %}apply-btn{% endif %} rounded-pill px-4 py-2"
                                 data-gig-id="{{ listing.id }}"
@@ -59,6 +60,7 @@
                                 data-bookmarked="{{ is_bookmarked|yesno:'true,false' }}">
                           {% if is_bookmarked %}★ Bookmarked{% else %}☆ Bookmark{% endif %}
                         </button>
+                        {% endif %}
 
                         {% if user.is_authenticated and has_applied %}
                           <a href="{% url 'gigs:submit_review' listing.id %}" 
@@ -88,6 +90,7 @@
         </div>
     </div>
 </div>
+<p>DEBUG: profile_type = {{ profile_type }}</p>
 {% endblock %}
 
 {% block scripts_block %}

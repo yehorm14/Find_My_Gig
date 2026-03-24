@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.conf import settings
+import difflib
 
 # IMPORT THE MODELS and FORMS
 from gigs.models import Musician, Band, Listing, Application, Review, MediaLink
@@ -25,6 +26,17 @@ def clean_search_query(query):
     if query:
         return query.strip().lower()
     return ''
+
+def fuzzy_match_instrument(user_typo):
+    """If the user spells 'gutar', this function guesses they meant 'guitar' and fixes it!"""
+    valid_instruments = ['guitar', 'drums', 'vocals', 'piano', 'bass']
+    best_guesses = difflib.get_close_matches(user_typo, valid_instruments, n=1, cutoff=0.5)
+
+    if best_guesses:
+        return best_guesses[0]
+    return user_typo
+
+
 
 # ==========================================
 # --- CORE VIEWS ---
@@ -68,9 +80,16 @@ def gig_listings(request):
     else:
         # Default sort by deadline (most urgent first)
         gigs_queryset = gigs_queryset.order_by('deadline')
+    
+    applied_gig_ids = []
+    if request.user.is_authenticated:
+        applied_gig_ids = Application.objects.filter(
+            applicant=request.user
+        ).values_list('listing_id', flat=True)
 
     context = {
         'gigs': gigs_queryset,
+        'applied_gig_ids': applied_gig_ids,
         'selected_instrument': instrument_filter,
         'selected_location': location_query,
         'selected_date': date_query,
