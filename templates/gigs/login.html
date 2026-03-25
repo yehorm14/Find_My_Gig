@@ -1,59 +1,68 @@
 {% extends 'gigs/base.html' %}
-
 {% load static %}
 
 {% block title_block %}
-Login
-{% endblock %}
-
-{% block header_detailed %}
+Login | Find My Gig
 {% endblock %}
 
 {% block body_block %}
-<div class="row justify-content-center">
-  <div class="col-4">
-    <form id="login-form" method="POST" action="">
-      {% csrf_token %}
-
-      {% if form.errors %}
-        <div id="login-error-message">
-          <p>Username or password was incorrect. Please try again.</p>
-        </div>
-      {% endif %}
-
-      {% if next %}
-        <input type="hidden" name="next" value="{{ next }}">
-      {% endif %}
-
-      <div class="mb-3">
-        <label for="login-username" class="form-label">Username</label>
-        <input type="text" class="form-control" id="login-username" name="username" required />
-        <span id="login-username-error" class="field-error"></span>
+<div class="container mt-5 pt-4 mb-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-5">
+      
+      <div class="text-center mb-4">
+        <h1 class="display-5" style="font-weight: 800; color: #fff;">Welcome <span class="gig-accent-text">Back</span></h1>
+        <p class="text-muted-custom">Sign in to manage your gigs and profile.</p>
       </div>
 
-      <div class="mb-3">
-        <label for="login-password" class="form-label">Password</label>
-        <input type="password" class="form-control" id="login-password" name="password" required />
-        <button type="button" id="toggle-login-password" class="btn btn-sm btn-secondary mt-1">Show</button>
-        <span id="login-password-error" class="field-error"></span>
+      <div class="listing-card p-4 p-md-5">
+        <form id="login-form" method="POST" action="">
+          {% csrf_token %}
+
+          {% if form.errors %}
+            <div id="login-error-message" class="status-error" style="display: block; margin-bottom: 20px;">
+              Username or password was incorrect. Please try again.
+            </div>
+          {% endif %}
+
+          {% if next %}
+            <input type="hidden" name="next" value="{{ next }}">
+          {% endif %}
+
+          <div class="mb-4">
+            <label for="login-username" class="detail-label">Username</label>
+            <input type="text" class="form-control" id="login-username" name="username" required />
+            <span id="login-username-error" class="field-error text-danger small"></span>
+          </div>
+
+          <div class="mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <label for="login-password" class="detail-label mb-0">Password</label>
+              <a href="{% url 'gigs:password_reset' %}" class="subtle-link" style="font-size: 0.8rem;">Forgot password?</a>
+            </div>
+            
+            <div class="input-group">
+              <input type="password" class="form-control" id="login-password" name="password" required />
+              <button type="button" id="toggle-login-password" class="btn btn-outline-secondary px-3" style="border-color: var(--border-dim);">Show</button>
+            </div>
+            <span id="login-password-error" class="field-error text-danger small"></span>
+          </div>
+
+          <button type="submit" class="btn apply-btn rounded-pill w-100 py-2 mb-4" style="font-size: 1.1rem;">
+            Log In
+          </button>
+
+          <div class="text-center pt-3 border-top-accent" style="border-top: 1px solid var(--border-dim);">
+            <p class="text-muted-custom mb-2">Don't have an account yet?</p>
+            <a href="{% url 'gigs:signup' %}" class="btn btn-outline-light rounded-pill w-100 py-2">
+              Create an Account
+            </a>
+          </div>
+          
+        </form>
       </div>
 
-      <div class="my-4">
-        <a href="{% url 'gigs:password_reset' %}">Forgot your password? Click here</a>
-      </div>
-
-      <button type="submit" class="btn btn-primary nice-button primary-color">
-        Log in
-      </button>
-
-      <div class="my-4">
-        <p>Not registered an account with us?</p>
-        Sign up here:
-        <a href="{% url 'gigs:signup' %}" class="btn btn-primary nice-button primary-color">
-          Sign Up
-        </a>
-      </div>
-    </form>
+    </div>
   </div>
 </div>
 {% endblock %}
