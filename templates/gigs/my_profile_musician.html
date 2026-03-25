@@ -1,0 +1,129 @@
+{% extends 'gigs/base.html' %}
+{% load static %}
+
+{% block title_block %}
+Musician Profile | Find My Gig
+{% endblock %}
+
+{% block body_block %}
+<div id="status-message" class="container mt-3"></div>
+
+<div class="container mt-4 px-4 px-md-5 mb-5">
+  
+  <div class="text-center mb-5">
+    <h1 class="display-4" style="font-weight: 800; color: #fff;">Musician <span class="gig-accent-text">Profile</span></h1>
+    <p class="lead text-muted-custom">Update your personal details, instruments, and media links.</p>
+  </div>
+
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+      
+      <div class="listing-card p-4 p-md-5">
+        <form method="POST" action="" enctype="multipart/form-data">
+          {% csrf_token %}
+          
+          <h4 class="mb-4 border-bottom-accent pb-2">Account Details</h4>
+          
+          <div class="row g-4 mb-5">
+            <div class="col-md-6">
+              <label for="profile-username" class="detail-label">Username</label>
+              <input type="text" class="form-control" id="profile-username" name="username" value="{{ user.username }}" required />
+            </div>
+            
+            <div class="col-md-6">
+              <label for="profile-age" class="detail-label">Age</label>
+              <input type="number" class="form-control" id="profile-age" name="age" value="{{ profile.age }}" required />
+            </div>
+
+            <div class="col-md-6">
+              <label for="firstname" class="detail-label">First Name</label>
+              <input type="text" class="form-control" id="firstname" name="firstname" value="{{ user.first_name }}" required />
+            </div>
+
+            <div class="col-md-6">
+              <label for="surname" class="detail-label">Surname</label>
+              <input type="text" class="form-control" id="surname" name="surname" value="{{ user.last_name }}" required />
+            </div>
+          </div>
+
+          <h4 class="mb-4 border-bottom-accent pb-2">Public Profile</h4>
+
+          <div class="row g-4 mb-5">
+            <div class="col-md-4 text-center d-flex flex-column align-items-center justify-content-center border-end" style="border-color: var(--border-dim) !important;">
+              <label for="profile-picture-input" class="profile-pic-label position-relative mb-3" style="cursor: pointer;">
+                <img id="profile-picture-preview"
+                  src="{% if profile.profile_picture %}{{ profile.profile_picture.url }}{% else %}{% static 'find_my_gig/images/pfp-placeholder.png' %}{% endif %}"
+                  class="profile-pic"
+                  alt="Profile Picture"
+                  style="width: 150px; height: 150px;"
+                  onclick="document.getElementById('profile-picture-input').click()"
+                />
+                <div class="position-absolute bottom-0 end-0 bg-dark rounded-circle p-2 border border-accent" style="transform: translate(10%, 10%);" onclick="document.getElementById('profile-picture-input').click()">
+                  ✏️
+                </div>
+              </label>
+              <input type="file" id="profile-picture-input" name="profile_picture" accept="image/*" style="display:none" />
+              <p class="text-muted-custom small uppercase-label">Click image to change</p>
+            </div>
+
+            <div class="col-md-8">
+              <div class="mb-4">
+                <label for="profile-about" class="detail-label">Bio / About</label>
+                <textarea class="form-control" name="about" id="profile-about" rows="4" placeholder="Tell the community about yourself...">{{ profile.bio }}</textarea>
+              </div>
+
+              <div class="mb-4">
+                <label for="profile-instruments" class="detail-label">Primary Instrument</label>
+                <select class="form-select" id="profile-instruments" name="instruments">
+                  <option value="">Select instrument</option>
+                  <option value="Guitar" {% if profile.instruments == 'Guitar' %}selected{% endif %}>Guitar</option>
+                  <option value="Bass"   {% if profile.instruments == 'Bass' %}selected{% endif %}>Bass</option>
+                  <option value="Drums"  {% if profile.instruments == 'Drums' %}selected{% endif %}>Drums</option>
+                  <option value="Vocals" {% if profile.instruments == 'Vocals' %}selected{% endif %}>Vocals</option>
+                  <option value="Other"  {% if profile.instruments == 'Other' %}selected{% endif %}>Other</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label class="detail-label">Media Links (YouTube, Spotify, Soundcloud)</label>
+                <div class="input-group mb-3">
+                  <input type="text" class="form-control" id="media-link-input" placeholder="Paste link here (e.g., https://youtube.com/...)" />
+                  <button type="button" id="add-media-btn" class="btn apply-btn px-4">Add Link</button>
+                </div>
+                
+                <ul id="media-links-list" class="list-group list-group-flush rounded border" style="border-color: var(--border-dim) !important;">
+                  {% for link in media_links %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center" style="background-color: transparent; border-color: var(--border-dim);">
+                      <a href="{{ link.url }}" target="_blank" class="subtle-link text-truncate" style="max-width: 80%;">{{ link.url }}</a>
+                      <button type="button" data-media-id="{{ link.id }}" class="delete-media-btn btn btn-sm btn-outline-danger rounded-pill px-3">
+                        Remove
+                      </button>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <hr style="border-color: var(--border-dim);">
+
+          <div class="d-flex justify-content-between align-items-center mt-4">
+            <button id="delete-account-btn" type="button" class="btn btn-outline-danger rounded-pill px-4 py-2">
+              Delete Account
+            </button>
+            <button id="update-profile-btn" type="button" class="btn apply-btn rounded-pill px-5 py-2" style="font-size: 1.1rem;">
+              Save Changes
+            </button>
+          </div>
+
+        </form>
+      </div>
+      
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts_block %}
+    <script src="{% static 'find_my_gig/js/dashboard.js' %}"></script>
+{% endblock %}
