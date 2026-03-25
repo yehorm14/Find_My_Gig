@@ -1,57 +1,71 @@
 {% extends 'gigs/base.html' %}
 {% load static %}
 
-{% block title_block %}Home{% endblock %}
+{% block title_block %}Home | Find My Gig{% endblock %}
 
 {% block body_block %}
-<div class="container mt-5 pt-5">
-    <div class="text-center mb-5">
+<div class="container mt-5 pt-5 mb-5">
+    
+    <div class="text-center mb-5 pb-4">
         <h1 class="display-2" style="font-weight: 800; color: #fff;">Find Your Next <span class="gig-accent-text">Stage.</span></h1>
-        <p class="lead text-muted-custom">Connecting local talent with the best venues in Glasgow.</p>
+        <p class="lead text-muted-custom mt-3">Connecting local talent with the best venues and bands in Glasgow.</p>
     </div>
 
-    <div class="row justify-content-center gap-4 mt-5">
+    <div class="row g-4 justify-content-center mt-2">
         
-        <div class="col-md-5 col-lg-4">
-            <div class="listing-card p-5 text-center h-100 d-flex flex-column align-items-center justify-content-center">
+        <div class="col-md-6 col-lg-4 d-flex align-items-stretch">
+            <div class="listing-card p-5 text-center w-100 d-flex flex-column align-items-center justify-content-center">
                 <div class="mb-4">
                     <h1 style="font-size: 4rem;">🎸</h1>
                 </div>
-                <h2 class="mb-3">Find a Gig</h2>
-                <p class="text-muted-custom mb-4">Browse open listings for guitarists, drummers, and more.</p>
-                <a href="{% url 'gigs:gig_listings' %}" class="btn apply-btn rounded-pill px-5 py-2 w-100">
+                <h2 class="mb-3" style="color: #fff; font-weight: 700;">Find a Gig</h2>
+                <p class="text-muted-custom mb-4 flex-grow-1">Browse open listings for guitarists, drummers, singers, and more.</p>
+                <a href="{% url 'gigs:gig_listings' %}" class="btn apply-btn rounded-pill px-4 py-2 w-100" style="font-size: 1.1rem;">
                     Browse Gigs
                 </a>
             </div>
         </div>
 
-        <div class="col-md-5 col-lg-4">
-            <div class="listing-card p-5 text-center h-100 d-flex flex-column align-items-center justify-content-center">
+        <div class="col-md-6 col-lg-4 d-flex align-items-stretch">
+            <div class="listing-card p-5 text-center w-100 d-flex flex-column align-items-center justify-content-center" style="border-color: var(--neon-cyan);">
                 <div class="mb-4">
-                    <h1 style="font-size: 4rem;">👨‍🎤</h1>
+                    <h1 style="font-size: 4rem;">🤝</h1>
                 </div>
-                <h2 class="mb-3">Find Talent</h2>
-                <p class="text-muted-custom mb-4">Search for local musicians to join your band or fill a spot.</p>
-                <a href="{% url 'gigs:musicians_list' %}" class="btn btn-outline-light rounded-pill px-5 py-2 w-100">
+                <h2 class="mb-3" style="color: #fff; font-weight: 700;">Find Talent</h2>
+                <p class="text-muted-custom mb-4 flex-grow-1">Search for local musicians to join your band or fill a temporary spot.</p>
+                <a href="{% url 'gigs:musicians_list' %}" class="btn btn-outline-light rounded-pill px-4 py-2 w-100" style="font-size: 1.1rem;">
                     Find Musicians
+                </a>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4 d-flex align-items-stretch">
+            <div class="listing-card p-5 text-center w-100 d-flex flex-column align-items-center justify-content-center">
+                <div class="mb-4">
+                    <h1 style="font-size: 4rem;">🏢</h1>
+                </div>
+                <h2 class="mb-3" style="color: #fff; font-weight: 700;">Discover Bands</h2>
+                <p class="text-muted-custom mb-4 flex-grow-1">Explore our directory of local bands and venues to network and follow.</p>
+                <a href="{% url 'gigs:bands_list' %}" class="btn btn-outline-light rounded-pill px-4 py-2 w-100" style="font-size: 1.1rem;">
+                    View Directory
                 </a>
             </div>
         </div>
 
     </div>
 
-    <div class="row mt-5 pt-5 text-center">
-        <div class="col-md-4">
-            <h4 class="gig-accent-text">200+</h4>
-            <p class="text-muted-custom small uppercase">Gigs Found</p>
+    <div class="row mt-5 pt-5 text-center border-top-accent" style="border-top: 1px solid var(--border-dim);">
+        <div class="col-md-4 mb-4 mb-md-0">
+            <h1 class="display-4 gig-accent-text" style="font-weight: 800;">200+</h1>
+            <p class="text-muted-custom small uppercase-label">Gigs Found</p>
+        </div>
+        <div class="col-md-4 mb-4 mb-md-0">
+            <h1 class="display-4 gig-accent-text" style="font-weight: 800;">50+</h1>
+            <p class="text-muted-custom small uppercase-label">Active Bands</p>
         </div>
         <div class="col-md-4">
-            <h4 class="gig-accent-text">50+</h4>
-            <p class="text-muted-custom small uppercase">Active Bands</p>
-        </div>
-        <div class="col-md-4">
-            <h4 class="gig-accent-text">Glasgow</h4>
-            <p class="text-muted-custom small uppercase">Local Community</p>
+            <h1 class="display-4 gig-accent-text" style="font-weight: 800;">GLA</h1>
+            <p class="text-muted-custom small uppercase-label">Local Community</p>
         </div>
     </div>
 </div>
