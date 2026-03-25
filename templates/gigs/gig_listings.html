@@ -73,10 +73,11 @@ Gigs
                           {% if gig.id in applied_gig_ids %}Withdraw{% else %}Apply{% endif %}
                         </button>
 
-                        <button type="button" 
-                                class="bookmark-btn btn apply-btn rounded-pill w-50"
-                                data-gig-id="{{ gig.id }}">
-                            ★ Bookmark
+                        <button type="button" id="gig-detail-bookmark-btn"
+                                class="btn btn-outline-light rounded-pill px-4 py-2"
+                                data-gig-id="{{ listing.id }}"
+                                data-bookmarked="{{ is_bookmarked|yesno:'true,false' }}">
+                          {% if is_bookmarked %}★ Bookmarked{% else %}☆ Bookmark{% endif %}
                         </button>
                     </div>
                     {% endif %}

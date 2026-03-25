@@ -62,6 +62,10 @@ def gig_listings(request):
         applied_gig_ids = Application.objects.filter(
             applicant=request.user
         ).values_list('listing_id', flat=True)
+    
+    bookmarked_gig_ids = []
+    if request.user.is_authenticated:
+        bookmarked_gig_ids = request.user.saved_gigs.values_list('id', flat=True)
 
     context = {
         'gigs': gigs_queryset,
@@ -69,6 +73,7 @@ def gig_listings(request):
         'selected_instrument': instrument_filter,
         'selected_date': date_query,
         'current_sort': sort_by,
+        'bookmarked_gig_ids': bookmarked_gig_ids,
     }
 
     return render(request, 'gigs/gig_listings.html', context)
