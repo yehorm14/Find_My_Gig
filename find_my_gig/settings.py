@@ -76,6 +76,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'gigs.context_processors.profile_type',
+                'gigs.context_processors.user_profile',
             ],
         },
     },

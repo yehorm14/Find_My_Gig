@@ -36,8 +36,13 @@
             
             <div class="d-flex gap-2 justify-content-end">
               {% if user.is_authenticated %}
-                <a href="{% url 'gigs:my_applications' %}" class="btn btn-sm btn-outline-light rounded-pill px-3">Applications</a>
-                <a href="{% url 'gigs:my_profile' %}" class="btn btn-sm btn-outline-light rounded-pill px-3">Profile</a>
+                {% if profile_type == 'musician' %}
+                  <a href="{% url 'gigs:my_applications' %}" class="btn btn-sm btn-outline-light rounded-pill px-3">My Applications</a>
+                {% elif profile_type == 'band' %}
+                  <a href="{% url 'gigs:my_listings' %}" class="btn btn-sm btn-outline-light rounded-pill px-3"> My Listings</a>
+                {% endif %}
+
+                  <a href="{% url 'gigs:my_profile' %}" class="btn btn-sm btn-outline-light rounded-pill px-3">Profile</a>
                 <form method="POST" action="{% url 'gigs:logout' %}" style="display:inline;">
                   {% csrf_token %}
                   <button class="btn btn-sm btn-outline-danger rounded-pill px-3">Sign Out</button>
@@ -50,7 +55,11 @@
           </div>
           
           {% if user.is_authenticated %}
-            <img src="{{ user.profile.profile_pic.url }}" alt="Profile" class="profile-pic-nav border border-2 border-accent">
+            {% if profile_pic %}
+              <img src="{{ profile_pic.url }}" class="profile-pic">
+            {% else %}
+              <img src="{% static 'find_my_gig/images/pfp-placeholder.png' %}" class="profile-pic">
+            {% endif %}
           {% endif %}
           
         </div>

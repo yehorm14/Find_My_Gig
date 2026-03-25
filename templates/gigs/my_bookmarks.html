@@ -26,7 +26,7 @@ My Bookmarks | Find My Gig
                 <p class="mb-3">📍 <span class="gig-accent-text">{{ gig.location }}</span></p>
                 <div class="mt-auto pt-3 border-top-accent">
                     <a href="{% url 'gigs:gig_detail' gig.id %}" class="btn btn-outline-light w-100 rounded-pill mb-2">View Details</a>
-                    <button type="button" class="btn btn-outline-danger w-100 rounded-pill unsave-gig-btn" data-gig-id="{{ gig.id }}">Remove Bookmark</button>
+                    <button type="button" class="btn btn-outline-danger w-100 rounded-pill remove-saved-gig-btn" data-gig-id="{{ gig.id }}">Remove Bookmark</button>
                 </div>
             </div>
         </div>
@@ -58,4 +58,7 @@ My Bookmarks | Find My Gig
   </div>
 
 </div>
+{% endblock %}
+{% block scripts_block %}
+    <script src="{% static 'find_my_gig/js/dashboard.js' %}"></script>
 {% endblock %}

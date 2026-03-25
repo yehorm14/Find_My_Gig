@@ -62,6 +62,10 @@ def gig_listings(request):
         applied_gig_ids = Application.objects.filter(
             applicant=request.user
         ).values_list('listing_id', flat=True)
+    
+    bookmarked_gig_ids = []
+    if request.user.is_authenticated:
+        bookmarked_gig_ids = request.user.saved_gigs.values_list('id', flat=True)
 
     context = {
         'gigs': gigs_queryset,
@@ -69,6 +73,7 @@ def gig_listings(request):
         'selected_instrument': instrument_filter,
         'selected_date': date_query,
         'current_sort': sort_by,
+        'bookmarked_gig_ids': bookmarked_gig_ids,
     }
 
     return render(request, 'gigs/gig_listings.html', context)
@@ -207,6 +212,15 @@ def my_profile(request):
         return render(request, 'gigs/my_profile_musician.html', context)
     else:
         return render(request, 'gigs/my_profile_band.html', context)
+
+@login_required
+def create_gig_page(request):
+    try:
+        request.user.band
+    except Band.DoesNotExist:
+        return redirect('gigs:dashboard')
+
+    return render(request, 'gigs/create_gig.html')
 
 
 # ==========================================
@@ -390,10 +404,15 @@ def create_gig_listing(request):
     
 @login_required
 def delete_listing(request, listing_id):
-    """Placeholder view for deleting a gig listing."""
     if request.method == 'POST':
-        # TODO: Add listing deletion logic here later if needed
-        return JsonResponse({'success': True})
+        try:
+            listing = Listing.objects.get(id=listing_id, band=request.user.band)
+            listing.delete()
+            return JsonResponse({'success': True})
+        except Listing.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'not_found'})
+    
+    return JsonResponse({'success': False, 'error': 'invalid_request'})
 
 def apply_gig(request, gig_id):
     """Creates an Application linking a Musician to a Gig."""
