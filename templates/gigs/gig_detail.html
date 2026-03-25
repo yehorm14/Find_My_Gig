@@ -46,20 +46,36 @@
 
                 <div class="mt-auto pt-4 action-border">
                     <div class="d-flex flex-wrap gap-3">
-                        {% if user.is_authenticated and user.musician %}
-                        <button type="button" id="gig-detail-apply-btn"
-                                class="btn {% if has_applied %}withdraw-btn{% else %}apply-btn{% endif %} rounded-pill px-4 py-2"
-                                data-gig-id="{{ listing.id }}"
-                                data-applied="{{ has_applied|yesno:'true,false' }}">
-                          {% if has_applied %}Withdraw Application{% else %}Apply Now{% endif %}
-                        </button>
+                        
+                        {% if not user.is_authenticated %}
+                            <button type="button" id="gig-detail-apply-btn"
+                                    class="btn apply-btn rounded-pill px-4 py-2"
+                                    data-gig-id="{{ listing.id }}"
+                                    data-applied="false">
+                              Apply Now
+                            </button>
 
-                        <button type="button" id="gig-detail-bookmark-btn"
-                                class="btn btn-outline-light rounded-pill px-4 py-2"
-                                data-gig-id="{{ listing.id }}"
-                                data-bookmarked="{{ is_bookmarked|yesno:'true,false' }}">
-                          {% if is_bookmarked %}★ Bookmarked{% else %}☆ Bookmark{% endif %}
-                        </button>
+                            <button type="button" id="gig-detail-bookmark-btn"
+                                    class="btn btn-outline-light rounded-pill px-4 py-2"
+                                    data-gig-id="{{ listing.id }}"
+                                    data-bookmarked="false">
+                              ☆ Bookmark
+                            </button>
+
+                        {% elif user.musician %}
+                            <button type="button" id="gig-detail-apply-btn"
+                                    class="btn {% if has_applied %}withdraw-btn{% else %}apply-btn{% endif %} rounded-pill px-4 py-2"
+                                    data-gig-id="{{ listing.id }}"
+                                    data-applied="{{ has_applied|yesno:'true,false' }}">
+                              {% if has_applied %}Withdraw Application{% else %}Apply Now{% endif %}
+                            </button>
+
+                            <button type="button" id="gig-detail-bookmark-btn"
+                                    class="btn btn-outline-light rounded-pill px-4 py-2"
+                                    data-gig-id="{{ listing.id }}"
+                                    data-bookmarked="{{ is_bookmarked|yesno:'true,false' }}">
+                              {% if is_bookmarked %}★ Bookmarked{% else %}☆ Bookmark{% endif %}
+                            </button>
                         {% endif %}
 
                         {% if user.is_authenticated and has_applied %}
@@ -68,6 +84,7 @@
                              Leave a Review
                           </a>
                         {% endif %}
+                        
                     </div>
                 </div>
             </div>
