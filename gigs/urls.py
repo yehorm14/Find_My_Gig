@@ -22,6 +22,8 @@ urlpatterns = [
     path('gigs/create/', views.create_gig_listing, name='create_gig'),
     path('gigs/<int:gig_id>/gig_review/', views.submit_review, name='submit_review'),
     path('musicians/<int:musician_id>/review/', views.submit_musician_review, name='submit_musician_review'),
+    path('bands/<int:band_id>/save/', views.save_band, name='save_band'),
+    path('bands/<int:band_id>/unsave/', views.unsave_band, name='unsave_band'),
 
     # --- USER PROFILES ROUTING ---
     path('musicians/', views.musicians_list, name='musicians_list'),

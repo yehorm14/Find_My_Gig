@@ -1,68 +1,85 @@
 {% extends 'gigs/base.html' %}
-
 {% load static %}
 
 {% block title_block %}
-My Applications
-{% endblock %}
-
-{% block header_block %}
+My Applications | Find My Gig
 {% endblock %}
 
 {% block body_block %}
-<div id="status-message"></div>
-<div class="text-center m-4">
-  <h2>My Applications</h2>
-</div>
+<div id="status-message" class="container mt-3"></div>
 
-<hr class="mx-5">
+<div class="container mt-5 px-4 px-md-5 mb-5">
+  
+  <div class="text-center mb-5">
+    <h1 class="display-4" style="font-weight: 800; color: #fff;">My <span class="gig-accent-text">Applications</span></h1>
+    <p class="lead text-muted-custom">Track the status of the gigs you've applied to.</p>
+  </div>
 
-<div class="row justify-content-center">
-  <div class="col mx-5">
-    <div class="listings-container">
+  <hr class="mb-5" style="border-color: #2a2a35;">
+
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+      
       {% for application in applications %}
-        <div class="application-card listing-card m-2">
-            <div class="row">
-                <div class="col">
-                    <h4> {{ application.listing.title }}</h4>
-                    <p>Posted by: {{ application.listing.band.name }}</p>
-                    <p>Position: {{ application.listing.req_instruments }}</p>
-                    <p>Date: {{ application.listing.deadline}}</p>
-                </div>
-
-                <div class="col">
-                  <p>Description: {{ application.listing.description }}</p>
-                  <p>Location: {{ application.listing.location }}</p>
-                </div>
-
-                <div class="col-3">
-                  <div class="d-flex flex-column justify-content-center h-100">
-                    <!-- Google Maps API placeholder -->
-                    <div class="map-placeholder">
-                        Map coming soon
+        <div class="listing-card p-4 mb-4" id="application-{{ application.listing.id }}">
+            <div class="row align-items-center">
+                
+                <div class="col-md-5 mb-4 mb-md-0">
+                    <h4 class="mb-1" style="font-weight: 700; color: #fff;">{{ application.listing.title }}</h4>
+                    <p class="gig-accent-text mb-3">{{ application.listing.band.name }}</p>
+                    
+                    <div class="d-flex flex-column gap-2 mb-3">
+                        <span class="text-muted-custom small">🎸 <strong>Position:</strong> {{ application.listing.req_instruments }}</span>
+                        <span class="text-muted-custom small">📅 <strong>Gig Date:</strong> {{ application.listing.deadline|date:"M d, Y" }}</span>
+                        <span class="text-muted-custom small">📍 <strong>Location:</strong> {{ application.listing.location }}</span>
                     </div>
-                  </div>
+                    
+                    <p class="description-text small mb-0">{{ application.listing.description|truncatechars:90 }}</p>
                 </div>
 
-                <div class="col-3 d-flex flex-column align-items-center text-center justify-content-center">
-                    <button type="button"
-                             class="withdraw-application-btn btn btn-danger nice-button background-color w-100 my-2"
-                             data-gig-id="{{ application.listing.id }}">
-                         Withdraw
-                    </button>
+                <div class="col-md-4 mb-4 mb-md-0">
+                    {% if application.listing.latitude and application.listing.longitude %}
+                        <div class="gig-mini-map rounded" 
+                             id="map-{{ application.listing.id }}"
+                             data-lat="{{ application.listing.latitude|safe }}" 
+                             data-lng="{{ application.listing.longitude|safe }}" 
+                             data-title="{{ application.listing.title|escapejs }}"
+                             style="height: 160px; width: 100%; border: 1px solid var(--border-dim);">
+                        </div>
+                    {% else %}
+                        <div class="map-placeholder rounded d-flex flex-column align-items-center justify-content-center" style="height: 160px; width: 100%;">
+                            <h2 class="mb-0">🗺️</h2>
+                            <p class="text-muted small mt-1 mb-0">Coordinates pending</p>   
+                        </div>
+                    {% endif %}
+                </div>
 
-                    <a href="{% url 'gigs:gig_detail' application.listing.id %}"
-                       class="btn btn-primary nice-button background-color w-100 my-2 py-2">
-                        View / Review
+                <div class="col-md-3 d-flex flex-column gap-3">
+                    <a href="{% url 'gigs:gig_detail' application.listing.id %}" class="btn btn-outline-light rounded-pill w-100 py-2">
+                        View Details
                     </a>
+                    <button type="button" class="withdraw-application-btn btn withdraw-btn rounded-pill w-100 py-2" data-gig-id="{{ application.listing.id }}">
+                        Withdraw
+                    </button>
                 </div>
+
             </div>
         </div>
-        {% endfor %}
+        
+      {% empty %}
+        <div class="text-center py-5">
+            <h1 class="display-1 text-muted mb-3">📭</h1>
+            <h4 class="text-muted-custom">You haven't applied to any gigs yet.</h4>
+            <a href="{% url 'gigs:gig_listings' %}" class="btn apply-btn rounded-pill px-4 py-2 mt-3">Browse Gigs</a>
+        </div>
+      {% endfor %}
+      
     </div>
-    </div>
+  </div>
 </div>
 {% endblock %}
+
 {% block scripts_block %}
     <script src="{% static 'find_my_gig/js/dashboard.js' %}"></script>
+    <script src="{% static 'find_my_gig/js/gigs.js' %}"></script> <script async defer src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_frontend_key }}&callback=initMap"></script>
 {% endblock %}

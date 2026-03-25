@@ -137,18 +137,35 @@ def dashboard(request):
     """The main hub for a logged-in user. Routes to templates with profile context."""
     context = {}
     
-    if hasattr(request.user, 'musician'):
+    # Try to load a Musician profile
+    try:
         context['profile'] = request.user.musician
+        context['profile_type'] = 'musician'  
         return render(request, 'gigs/musician_dashboard.html', context)
-    else:
+    except Musician.DoesNotExist:
+        pass
+
+    # Try to load a Band profile
+    try:
         context['profile'] = request.user.band
+        context['profile_type'] = 'band'  
         return render(request, 'gigs/band_dashboard.html', context)
+    except Band.DoesNotExist:
+        pass
+        
+    # Fallback if somehow they have neither profile
+    return redirect('gigs:home')
     
 @login_required
 def my_applications(request):
     """Shows a Musician all the gigs they have applied for."""
     user_applications = Application.objects.filter(applicant=request.user)
-    return render(request, 'gigs/my_applications.html', {'applications': user_applications})
+    
+    context = {
+        'applications': user_applications,
+        'google_maps_frontend_key': settings.GOOGLE_MAPS_FRONTEND_KEY, 
+    }
+    return render(request, 'gigs/my_applications.html', context)
 
 @login_required
 def my_bookmarks(request):

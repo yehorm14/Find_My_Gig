@@ -40,15 +40,18 @@ My Bookmarks | Find My Gig
     <h3 class="mb-4" style="color: #fff; font-weight: 700;">🎸 Saved Bands</h3>
     <div class="row">
       {% for band in saved_bands %}
-        <div class="col-md-6 col-lg-4 d-flex align-items-stretch mb-4">
-            <div class="listing-card w-100 d-flex align-items-center p-3">
+        <div class="col-md-6 col-lg-4 d-flex align-items-stretch mb-4" id="saved-band-{{ band.id }}">
+            <div class="listing-card w-100 d-flex align-items-center p-3 flex-wrap">
                 <img src="{% if band.profile_picture %}{{ band.profile_picture.url }}{% else %}{% static 'find_my_gig/images/pfp-placeholder.png' %}{% endif %}" 
                      class="profile-pic me-3" style="width: 70px; height: 70px; border-width: 2px;" alt="{{ band.name }}">
-                <div class="flex-grow-1">
+                <div class="flex-grow-1 mb-2 mb-sm-0">
                     <h5 class="mb-1" style="color: #fff;">{{ band.name }}</h5>
                     <p class="text-muted-custom mb-0" style="font-size: 0.85rem;">📍 {{ band.location }}</p>
                 </div>
-                <a href="{% url 'gigs:band_profile' band.id %}" class="btn apply-btn rounded-pill px-3 py-1 text-uppercase" style="font-size: 0.75rem;">View</a>
+                <div class="d-flex flex-column gap-2 w-100 mt-3 border-top-accent pt-3">
+                    <a href="{% url 'gigs:band_profile' band.id %}" class="btn btn-outline-light rounded-pill btn-sm w-100">View Profile</a>
+                    <button type="button" class="btn btn-outline-danger rounded-pill btn-sm w-100 remove-saved-band-btn" data-band-id="{{ band.id }}">Remove</button>
+                </div>
             </div>
         </div>
       {% empty %}

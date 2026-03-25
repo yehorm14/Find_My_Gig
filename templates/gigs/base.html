@@ -55,11 +55,15 @@
           </div>
           
           {% if user.is_authenticated %}
-            {% if profile_pic %}
-              <img src="{{ profile_pic.url }}" class="profile-pic">
-            {% else %}
-              <img src="{% static 'find_my_gig/images/pfp-placeholder.png' %}" class="profile-pic">
-            {% endif %}
+            <div class="ms-3">
+              {% if user.musician.profile_picture %}
+                <img src="{{ user.musician.profile_picture.url }}" class="nav-profile-pic" alt="Profile">
+              {% elif user.band.profile_picture %}
+                <img src="{{ user.band.profile_picture.url }}" class="nav-profile-pic" alt="Profile">
+              {% else %}
+                <img src="{% static 'find_my_gig/images/pfp-placeholder.png' %}" class="nav-profile-pic" alt="Profile">
+              {% endif %}
+            </div>
           {% endif %}
           
         </div>

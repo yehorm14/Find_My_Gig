@@ -166,6 +166,19 @@ body {
     border-color: var(--neon-cyan);
 }
 
+/* Restricts the SVG icons on the Musician Dashboard to a sane size */
+.dashboard-icon {
+    width: 65px;
+    height: 65px;
+    object-fit: contain;
+    transition: transform var(--transition-fast);
+}
+
+/* Adds a nice little pop effect when you hover over the card */
+.dashboard-card:hover .dashboard-icon {
+    transform: scale(1.15);
+}
+
 /* Custom Scrollbar for Long Lists */
 .listings-container {
     max-height: 70vh;
@@ -237,11 +250,17 @@ body {
 }
 
 /* Profile Pictures */
-.profile-pic {
+.nav-profile-pic {
+    width: 45px;
+    height: 45px;
     object-fit: cover;
     border-radius: 50%;
-    border: 3px solid var(--neon-cyan);
+    border: 2px solid var(--neon-cyan);
     transition: transform var(--transition-fast);
+}
+
+.nav-profile-pic:hover {
+    transform: scale(1.1);
 }
 
 .profile-pic-label:hover .profile-pic {

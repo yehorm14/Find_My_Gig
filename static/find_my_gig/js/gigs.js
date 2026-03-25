@@ -1,11 +1,12 @@
 document.addEventListener('DOMContentLoaded', function () {
 
-    //APPLY / WITHDRAW BUTTON
+    // APPLY / WITHDRAW BUTTON (For the Gig List Page)
     const gigsList = document.getElementById('gigs-list');
 
     if (gigsList) {
         gigsList.addEventListener('click', function (e) {
-            //apply
+            
+            // Apply
             if (e.target.classList.contains('apply-btn')) {
                 const btn = e.target;
                 const gigId = btn.dataset.gigId;
@@ -38,18 +39,14 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 })
                 .catch(function () {
-                    btn.textContent = 'Withdraw';
-                    btn.classList.remove('apply-btn');
-                    btn.classList.add('withdraw-btn');
-                    showStatusMessage('status-message', 'Application submitted', 'success');
+                    showStatusMessage('status-message', 'Network error.', 'error');
                 });
             }
 
-            //Withdraw Button
+            // Withdraw Button
             if (e.target.classList.contains('withdraw-btn')) {
                 const btn = e.target;
                 const gigId = btn.dataset.gigId;
-
                 const confirmed = confirm('Are you sure you want to withdraw your application?');
 
                 if (confirmed) {
@@ -74,15 +71,12 @@ document.addEventListener('DOMContentLoaded', function () {
                         }
                     })
                     .catch(function () {
-                        btn.textContent = 'Apply';
-                        btn.classList.remove('withdraw-btn');
-                        btn.classList.add('apply-btn');
-                        showStatusMessage('status-message', 'Application withdrawn', 'success');
+                        showStatusMessage('status-message', 'Network Error', 'error');
                     });
                 }
             }
 
-            //Bookmark Button
+            // Bookmark Button
             if (e.target.classList.contains('bookmark-btn')) {
                 const btn = e.target;
                 const gigId = btn.dataset.gigId;
@@ -139,12 +133,11 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    //Single Gig detail page
+    // Single Gig Detail Page: Apply
     const gigDetailApplyBtn = document.getElementById('gig-detail-apply-btn');
 
     if (gigDetailApplyBtn) {
         gigDetailApplyBtn.addEventListener('click', function () {
-
             if (!isLoggedIn()) {
                 redirectToLogin();
                 return;
@@ -153,7 +146,6 @@ document.addEventListener('DOMContentLoaded', function () {
             const gigId = this.dataset.gigId;
             const isApplied = this.dataset.applied === 'true';
             const btn = this;
-
             const url = isApplied ? `/gigs/${gigId}/withdraw/` : `/gigs/${gigId}/apply/`;
 
             if (isApplied) {
@@ -189,25 +181,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             })
             .catch(function () {
-                if (isApplied) {
-                    btn.textContent = 'Apply';
-                    btn.dataset.applied = 'false';
-                    showStatusMessage('gig-detail-status', 'Application withdrawn', 'success');
-                } else {
-                    btn.textContent = 'Withdraw';
-                    btn.dataset.applied = 'true';
-                    showStatusMessage('gig-detail-status', 'Application submitted', 'success');
-                }
+                showStatusMessage('gig-detail-status', 'Network Error', 'error');
             });
-        })
-    }});
+        });
+    }
     
-
+    // Single Gig Detail Page: Bookmark
     const gigDetailBookmarkBtn = document.getElementById('gig-detail-bookmark-btn');
 
     if (gigDetailBookmarkBtn) {
         gigDetailBookmarkBtn.addEventListener('click', function () {
-
             if (!isLoggedIn()) {
                 redirectToLogin();
                 return;
@@ -232,6 +215,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         btn.textContent = '★ Bookmark';
                         btn.classList.remove('bookmarked-btn');
                         btn.classList.add('bookmark-btn');
+                        btn.dataset.bookmarked = 'false';
                         showStatusMessage('gig-detail-status', 'Gig removed from saved', 'success');
                     } else {
                         btn.textContent = '★ Bookmarked';
@@ -245,54 +229,60 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             })
             .catch(() => {
-                if (isBookmarked) {
-                    btn.textContent = '★ Bookmark';
-                    btn.dataset.bookmarked = 'false';
-                    btn.classList.remove('bookmarked-btn');
-                    btn.classList.add('bookmark-btn')
-                } else {
-                    btn.textContent = 'Bookmarked';
-                    btn.dataset.bookmarked = 'true';
-                    btn.classList.remove('bookmark-btn');
-                    btn.classList.add('bookmarked-btn');
-                }
+                showStatusMessage('gig-detail-status', 'Network Error', 'error');
             });
         });
     }
 
+    // BAND DETAIL PAGE: Save Band (Bookmark)
+    const saveBandBtn = document.getElementById('save-band-btn');
 
-//Helper
+    if (saveBandBtn) {
+        saveBandBtn.addEventListener('click', function () {
+            if (!isLoggedIn()) {
+                redirectToLogin();
+                return;
+            }
 
-function updateGigsList(gigs) {
-    const gigsList = document.getElementById('gigs-list');
+            const bandId = this.dataset.bandId;
+            const isBookmarked = this.dataset.bookmarked === 'true';
+            const btn = this;
+            const url = isBookmarked ? `/gigs/bands/${bandId}/unsave/` : `/gigs/bands/${bandId}/save/`;
 
-    if (gigsList) {
-        gigsList.innerHTML = '';
-
-        if (gigs.length === 0) {
-            gigsList.innerHTML = '<p>No gigs found matching your filters</p>';
-            return;
-        }
-
-        gigs.forEach(function (gig) {
-            const gigCard = document.createElement('div');
-            gigCard.classList.add('gig-card');
-
-            gigCard.innerHTML = `
-                <h3>${gig.title}</h3>
-                <p>Posted by: ${gig.band_name}</p>
-                <p>Position: ${gig.req_instruments}</p>
-                <p>Date: ${formatDate(gig.deadline)}</p>
-                <p>Location: ${gig.location}</p>
-                <button class="apply-btn" data-gig-id="${gig.id}">Apply</button>
-                <button class="bookmark-btn" data-gig-id="${gig.id}">Bookmark</button>
-            `;
-
-            gigsList.appendChild(gigCard);
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    if (isBookmarked) {
+                        btn.textContent = '☆ Save Band';
+                        btn.dataset.bookmarked = 'false';
+                        btn.classList.remove('btn-outline-light');
+                        btn.classList.add('apply-btn');
+                        showStatusMessage('status-message', 'Band removed from favorites', 'success');
+                    } else {
+                        btn.textContent = '★ Saved to Favorites';
+                        btn.dataset.bookmarked = 'true';
+                        btn.classList.remove('apply-btn');
+                        btn.classList.add('btn-outline-light');
+                        showStatusMessage('status-message', 'Band saved to favorites!', 'success');
+                    }
+                } else {
+                    showStatusMessage('status-message', data.error || 'Something went wrong', 'error');
+                }
+            })
+            .catch(() => {
+                showStatusMessage('status-message', 'Network error. Try again.', 'error');
+            });
         });
     }
-}
 
+});
 
 // ==========================================
 //             GOOGLE MAPS LOGIC 
