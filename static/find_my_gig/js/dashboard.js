@@ -341,38 +341,40 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
     });
-}
+    }
+
 
     //Remove saved gig
-    document.querySelectorAll('.remove-saved-gig-btn').forEach(function (btn) {
-        btn.addEventListener('click', function () {
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-saved-gig-btn')) {
+        e.preventDefault();
 
-            const gigId = this.dataset.gigId;
-            const savedGigCard = this.closest('.saved-gig-card');
+        const btn = e.target;
+        const gigId = btn.dataset.gigId;
+        const savedGigCard = btn.closest('.listing-card'); 
 
-            fetch(`/gigs/${gigId}/unsave/`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': getCookie('csrftoken'),
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(function (response) {
-                return response.json();
-            })
-            .then(function (data) {
-                if (data.success) {
-                    savedGigCard.remove();
-                    showStatusMessage('status-message', 'Gig removed from saved', 'success');
-                }
-            })
-            .catch(function(){
-                savedGigCard.remove();
+        fetch(`/gigs/${gigId}/unsave/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                savedGigCard?.remove();
                 showStatusMessage('status-message', 'Gig removed from saved', 'success');
-            });
+            } else {
+                showStatusMessage('status-message', 'Failed to remove bookmark', 'error');
+            }
+        })
+        .catch(error => {
+            console.error(error);
+            showStatusMessage('status-message', 'Failed to remove bookmark', 'error');
         });
-    });
-
+    }
+});
 });
 
 //helper functions
