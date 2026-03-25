@@ -49,6 +49,7 @@ def add_review(reviwer, reviewee, rating, comment):
     review.rating = rating
     review.comment = comment
 
+    review.full_clean()
     review.save()
     return review
 

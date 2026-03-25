@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.template.defaultfilters import slugify
 # Create your models here.
 class Musician(models.Model):
@@ -40,7 +41,9 @@ class Listing(models.Model):
 class Review(models.Model):
     reviewer = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reviews_written")
     reviewee = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reviews_received")
-    rating = models.IntegerField()
+    rating = models.IntegerField(validators= [
+        MinValueValidator(0), MaxValueValidator(5)
+    ])
     comment = models.CharField(max_length=200)
 
 

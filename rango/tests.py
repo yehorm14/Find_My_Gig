@@ -1,7 +1,9 @@
+import django.core.exceptions
 from django.test import TestCase
 from rango.models import *
 import population_script
 from datetime import date
+from django.core.validators import MinValueValidator, MaxValueValidator
 class MusicianTest(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -89,3 +91,11 @@ class ReviewTest(TestCase):
 
     def test_comment(self):
         self.assertEqual("He's alright, what you get is what you see", self.test_review.comment)
+
+    def validation_error(self):
+        caught_error = False
+        try:
+            test_review = population_script.add_review(self.test_user1, self.test_user2, 20,
+                                                       "He's alright, what you get is what you see")
+        except django.core.exceptions.ValidationError:
+            self.assertTrue(caught_error)
