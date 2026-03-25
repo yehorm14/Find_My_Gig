@@ -29,6 +29,9 @@ Gigs
             <button type="button" id="filter-btn" class="btn apply-btn rounded-pill px-4">
                 Filter
             </button>
+            <div class="col-auto m-3">
+            <a href="/gigs/" class="btn btn-primary nice-button primary-color">Clear</a>
+            </div>
         </div>
     </div>
 
@@ -61,17 +64,28 @@ Gigs
                     <a href="{% url 'gigs:gig_detail' gig.id %}" class="btn btn-outline-light w-100 rounded-pill mb-2">
                         View Details
                     </a>
-
+                    
+                    {% if user.is_authenticated and user.musician %}
                     <div class="d-flex gap-2 mb-3">
-                        <button type="button" 
-                                class="bookmark-btn btn apply-btn rounded-pill w-50"
+                        <button type="button" id="gig-detail-apply-btn-{{ gig.id }}"
+                                class="{% if gig.id in applied_gig_ids %}withdraw-btn{% else %}apply-btn{% endif %} btn btn-primary nice-button w-50"
                                 data-gig-id="{{ gig.id }}">
-                            ★ Bookmark
+                          {% if gig.id in applied_gig_ids %}Withdraw{% else %}Apply{% endif %}
                         </button>
 
+                        <button type="button" id="gig-detail-bookmark-btn"
+                                class="btn btn-outline-light rounded-pill px-4 py-2"
+                                data-gig-id="{{ listing.id }}"
+                                data-bookmarked="{{ is_bookmarked|yesno:'true,false' }}">
+                          {% if is_bookmarked %}★ Bookmarked{% else %}☆ Bookmark{% endif %}
+                        </button>
+                    </div>
+                    {% endif %}
+
+                    <div class="d-flex gap-2 mb-3">
                         <a href="{% url 'gigs:submit_review' gig.id %}" 
-                        class="btn btn-outline-secondary rounded-pill w-50">
-                            Review
+                           class="btn btn-outline-secondary rounded-pill w-100">
+                            Leave a Review
                         </a>
                     </div>
 

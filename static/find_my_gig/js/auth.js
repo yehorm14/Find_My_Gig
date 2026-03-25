@@ -1,15 +1,16 @@
 document.addEventListener('DOMContentLoaded', function () {
+
+    /* ==========================================================================
+       1. SIGN UP FLOW
+       ========================================================================== */
     const signUpForm = document.getElementById('sign-up-form');
 
-    //Sign up Form
     if (signUpForm) {
-
-        //Band / Musician Radio Button
         const bandRadio = document.getElementById('radio-band');
         const musicianRadio = document.getElementById('radio-musician');
 
+        // Toggle visual styling for the radio buttons
         if (bandRadio && musicianRadio) {
-
             [bandRadio, musicianRadio].forEach(function (radio) {
                 radio.addEventListener('click', function () {
                     bandRadio.parentElement.classList.remove('radio-selected');
@@ -19,26 +20,24 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
 
-        //Sign Up Form Submission Validation
+        // Form Submission Validation
         signUpForm.addEventListener('submit', function (e) {
-
             clearErrors();
+            let hasError = false;
 
-            // Grab the values from each field
+            // Grab the values
             const username = document.getElementById('username').value.trim();
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirm-password').value;
 
-            let hasError = false;
-
-            // Username check 
+            // Validate Username
             if (username === '') {
                 showFieldError('username-error', 'Please enter a username');
                 hasError = true;
             }
 
-            //Email check
+            // Validate Email
             if (email === '') {
                 showFieldError('email-error', 'Please enter your email address');
                 hasError = true;
@@ -47,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 hasError = true;
             }
 
-            //Account type check
+            // Validate Account Type Selection
             if (bandRadio && musicianRadio) {
                 if (!bandRadio.checked && !musicianRadio.checked) {
                     showFieldError('account-type-error', 'Please select Band or Musician');
@@ -55,15 +54,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             }
 
-            if (bandRadio.checked) {
+            // Validate Band Name if Band is selected
+            if (bandRadio && bandRadio.checked) {
                 const bandName = document.getElementById('band-name').value.trim();
                 if (bandName === '') {
-                    showFieldError('band-name-error', 'Please enter your band name');
+                    showFieldError('band-name-error', 'Please enter your band or venue name');
                     hasError = true;
                 }
             }
 
-            //Password check
+            // Validate Password
             if (password === '') {
                 showFieldError('password-error', 'Please enter a password');
                 hasError = true;
@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 hasError = true;
             }
 
-            //Confirm password check
+            // Validate Confirm Password
             if (confirmPassword === '') {
                 showFieldError('confirm-password-error', 'Please confirm your password');
                 hasError = true;
@@ -81,22 +81,23 @@ document.addEventListener('DOMContentLoaded', function () {
                 hasError = true;
             }
 
+            // Stop submission if errors exist
             if (hasError) {
                 e.preventDefault();
             }
-
         });
     }
 
-    //Login
+    /* ==========================================================================
+       2. LOGIN FLOW
+       ========================================================================== */
     const loginForm = document.getElementById('login-form');
 
     if (loginForm) {
-
-        //Show/Hide Password on Login
         const toggleLoginPassword = document.getElementById('toggle-login-password');
         const loginPasswordField = document.getElementById('login-password');
 
+        // Show/Hide Password Feature
         if (toggleLoginPassword && loginPasswordField) {
             toggleLoginPassword.addEventListener('click', function () {
                 if (loginPasswordField.type === 'password') {
@@ -109,23 +110,19 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
 
-        //Login Form Submission Validation
+        // Login Validation
         loginForm.addEventListener('submit', function (e) {
-
             clearErrors();
+            let hasError = false;
 
             const username = document.getElementById('login-username').value.trim();
             const password = loginPasswordField.value;
 
-            let hasError = false;
-
-            //Username check
             if (username === '') {
                 showFieldError('login-username-error', 'Please enter your username');
                 hasError = true;
             }
 
-            //Password check
             if (password === '') {
                 showFieldError('login-password-error', 'Please enter your password');
                 hasError = true;
@@ -134,57 +131,83 @@ document.addEventListener('DOMContentLoaded', function () {
             if (hasError) {
                 e.preventDefault();
             }
-
         });
 
-        //Failed Login Error Message
+        // Form Shake Animation on Backend Error
         const loginError = document.getElementById('login-error-message');
-        if (loginError) {
-            // Shake the form gently to draw attention to the error
+        if (loginError && loginError.style.display !== 'none') {
             loginForm.classList.add('form-shake');
-            // Remove the shake class after animation finishes
             setTimeout(function () {
                 loginForm.classList.remove('form-shake');
             }, 500);
         }
-
     }
 
+    /* ==========================================================================
+       3. PASSWORD RESET FLOW & DJANGO FORM STYLING
+       ========================================================================== */
     
-    // Password reset page
-    const passwordResetForm = document.getElementById('password-reset-form');
+    // Auto-styler: Injects our custom 'form-control' CSS class into Django's auto-generated inputs
+    const djangoResetInputs = document.querySelectorAll('#reset-form input:not([type="hidden"]), #new-password-form input:not([type="hidden"])');
+    if (djangoResetInputs.length > 0) {
+        djangoResetInputs.forEach(input => {
+            input.classList.add('form-control');
+        });
+    }
 
+    // Reset Form Client-Side Validation
+    const passwordResetForm = document.getElementById('reset-form');
     if (passwordResetForm) {
-
         passwordResetForm.addEventListener('submit', function (e) {
-
             clearErrors();
-
-            const email = document.getElementById('reset-email').value.trim();
-
             let hasError = false;
 
-            // Email check
-            if (email === '') {
-                showFieldError('reset-email-error', 'Please enter your email address');
-                hasError = true;
-            } else if (!isValidEmail(email)) {
-                showFieldError('reset-email-error', 'Please enter a valid email address');
-                hasError = true;
+            // Django generates the email input with the id 'id_email'
+            const emailInput = document.getElementById('id_email');
+            
+            if (emailInput) {
+                const email = emailInput.value.trim();
+                
+                if (email === '') {
+                    // Creating a dynamic error span since Django doesn't generate one natively
+                    let errorSpan = document.getElementById('reset-email-error');
+                    if (!errorSpan) {
+                        errorSpan = document.createElement('span');
+                        errorSpan.id = 'reset-email-error';
+                        errorSpan.className = 'text-danger small mt-1 field-error d-block';
+                        emailInput.parentNode.appendChild(errorSpan);
+                    }
+                    errorSpan.textContent = 'Please enter your email address';
+                    errorSpan.style.display = 'block';
+                    hasError = true;
+                } else if (!isValidEmail(email)) {
+                    let errorSpan = document.getElementById('reset-email-error');
+                    if (!errorSpan) {
+                        errorSpan = document.createElement('span');
+                        errorSpan.id = 'reset-email-error';
+                        errorSpan.className = 'text-danger small mt-1 field-error d-block';
+                        emailInput.parentNode.appendChild(errorSpan);
+                    }
+                    errorSpan.textContent = 'Please enter a valid email address';
+                    errorSpan.style.display = 'block';
+                    hasError = true;
+                }
             }
 
             if (hasError) {
                 e.preventDefault();
             }
-
         });
     }
 
 });
 
-//Helper Functions
+/* ==========================================================================
+   4. HELPER FUNCTIONS
+   ========================================================================== */
 
 function isValidEmail(email) {
+    // Standard Regex for email validation
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 

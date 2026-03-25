@@ -11,9 +11,10 @@ class Musician(models.Model):
     instruments = models.CharField(max_length=100)
     bio = models.CharField(max_length=500)
     age = models.IntegerField(null=True, blank=True)
-    profile_picture = models.ImageField(upload_to='profile_images', blank=True)
+    profile_picture = models.ImageField(upload_to='profile_images', blank=True, default='profile_images/pfp-placeholder.png')
     media_link = models.URLField(blank=True)
     location = models.CharField(max_length=100)
+    bookmarked_bands = models.ManyToManyField('Band', related_name='bookmarked_by_musicians', blank=True)
 
     @property
     def community_badge(self):
@@ -40,7 +41,7 @@ class Band(models.Model):
     name = models.CharField(max_length=50)
     location = models.CharField(max_length=100)
     bio = models.CharField(max_length=500)
-    profile_picture = models.ImageField(upload_to='profile_images', blank=True)
+    profile_picture = models.ImageField(upload_to='profile_images', blank=True, default='profile_images/pfp-placeholder.png')
 
     @property
     def community_badge(self):
@@ -117,3 +118,10 @@ class Review(models.Model):
 
     def __str__(self):
         return self.comment
+
+class MediaLink(models.Model):
+    musician = models.ForeignKey(Musician, on_delete=models.CASCADE, related_name='media_links')
+    url = models.URLField()
+
+    def __str__(self):
+        return self.url

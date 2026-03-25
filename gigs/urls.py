@@ -1,6 +1,8 @@
 from django.urls import path, reverse_lazy
 from gigs import views
 from django.contrib.auth import views as auth_views
+from django.conf import settings
+from django.conf.urls.static import static
 
 # This is our "namespace". If we ever add another app (like 'accounts'), 
 # this stops Django from confusing 'gigs:home' with 'accounts:home'.
@@ -17,14 +19,15 @@ urlpatterns = [
     path('gigs/<int:gig_id>/withdraw/', views.withdraw_gig, name='withdraw_gig'),
     path('gigs/<int:gig_id>/save/', views.save_gig, name='save_gig'),
     path('gigs/<int:gig_id>/unsave/', views.unsave_gig, name='unsave_gig'),
-    path('gigs/create/', views.create_gig, name='create_gig'),
+    path('gigs/create/', views.create_gig_listing, name='create_gig'),
     path('gigs/<int:gig_id>/gig_review/', views.submit_review, name='submit_review'),
     path('musicians/<int:musician_id>/review/', views.submit_musician_review, name='submit_musician_review'),
 
     # --- USER PROFILES ROUTING ---
     path('musicians/', views.musicians_list, name='musicians_list'),
     path('musicians/<int:id>/', views.musician_detail, name='musician_profile'),
-    path('bands/<int:id>/', views.band_profile, name='band_profile'),
+    path('bands/', views.bands_list, name='bands_list'), 
+    path('bands/<int:id>/', views.band_detail, name='band_profile'),
 
     # --- USER PORTAL ---
     path('dashboard/', views.dashboard, name='dashboard'),
@@ -34,6 +37,7 @@ urlpatterns = [
     path('dashboard/my-profile/update/', views.update_profile, name='update_profile'),
     path('dashboard/my-profile/delete-account/', views.delete_account, name='delete_account'),
     path('dashboard/my-listings/create/', views.create_gig_listing, name='create_gig_listing'),
+    path('dashboard/my-bookmarks/', views.my_bookmarks, name='my_bookmarks'),
     path('dashboard/my-listings/<int:listing_id>/delete/', views.delete_listing, name='delete_listing'),
 
 
@@ -82,4 +86,4 @@ urlpatterns = [
         ),
         name='password_reset_complete',
     ),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

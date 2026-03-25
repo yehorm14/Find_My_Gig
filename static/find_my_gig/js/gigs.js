@@ -87,7 +87,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 const btn = e.target;
                 const gigId = btn.dataset.gigId;
 
-                // Check if user is logged in
                 if (!isLoggedIn()) {
                     redirectToLogin();
                     return;
@@ -100,28 +99,20 @@ document.addEventListener('DOMContentLoaded', function () {
                         'Content-Type': 'application/json'
                     }
                 })
-                .then(function (response) {
-                    return response.json();
-                })
-                .then(function (data) {
+                .then(response => response.json())
+                .then(data => {
                     if (data.success) {
-                        btn.textContent = 'Bookmarked';
+                        btn.textContent = '★ Bookmarked';
                         btn.classList.remove('bookmark-btn');
                         btn.classList.add('bookmarked-btn');
                         showStatusMessage('status-message', 'Gig saved', 'success');
                     } else {
                         showStatusMessage('status-message', 'Something went wrong, try again', 'error');
                     }
-                })
-                .catch(function () {
-                    btn.textContent = 'Bookmarked';
-                    btn.classList.remove('bookmark-btn');
-                    btn.classList.add('bookmarked-btn');
-                    showStatusMessage('status-message', 'Gig saved', 'success');
                 });
             }
 
-            //Bookmarked Button (unsave) 
+            // Bookmarked Button (saved → unsaved)
             if (e.target.classList.contains('bookmarked-btn')) {
                 const btn = e.target;
                 const gigId = btn.dataset.gigId;
@@ -133,24 +124,16 @@ document.addEventListener('DOMContentLoaded', function () {
                         'Content-Type': 'application/json'
                     }
                 })
-                .then(function (response) {
-                    return response.json();
-                })
-                .then(function (data) {
+                .then(response => response.json())
+                .then(data => {
                     if (data.success) {
-                        btn.textContent = 'Bookmark';
+                        btn.textContent = '★ Bookmark';
                         btn.classList.remove('bookmarked-btn');
                         btn.classList.add('bookmark-btn');
                         showStatusMessage('status-message', 'Gig removed from saved', 'success');
                     } else {
                         showStatusMessage('status-message', 'Something went wrong, try again', 'error');
                     }
-                })
-                .catch(function () {
-                    btn.textContent = 'Bookmark';
-                    btn.classList.remove('bookmarked-btn');
-                    btn.classList.add('bookmark-btn');
-                    showStatusMessage('status-message', 'Gig removed from saved', 'success');
                 });
             }
         });
@@ -216,8 +199,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     showStatusMessage('gig-detail-status', 'Application submitted', 'success');
                 }
             });
-        });
-    }
+        })
+    }});
+    
 
     const gigDetailBookmarkBtn = document.getElementById('gig-detail-bookmark-btn');
 
@@ -232,7 +216,6 @@ document.addEventListener('DOMContentLoaded', function () {
             const gigId = this.dataset.gigId;
             const isBookmarked = this.dataset.bookmarked === 'true';
             const btn = this;
-
             const url = isBookmarked ? `/gigs/${gigId}/unsave/` : `/gigs/${gigId}/save/`;
 
             fetch(url, {
@@ -242,71 +225,40 @@ document.addEventListener('DOMContentLoaded', function () {
                     'Content-Type': 'application/json'
                 }
             })
-            .then(function (response) {
-                return response.json();
-            })
-            .then(function (data) {
+            .then(response => response.json())
+            .then(data => {
                 if (data.success) {
                     if (isBookmarked) {
-                        btn.textContent = 'Bookmark';
-                        btn.dataset.bookmarked = 'false';
+                        btn.textContent = '★ Bookmark';
+                        btn.classList.remove('bookmarked-btn');
+                        btn.classList.add('bookmark-btn');
                         showStatusMessage('gig-detail-status', 'Gig removed from saved', 'success');
                     } else {
-                        btn.textContent = 'Bookmarked';
+                        btn.textContent = '★ Bookmarked';
                         btn.dataset.bookmarked = 'true';
+                        btn.classList.remove('bookmark-btn');
+                        btn.classList.add('bookmarked-btn');
                         showStatusMessage('gig-detail-status', 'Gig saved', 'success');
                     }
                 } else {
                     showStatusMessage('gig-detail-status', 'Something went wrong, try again', 'error');
                 }
             })
-            .catch(function () {
+            .catch(() => {
                 if (isBookmarked) {
-                    btn.textContent = 'Bookmark';
+                    btn.textContent = '★ Bookmark';
                     btn.dataset.bookmarked = 'false';
-                    showStatusMessage('gig-detail-status', 'Gig removed from saved', 'success');
+                    btn.classList.remove('bookmarked-btn');
+                    btn.classList.add('bookmark-btn')
                 } else {
                     btn.textContent = 'Bookmarked';
                     btn.dataset.bookmarked = 'true';
-                    showStatusMessage('gig-detail-status', 'Gig saved', 'success');
+                    btn.classList.remove('bookmark-btn');
+                    btn.classList.add('bookmarked-btn');
                 }
             });
         });
     }
-
-    // FILTER - /gigs/
-    const filterBtn = document.getElementById('filter-btn');
-
-    if (filterBtn) {
-        filterBtn.addEventListener('click', function () {
-
-            const instrumentFilter = document.getElementById('filter-instrument')?.value || '';
-
-            const params = new URLSearchParams();
-
-            if (instrumentFilter) params.append('instrument', instrumentFilter);
-
-            fetch(`/gigs/?${params.toString()}`, {
-                method: 'GET',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(function (response) {
-                return response.json();
-            })
-            .then(function (data) {
-                if (data.gigs) {
-                    updateGigsList(data.gigs);
-                }
-            })
-            .catch(function () {
-                console.log('Filter backend not ready yet');
-            });
-        });
-    }
-
-});
 
 
 //Helper
