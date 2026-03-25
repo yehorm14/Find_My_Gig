@@ -389,10 +389,15 @@ def create_gig_listing(request):
     
 @login_required
 def delete_listing(request, listing_id):
-    """Placeholder view for deleting a gig listing."""
     if request.method == 'POST':
-        # TODO: Add listing deletion logic here later if needed
-        return JsonResponse({'success': True})
+        try:
+            listing = Listing.objects.get(id=listing_id, band=request.user.band)
+            listing.delete()
+            return JsonResponse({'success': True})
+        except Listing.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'not_found'})
+    
+    return JsonResponse({'success': False, 'error': 'invalid_request'})
 
 def apply_gig(request, gig_id):
     """Creates an Application linking a Musician to a Gig."""
