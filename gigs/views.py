@@ -198,6 +198,15 @@ def my_profile(request):
         'media_links': media_links
     })
 
+@login_required
+def create_gig_page(request):
+    try:
+        request.user.band
+    except Band.DoesNotExist:
+        return redirect('gigs:dashboard')
+
+    return render(request, 'gigs/create_gig.html')
+
 
 # ==========================================
 # --- AUTHENTICATION & SETTINGS ---

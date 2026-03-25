@@ -242,11 +242,11 @@ document.addEventListener('DOMContentLoaded', function () {
     
     if (createGigBtn) {
         createGigBtn.addEventListener('click', function () {
-            const gigTitle = document.getElementById('gig-title')?.value.trim();
+            const gigTitle = document.getElementById('listing-title')?.value?.trim();
             const gigPosition = document.getElementById('gig-position')?.value;
             const gigDate = document.getElementById('gig-date')?.value;
-            const gigDescription = document.getElementById('gig-description')?.value.trim();
-            const gigLocation = document.getElementById('gig-location')?.value.trim();
+            const gigDescription = document.getElementById('gig-description')?.value?.trim();
+            const gigLocation = document.getElementById('gig-location')?.value?.trim();
 
             if (!gigTitle) {
                 showStatusMessage('status-message', 'Please enter a title for your listing', 'error');
@@ -295,16 +295,11 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(function (data) {
                 if (data.success) {
                     showStatusMessage('status-message', 'Gig listing created successfully', 'success');
-                    clearCreateGigForm();
-                    addListingToPage(data.listing);
+                    window.location.href = '/dashboard/my-listings/';
                 } else {
                     showStatusMessage('status-message', 'Something went wrong, try again', 'error');
                 }
             })
-            .catch(function () {
-                showStatusMessage('status-message', 'Gig listing created successfully', 'success');
-                clearCreateGigForm();
-            });
         });
     }
 
@@ -439,7 +434,7 @@ function addMediaLinkToList(url,mediaId){
 
 function clearCreateGigForm() {
     const fields = [
-        'gig-title',
+        'lisitng-title',
         'gig-description',
         'gig-location',
         'gig-date'
@@ -461,13 +456,26 @@ function addListingToPage(listing) {
         listingCard.classList.add('listing-card');
 
         listingCard.innerHTML = `
-            <h3>${listing.title}</h3>
-            <p>Position: ${listing.req_instruments}</p>
-            <p>Date: ${listing.deadline}</p>
-            <p>Location: ${listing.location}</p>
-            <button class="delete-listing-btn" data-listing-id="${listing.id}">
-                Delete
-            </button>
+            <div class="row align-items-center">
+                <div class="col-md-4">
+                    <h4 style="color: #fff; font-weight: 700;">${listing.title}</h4>
+                    <p class="mb-1 text-muted-custom">🎸 Position: ${listing.req_instruments}</p>
+                    <p class="mb-0 text-muted-custom">⏳ Date: ${listing.deadline}</p>
+                </div>
+
+                <div class="col-md-5">
+                    <p class="description-text mb-1">${listing.description}</p>
+                    <p class="gig-accent-text mb-0">📍 ${listing.location}</p>
+                </div>
+
+                <div class="col-md-3 d-flex flex-column align-items-end justify-content-center">
+                    <button type="button"
+                        class="delete-listing-btn btn btn-outline-danger rounded-pill w-100 my-2"
+                        data-listing-id="${listing.id}">
+                        Delete Listing
+                    </button>
+                </div>
+            </div>
         `;
 
         listingsList.appendChild(listingCard);
