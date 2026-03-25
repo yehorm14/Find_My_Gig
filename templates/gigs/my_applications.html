@@ -1,0 +1,68 @@
+{% extends 'gigs/base.html' %}
+
+{% load static %}
+
+{% block title_block %}
+My Applications
+{% endblock %}
+
+{% block header_block %}
+{% endblock %}
+
+{% block body_block %}
+<div id="status-message"></div>
+<div class="text-center m-4">
+  <h2>My Applications</h2>
+</div>
+
+<hr class="mx-5">
+
+<div class="row justify-content-center">
+  <div class="col mx-5">
+    <div class="listings-container">
+      {% for application in applications %}
+        <div class="application-card listing-card m-2">
+            <div class="row">
+                <div class="col">
+                    <h4> {{ application.listing.title }}</h4>
+                    <p>Posted by: {{ application.listing.band.name }}</p>
+                    <p>Position: {{ application.listing.req_instruments }}</p>
+                    <p>Date: {{ application.listing.deadline}}</p>
+                </div>
+
+                <div class="col">
+                  <p>Description: {{ application.listing.description }}</p>
+                  <p>Location: {{ application.listing.location }}</p>
+                </div>
+
+                <div class="col-3">
+                  <div class="d-flex flex-column justify-content-center h-100">
+                    <!-- Google Maps API placeholder -->
+                    <div class="map-placeholder">
+                        Map coming soon
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-3 d-flex flex-column align-items-center text-center justify-content-center">
+                    <button type="button"
+                             class="withdraw-application-btn btn btn-danger nice-button background-color w-100 my-2"
+                             data-gig-id="{{ application.listing.id }}">
+                         Withdraw
+                    </button>
+
+                    <a href="{% url 'gigs:gig_detail' application.listing.id %}"
+                       class="btn btn-primary nice-button background-color w-100 my-2 py-2">
+                        View / Review
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts_block %}
+    <script src="{% static 'find_my_gig/js/dashboard.js' %}"></script>
+{% endblock %}

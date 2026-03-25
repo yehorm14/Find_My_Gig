@@ -1,0 +1,55 @@
+{% extends 'gigs/base.html' %}
+{% load static %}
+
+{% block title_block %}
+Browse Bands | Find My Gig
+{% endblock %}
+
+{% block body_block %}
+<div class="container mt-5 px-4 px-md-5 mb-5">
+    
+    <div class="row align-items-center mb-4">
+        <div class="col-md-6">
+            <h2 class="mb-0" style="font-weight: 800; font-size: 2.2rem;">Discover <span class="gig-accent-text">Bands & Venues</span></h2>
+        </div>
+    </div>
+
+    <hr class="mb-5" style="border-color: #2a2a35;">
+
+    <div class="row g-4">
+        
+        {% for band in bands %}
+        <div class="col-md-6 col-lg-4 d-flex align-items-stretch">
+            <div class="listing-card w-100 d-flex flex-column align-items-center text-center p-4">
+                
+                <img src="{% if band.profile_picture %}{{ band.profile_picture.url }}{% else %}{% static 'find_my_gig/images/pfp-placeholder.png' %}{% endif %}" 
+                     class="profile-pic mb-3" style="width: 100px; height: 100px; border-width: 2px;" alt="Band Logo">
+                
+                <h4 class="mb-2" style="color: #fff; font-weight: 700;">{{ band.name }}</h4>
+                
+                {% if band.location %}
+                    <p class="text-muted-custom small mb-2">📍 {{ band.location }}</p>
+                {% endif %}
+                
+                {% if band.bio %}
+                    <p class="text-muted-custom small mb-3">{{ band.bio|truncatechars:60 }}</p>
+                {% endif %}
+
+                <div class="mt-auto w-100 pt-3" style="border-top: 1px solid #2a2a35;">
+                    <a href="{% url 'gigs:band_profile' band.id %}" class="btn btn-outline-light w-100 rounded-pill">
+                        View Profile
+                    </a>
+                </div>
+                
+            </div>
+        </div>
+        
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <h4 class="text-muted-custom">No bands or venues have registered yet. Check back soon!</h4>
+        </div>
+        {% endfor %}
+        
+    </div>
+</div>
+{% endblock %}

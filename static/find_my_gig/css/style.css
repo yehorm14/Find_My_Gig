@@ -1,0 +1,316 @@
+/* ==========================================================================
+   1. VARIABLES & RESET
+   ========================================================================== */
+:root {
+    /* Core Palette */
+    --bg-dark: #121212;          /* The deep background color */
+    --card-bg: #1e1e24;          /* The slightly lighter card color */
+    
+    /* Neon Accents */
+    --neon-cyan: #00ffaa;        /* The primary Find My Gig green/cyan */
+    --neon-cyan-dark: #00cc88;   /* Darker shade for hover states */
+    --neon-red: #ff4757;         /* Used for delete/withdraw actions */
+    
+    /* Text & Borders */
+    --text-main: #e0e0e0;
+    --text-muted: #888899;
+    --border-dim: #2a2a35;
+    
+    /* Animation Speeds */
+    --transition-fast: 0.2s ease;
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    min-height: 100vh;
+    margin: 0;
+    padding-top: 85px; 
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.fixed-top {
+    backdrop-filter: blur(10px);
+    background-color: rgba(18, 18, 18, 0.9) !important;
+}
+
+
+/* ==========================================================================
+   2. TYPOGRAPHY & UTILITIES
+   ========================================================================== */
+.gig-accent-text { 
+    color: var(--neon-cyan); 
+    font-weight: bold; 
+}
+
+.text-muted-custom { 
+    color: var(--text-muted); 
+}
+
+.uppercase-label { 
+    text-transform: uppercase; 
+    letter-spacing: 0.05rem; 
+    font-size: 0.75rem; 
+    font-weight: 700; 
+}
+
+.detail-label {
+    text-transform: uppercase;
+    letter-spacing: 0.05rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    display: block;
+    margin-bottom: 4px;
+}
+
+.description-text { 
+    line-height: 1.7; 
+    color: var(--text-main); 
+}
+
+/* Structural Utilities */
+.action-border { 
+    border-top: 1px solid var(--border-dim); 
+    margin-top: 2rem; 
+    padding-top: 1rem; 
+}
+
+.border-bottom-accent {
+    border-bottom: 2px solid var(--neon-cyan);
+    display: inline-block;
+}
+
+
+/* ==========================================================================
+   3. LINKS & BUTTONS
+   ========================================================================== */
+.site-title {
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 900; 
+    letter-spacing: -1px; 
+    font-size: 1.8rem;
+    text-shadow: 0 0 10px rgba(0, 255, 170, 0.2);
+    transition: all var(--transition-fast);
+}
+
+.site-title:hover { 
+    color: var(--neon-cyan); 
+    text-shadow: 0 0 15px rgba(0, 255, 170, 0.6); 
+    transform: scale(1.02); 
+}
+
+.subtle-link {
+    color: var(--neon-cyan);
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: opacity var(--transition-fast);
+}
+
+.subtle-link:hover { 
+    opacity: 0.8; 
+    text-decoration: underline; 
+}
+
+/* Master Button Styles */
+.apply-btn, .bookmarked-btn, .withdraw-btn {
+    border-radius: 50rem !important; /* Forces the pill shape */
+    font-weight: 600 !important;
+    transition: transform var(--transition-fast), background-color var(--transition-fast) !important;
+    border: none !important;
+}
+
+/* Apply & Action Buttons */
+.apply-btn {
+    background-color: var(--neon-cyan) !important;
+    color: #000 !important;
+}
+
+.apply-btn:hover {
+    background-color: var(--neon-cyan-dark) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 255, 170, 0.3);
+}
+
+/* Saved State Button */
+.bookmarked-btn {
+    background-color: transparent !important;
+    color: var(--neon-cyan) !important;
+    border: 2px solid var(--neon-cyan) !important;
+}
+
+/* Danger / Withdraw Button */
+.withdraw-btn {
+    background-color: var(--neon-red) !important;
+    color: white !important;
+}
+
+.withdraw-btn:hover {
+    background-color: #ff2a3f !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3);
+}
+
+
+/* ==========================================================================
+   4. CARDS & CONTAINERS
+   ========================================================================== */
+.listing-card, .dashboard-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-dim);
+    border-radius: 12px;
+    padding: 20px;
+    color: var(--text-main);
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+
+/* The "Lift" Hover Effect */
+.listing-card:hover, .dashboard-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 255, 170, 0.15);
+    border-color: var(--neon-cyan);
+}
+
+/* Custom Scrollbar for Long Lists */
+.listings-container {
+    max-height: 70vh;
+    overflow-y: auto;
+    border: 1px solid var(--border-dim);
+    border-radius: 12px;
+    padding: 15px;
+    background-color: rgba(30, 30, 36, 0.5); /* Slightly transparent background */
+}
+
+.listings-container::-webkit-scrollbar { width: 8px; }
+.listings-container::-webkit-scrollbar-track { background: var(--bg-dark); border-radius: 10px; }
+.listings-container::-webkit-scrollbar-thumb { background: #4a4a5a; border-radius: 10px; }
+.listings-container::-webkit-scrollbar-thumb:hover { background: var(--neon-cyan); }
+
+/* Tiny UI Badges */
+.badge-urgent { background-color: var(--neon-red); color: white; }
+.badge-instrument { background-color: #373748; color: var(--text-main); border: 1px solid #4a4a5a; }
+
+
+/* ==========================================================================
+   5. FORMS & INPUTS
+   ========================================================================== */
+.form-select, .form-control {
+    background-color: var(--bg-dark) !important;
+    color: var(--text-main) !important;
+    border: 1px solid var(--border-dim) !important;
+    border-radius: 8px;
+    padding: 0.6rem 1rem;
+}
+
+.form-select:focus, .form-control:focus {
+    background-color: #1a1a20 !important;
+    border-color: var(--neon-cyan) !important;
+    box-shadow: 0 0 0 0.25rem rgba(0, 255, 170, 0.25) !important;
+}
+
+/* Custom styling for Radio buttons in the Signup form */
+.form-check-input { background-color: var(--card-bg); border-color: #4a4a5a; }
+.form-check-input:checked { background-color: var(--neon-cyan); border-color: var(--neon-cyan); }
+
+/* The invisible radio input trick for your pill buttons */
+.btn-check:checked + .btn-outline-light {
+    background-color: var(--neon-cyan);
+    color: #000;
+    border-color: var(--neon-cyan);
+    font-weight: bold;
+}
+
+
+/* ==========================================================================
+   6. SPECIALIZED UI (MAPS, STARS, PROFILE)
+   ========================================================================== */
+/* Google Maps */
+.gig-mini-map, .map-placeholder {
+    height: 350px;
+    width: 100%;
+    border-radius: 12px;
+    background-color: var(--card-bg);
+}
+
+.gig-mini-map { 
+    border: 1px solid var(--border-dim); 
+    box-shadow: 0 8px 20px rgba(0,0,0,0.4); 
+}
+
+.map-placeholder { 
+    border: 1px dashed #4a4a5a; 
+}
+
+/* Profile Pictures */
+.profile-pic {
+    object-fit: cover;
+    border-radius: 50%;
+    border: 3px solid var(--neon-cyan);
+    transition: transform var(--transition-fast);
+}
+
+.profile-pic-label:hover .profile-pic {
+    transform: scale(1.05);
+}
+
+/* Star Rating System */
+.star-rating { 
+    direction: rtl; 
+    display: inline-block; 
+}
+
+.star-rating input { display: none; }
+
+.star-rating label { 
+    color: #4a4a5a; 
+    font-size: 28px; 
+    padding: 0 2px; 
+    cursor: pointer; 
+    transition: color var(--transition-fast); 
+}
+
+.star-rating label:hover, 
+.star-rating label:hover ~ label, 
+.star-rating input:checked ~ label { 
+    color: var(--neon-cyan); 
+}
+
+
+/* ==========================================================================
+   7. JAVASCRIPT ANIMATIONS & STATUS ALERTS
+   ========================================================================== */
+/* The Shake Animation for failed logins */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-8px); }
+    75% { transform: translateX(8px); }
+}
+
+.form-shake { 
+    animation: shake 0.5s ease; 
+}
+
+/* The dynamic status bars injected by utilities.js */
+.status-success, .status-error {
+    display: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    border: 1px solid;
+    text-align: center;
+}
+
+.status-success { 
+    background: rgba(0, 255, 170, 0.1); 
+    color: var(--neon-cyan); 
+    border-color: var(--neon-cyan); 
+}
+
+.status-error { 
+    background: rgba(255, 71, 87, 0.1); 
+    color: var(--neon-red); 
+    border-color: var(--neon-red); 
+}

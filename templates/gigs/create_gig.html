@@ -1,0 +1,100 @@
+{% extends 'gigs/base.html' %}
+
+{% load static %}
+
+{% block title_block %}
+List a Gig
+{% endblock %}
+
+{% block header_block %}
+{% endblock %} {% block body_block %}
+<div id="status-message"></div>
+
+<div class="text-center m-4">
+  <h2>List a Gig</h2>
+</div>
+
+<hr class="mx-5" />
+
+<div class="row justify-content-center">
+  <div class="col">
+    <form method="POST" action="">
+      {% csrf_token %}
+      <div class="row justify-content-center m-4">
+        <div class="col text-center">
+          <div class="row m-4">
+            <label for="listingTitle" class="form-label" id="gig-title" name="title" required
+              >Title of Listing</label
+            >
+            <input
+              type="text"
+              class="form-control"
+              id="listing-title"
+              name="title"
+              required
+            />
+          </div>
+          <div class="row m-4">
+            <label for="position" class="form-label">Position</label>
+            <select class="form-select" id="gig-position" name="position" required>
+              <option value="">Select an instrument</option>
+              <option value="guitar">Guitar</option>
+              <option value="bass">Bass</option>
+              <option value="drums">Drums</option>
+              <option value="piano">Piano</option>
+              <option value="vocals">Vocals</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="row m-4">
+            <label for="gig-date" class="form-label">Date</label>
+            <input
+              type="date"
+              class="form-control"
+              id="gig-date"
+              name="gig_date"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="col text-center">
+          <div class="row m-4">
+            <label for="description" class="form-label">Description</label>
+            <textarea
+              class="form-control"
+              id="gig-description"
+              rows="5"
+              name="description"
+              required
+            ></textarea>
+          </div>
+          <div class="row m-4">
+            <label for="location" class="form-label">Location</label>
+            <input
+              type="text"
+              class="form-control"
+              id="gig-location"
+              name="location"
+              required
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="row justify-content-center my-5">
+        <button
+          type="button"
+          id="create-gig-btn"
+          class="btn btn-primary btn-lg nice-button primary-color"
+        >
+          List
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+{% block scripts_block %}
+    <script src="{% static 'find_my_gig/js/dashboard.js' %}"></script>
+{% endblock %}

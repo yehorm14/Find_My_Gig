@@ -1,0 +1,115 @@
+{% extends 'gigs/base.html' %}
+{% load static %}
+
+{% block title_block %}{{ listing.title }}{% endblock %}
+
+{% block body_block %}
+<div id="gig-detail-status" class="container mt-3"></div>
+
+<div class="container mt-4 px-4 px-md-5">
+    
+    <nav aria-label="breadcrumb" class="mb-4">
+        <a href="{% url 'gigs:gig_listings' %}" class="subtle-link d-inline-flex align-items-center">
+            ← Back to all gigs
+        </a>
+    </nav>
+
+    <div class="mb-5">
+        <h1 class="display-4" style="font-weight: 800; color: #fff;">{{ listing.title }}</h1>
+        <h4 class="gig-accent-text">{{ listing.band.name }}</h4>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="listing-card p-4 h-100 d-flex flex-column">
+                <h5 class="mb-4 border-bottom-accent">Gig Details</h5>
+                
+                <div class="detail-item mb-3">
+                    <span class="detail-label">🎸 Position Needed</span>
+                    <p class="h5">{{ listing.req_instruments }}</p>
+                </div>
+                
+                <div class="detail-item mb-3">
+                    <span class="detail-label">⏳ Deadline to Apply</span>
+                    <p class="h5">{{ listing.deadline|date:"F d, Y" }}</p>
+                </div>
+
+                <div class="detail-item mb-3">
+                    <span class="detail-label">📍 Location</span>
+                    <p class="h5">{{ listing.location }}</p>
+                </div>
+                
+                <div class="mt-3">
+                    <span class="detail-label">Description</span>
+                    <p class="description-text">{{ listing.description }}</p>
+                </div>
+
+                <div class="mt-auto pt-4 action-border">
+                    <div class="d-flex flex-wrap gap-3">
+                        
+                        {% if not user.is_authenticated %}
+                            <button type="button" id="gig-detail-apply-btn"
+                                    class="btn apply-btn rounded-pill px-4 py-2"
+                                    data-gig-id="{{ listing.id }}"
+                                    data-applied="false">
+                              Apply Now
+                            </button>
+
+                            <button type="button" id="gig-detail-bookmark-btn"
+                                    class="btn btn-outline-light rounded-pill px-4 py-2"
+                                    data-gig-id="{{ listing.id }}"
+                                    data-bookmarked="false">
+                              ☆ Bookmark
+                            </button>
+
+                        {% elif user.musician %}
+                            <button type="button" id="gig-detail-apply-btn"
+                                    class="btn {% if has_applied %}withdraw-btn{% else %}apply-btn{% endif %} rounded-pill px-4 py-2"
+                                    data-gig-id="{{ listing.id }}"
+                                    data-applied="{{ has_applied|yesno:'true,false' }}">
+                              {% if has_applied %}Withdraw Application{% else %}Apply Now{% endif %}
+                            </button>
+
+                            <button type="button" id="gig-detail-bookmark-btn"
+                                    class="btn btn-outline-light rounded-pill px-4 py-2"
+                                    data-gig-id="{{ listing.id }}"
+                                    data-bookmarked="{{ is_bookmarked|yesno:'true,false' }}">
+                              {% if is_bookmarked %}★ Bookmarked{% else %}☆ Bookmark{% endif %}
+                            </button>
+                        {% endif %}
+
+                        {% if user.is_authenticated and has_applied %}
+                          <a href="{% url 'gigs:submit_review' listing.id %}" 
+                             class="btn btn-outline-secondary rounded-pill px-4 py-2">
+                             Leave a Review
+                          </a>
+                        {% endif %}
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            {% if listing.latitude and listing.longitude %}
+                <div class="gig-mini-map" 
+                     id="map-{{ listing.id }}"
+                     data-lat="{{ listing.latitude|safe }}" 
+                     data-lng="{{ listing.longitude|safe }}" 
+                     data-title="{{ listing.title|escapejs }}">
+                </div>
+            {% else %}
+                <div class="map-placeholder d-flex flex-column align-items-center justify-content-center">
+                    <h1 class="display-1">🗺️</h1>
+                    <p class="text-muted mt-2">Coordinates pending</p>   
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts_block %}
+    <script src="{% static 'find_my_gig/js/gigs.js' %}"></script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_frontend_key }}&callback=initMap"></script>
+{% endblock %}

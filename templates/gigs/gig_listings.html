@@ -1,0 +1,112 @@
+{% extends 'gigs/base.html' %}
+{% load static %}
+
+{% block title_block %}
+Gigs
+{% endblock %}
+
+{% block header_block %}
+{% endblock %}
+
+{% block body_block %}
+<div id="status-message"></div>
+
+<div class="container mt-5 px-4 px-md-5">
+    
+    <div class="row align-items-center mb-4">
+        <div class="col-md-6">
+            <h2 class="mb-0" style="font-weight: 800; font-size: 2.2rem;">Discover Gigs</h2>
+        </div>
+        <div class="col-md-6 d-flex justify-content-md-end mt-3 mt-md-0">
+            <select class="form-select w-auto me-2" id="filter-instrument" name="filter">
+                <option value="">Filter by Instrument...</option>
+                <option value="Guitar">Guitar</option>
+                <option value="Drums">Drums</option>
+                <option value="Vocals">Vocals</option>
+                <option value="Bass">Bass</option>
+                <option value="Other">Other</option>
+            </select>
+            <button type="button" id="filter-btn" class="btn apply-btn rounded-pill px-4">
+                Filter
+            </button>
+            <div class="col-auto m-3">
+            <a href="/gigs/" class="btn btn-primary nice-button primary-color">Clear</a>
+            </div>
+        </div>
+    </div>
+
+    <hr class="mb-5" style="border-color: #2a2a35; opacity: 1;">
+
+    <div id="gigs-list" class="row">
+        {% for gig in gigs %}
+        <div class="col-md-6 col-lg-4 d-flex align-items-stretch mb-4">
+            <div class="listing-card w-100 d-flex flex-column">
+                
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="badge badge-instrument rounded-pill px-3 py-2">
+                        🎸 {{ gig.req_instruments }}
+                    </span>
+                    {% if gig.is_urgent %}
+                        <span class="badge badge-urgent rounded-pill px-3 py-2">🔥 URGENT</span>
+                    {% endif %}
+                </div>
+
+                <h3 class="gig-title mb-1">{{ gig.title }}</h3>
+                <p class="text-muted-custom mb-2">
+                    <strong>Band:</strong> {{ gig.band.name }}
+                </p>
+                <p class="mb-3">
+                    📍 <span class="gig-accent-text">{{ gig.location }}</span>
+                </p>
+
+                <div class="mt-auto pt-3" style="border-top: 1px solid #2a2a35;">
+                    
+                    <a href="{% url 'gigs:gig_detail' gig.id %}" class="btn btn-outline-light w-100 rounded-pill mb-2">
+                        View Details
+                    </a>
+                    
+                    {% if user.is_authenticated and user.musician %}
+                    <div class="d-flex gap-2 mb-3">
+                        <button type="button" id="gig-detail-apply-btn-{{ gig.id }}"
+                                class="{% if gig.id in applied_gig_ids %}withdraw-btn{% else %}apply-btn{% endif %} btn btn-primary nice-button w-50"
+                                data-gig-id="{{ gig.id }}">
+                          {% if gig.id in applied_gig_ids %}Withdraw{% else %}Apply{% endif %}
+                        </button>
+
+                        <button type="button" id="gig-detail-bookmark-btn"
+                                class="btn btn-outline-light rounded-pill px-4 py-2"
+                                data-gig-id="{{ listing.id }}"
+                                data-bookmarked="{{ is_bookmarked|yesno:'true,false' }}">
+                          {% if is_bookmarked %}★ Bookmarked{% else %}☆ Bookmark{% endif %}
+                        </button>
+                    </div>
+                    {% endif %}
+
+                    <div class="d-flex gap-2 mb-3">
+                        <a href="{% url 'gigs:submit_review' gig.id %}" 
+                           class="btn btn-outline-secondary rounded-pill w-100">
+                            Leave a Review
+                        </a>
+                    </div>
+
+                    <div class="text-center">
+                        <small class="text-muted-custom">
+                            ⏳ Deadline: {{ gig.deadline|date:"M d, Y" }}
+                        </small>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <h4 class="text-muted-custom">No gigs found right now. Check back later!</h4>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts_block %}
+    <script src="{% static 'find_my_gig/js/gigs.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,537 @@
+import logging
+import json
+from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
+from django.contrib.auth import login, logout
+from django.db import transaction
+from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.conf import settings
+
+# IMPORT THE MODELS and FORMS
+from gigs.models import Musician, Band, Listing, Application, Review, MediaLink
+from gigs.forms import UserSignUpForm, MusicianProfileForm, BandProfileForm
+
+# Set up a logger for tracking issues in production
+logger = logging.getLogger(__name__)
+
+
+# ==========================================
+# --- CORE PAGES (Browsing & Viewing) ---
+# ==========================================
+
+def home(request):
+    """Handles the main landing page (/). Redirects logged-in users to their dashboard."""
+    # If they are already logged in, skip the landing page and send them to their dashboard!
+    if request.user.is_authenticated:
+        return redirect('gigs:dashboard')
+        
+    # If they are a guest, show them the normal marketing home page
+    context = {'welcome_message': 'Welcome to Find My Gig!'}
+    return render(request, 'gigs/home.html', context)
+
+
+def gig_listings(request):
+    """
+    Handles the main Gig list page. 
+    Strictly filters the database by dropdown options (instrument, date) and applies sorting.
+    """
+    gigs_queryset = Listing.objects.all()
+
+    # GET parameters from the dropdown filters
+    instrument_filter = request.GET.get('instrument', '')
+    date_query = request.GET.get('date', '')
+    sort_by = request.GET.get('sort', '')
+
+    # Filter logic
+    if instrument_filter:
+        gigs_queryset = gigs_queryset.filter(req_instruments__icontains=instrument_filter)
+    if date_query:
+        gigs_queryset = gigs_queryset.filter(deadline=date_query)
+
+    # Sorting logic
+    if sort_by == 'name':
+        gigs_queryset = gigs_queryset.order_by('title')
+    else:
+        gigs_queryset = gigs_queryset.order_by('deadline') # Default: most urgent first
+    
+    # Check which gigs the user has already applied to
+    applied_gig_ids = []
+    if request.user.is_authenticated:
+        applied_gig_ids = Application.objects.filter(
+            applicant=request.user
+        ).values_list('listing_id', flat=True)
+    
+    bookmarked_gig_ids = []
+    if request.user.is_authenticated:
+        bookmarked_gig_ids = request.user.saved_gigs.values_list('id', flat=True)
+
+    context = {
+        'gigs': gigs_queryset,
+        'applied_gig_ids': applied_gig_ids,
+        'selected_instrument': instrument_filter,
+        'selected_date': date_query,
+        'current_sort': sort_by,
+        'bookmarked_gig_ids': bookmarked_gig_ids,
+    }
+
+    return render(request, 'gigs/gig_listings.html', context)
+
+def gig_detail(request, gig_id):
+    """Shows the full details of a single gig, including the Google Map."""
+    listing = get_object_or_404(Listing, id=gig_id)
+    
+    has_applied = False
+    is_bookmarked = False
+    
+    # Check if the logged-in user has interacted with this gig
+    if request.user.is_authenticated:
+        has_applied = listing.applications_received.filter(applicant=request.user).exists()
+        is_bookmarked = listing.bookmarks.filter(id=request.user.id).exists()
+
+    context = {
+        'listing': listing, 
+        'has_applied': has_applied,
+        'is_bookmarked': is_bookmarked,
+        'google_maps_frontend_key': settings.GOOGLE_MAPS_FRONTEND_KEY, 
+    }
+    
+    return render(request, 'gigs/gig_detail.html', context)
+
+def musicians_list(request):
+    """Shows the page for browsing all registered musicians with a dropdown filter."""
+    musicians = Musician.objects.all()
+    instrument_filter = request.GET.get('instrument', '')
+    
+    # Apply strict filter from the dropdown
+    if instrument_filter:
+        musicians = musicians.filter(instruments__icontains=instrument_filter)
+        
+    return render(request, 'gigs/musicians_list.html', {'musicians': musicians, 'selected_instrument': instrument_filter})
+
+def musician_detail(request, id):
+    """Shows the public profile and reviews for a specific musician."""
+    musician = get_object_or_404(Musician, id=id)
+    reviews = Review.objects.filter(reviewee=musician.user).order_by('-id')
+    
+    context = {
+        'musician': musician,
+        'reviews': reviews,
+    }
+    return render(request, 'gigs/musician_detail.html', context)
+
+def bands_list(request):
+    """Shows the page for browsing all registered bands and venues."""
+    bands = Band.objects.all()
+    # You can add search/filter logic here later just like the musicians list!
+    return render(request, 'gigs/bands_list.html', {'bands': bands})
+
+def band_detail(request, id):
+    """Shows the public profile for a specific band and checks if it is bookmarked."""
+    band = get_object_or_404(Band, id=id)
+    is_bookmarked = False
+    
+    # Check if the logged-in user is a musician who bookmarked this band
+    if request.user.is_authenticated and hasattr(request.user, 'musician'):
+        is_bookmarked = request.user.musician.bookmarked_bands.filter(id=band.id).exists()
+        
+    return render(request, 'gigs/band_detail.html', {'band': band, 'is_bookmarked': is_bookmarked})
+
+# ==========================================
+# --- USER DASHBOARD & MANAGEMENT ---
+# ==========================================
+
+@login_required
+def dashboard(request):
+    """The main hub for a logged-in user. Routes to templates with profile context."""
+    context = {}
+    
+    if hasattr(request.user, 'musician'):
+        context['profile'] = request.user.musician
+        return render(request, 'gigs/musician_dashboard.html', context)
+    else:
+        context['profile'] = request.user.band
+        return render(request, 'gigs/band_dashboard.html', context)
+    
+@login_required
+def my_applications(request):
+    """Shows a Musician all the gigs they have applied for."""
+    user_applications = Application.objects.filter(applicant=request.user)
+    return render(request, 'gigs/my_applications.html', {'applications': user_applications})
+
+@login_required
+def my_bookmarks(request):
+    """Shows a Musician all their saved gigs and saved bands."""
+    # Safety check: Make sure only musicians can access this specific view
+    if not hasattr(request.user, 'musician'):
+        return redirect('gigs:dashboard')
+
+    # Grab all the bookmarks from the database!
+    saved_gigs = request.user.saved_gigs.all()
+    saved_bands = request.user.musician.bookmarked_bands.all()
+
+    return render(request, 'gigs/my_bookmarks.html', {
+        'saved_gigs': saved_gigs,
+        'saved_bands': saved_bands
+    })
+
+@login_required
+def my_listings(request):
+    """Shows a Band all the gigs they have currently posted."""
+    try:
+        band = request.user.band
+        listings = Listing.objects.filter(band=band)
+    except Band.DoesNotExist:
+        listings = []
+    return render(request, 'gigs/my_listings.html', {'listings': listings})
+
+@login_required
+def my_profile(request):
+    """Shows the user's editable profile settings (routes to Musician or Band template)."""
+    try:
+        profile = request.user.musician
+        profile_type = 'musician'
+        media_links = profile.media_links.all()
+    except Musician.DoesNotExist:
+        try:
+            profile = request.user.band
+            profile_type = 'band'
+            media_links = []
+        except Band.DoesNotExist:
+            return redirect('gigs:home')
+
+    # Bundle the data up
+    context = {
+        'profile': profile,
+        'profile_type': profile_type,
+        'media_links': media_links
+    }
+
+    if profile_type == 'musician':
+        return render(request, 'gigs/my_profile_musician.html', context)
+    else:
+        return render(request, 'gigs/my_profile_band.html', context)
+
+@login_required
+def create_gig_page(request):
+    try:
+        request.user.band
+    except Band.DoesNotExist:
+        return redirect('gigs:dashboard')
+
+    return render(request, 'gigs/create_gig.html')
+
+
+# ==========================================
+# --- AUTHENTICATION & SETTINGS ---
+# ==========================================
+
+@transaction.atomic
+def signup_choice(request):
+    """Handles the custom signup flow, separating users into Musicians or Bands upon creation."""
+    if request.user.is_authenticated:
+        return redirect('gigs:home')
+
+    user_form = UserSignUpForm()
+
+    if request.method == 'POST':
+        user_type = request.POST.get('user_type')
+        user_form = UserSignUpForm(request.POST)
+
+        if user_type not in ('musician', 'band'):
+            return render(request, 'gigs/signup.html', {
+                'user_form': user_form,
+                'error_message': 'Please select an account type.'
+            })
+
+        if user_form.is_valid():
+            user = user_form.save()
+            
+            # Create the corresponding profile based on their choice
+            if user_type == 'musician':
+                Musician.objects.create(user=user)
+            elif user_type == 'band':
+                band_name = request.POST.get('band_name', '').strip()
+                Band.objects.create(user=user, name=band_name)
+
+            login(request, user)
+            return redirect('gigs:my_profile')
+
+        return render(request, 'gigs/signup.html', {'user_form': user_form})
+
+    return render(request, 'gigs/signup.html')
+
+
+@login_required
+def update_profile(request):
+    """Handles saving profile edits (bio, picture, instruments, etc.) via AJAX."""
+    if request.method == 'POST':
+        user = request.user
+        
+        # Handle both FormData (with files) and raw JSON requests
+        if request.content_type and 'multipart' in request.content_type:
+            username = request.POST.get('username')
+            firstname = request.POST.get('firstname')
+            surname = request.POST.get('surname')
+            bio = request.POST.get('about')
+            age = request.POST.get('age')
+            instruments = request.POST.get('instruments')
+            picture = request.FILES.get('profile_picture')
+            media_links_json = request.POST.get('media_links')
+            delete_media_json = request.POST.get('delete_media')
+        else:
+            data = json.loads(request.body)
+            username = data.get('username')
+            firstname = data.get('firstname')
+            surname = data.get('surname')
+            bio = data.get('about')
+            age = request.POST.get('age')
+            instruments = data.get('instruments')
+            picture = None
+            media_links_json = data.get('media_links')
+            delete_media_json = data.get('delete_media')
+
+        # Prevent picking a username someone else already has
+        if User.objects.exclude(pk=user.pk).filter(username=username).exists():
+            return JsonResponse({'success': False, 'error': 'username_taken'})
+            
+        user.username = username
+        user.first_name = firstname or ''
+        user.last_name = surname or ''
+        user.save()
+
+        # Update specific Musician or Band fields
+        try:
+            profile = user.musician
+            profile.bio = bio
+            profile.age = age
+            profile.instruments = instruments
+            if picture:
+                profile.profile_picture = picture
+            profile.save()
+
+            if media_links_json:
+                new_links = json.loads(media_links_json) if isinstance(media_links_json, str) else media_links_json
+                for url in new_links:
+                    MediaLink.objects.create(musician=profile, url=url)
+
+            if delete_media_json:
+                ids_to_delete = json.loads(delete_media_json) if isinstance(delete_media_json, str) else delete_media_json
+                MediaLink.objects.filter(id__in=ids_to_delete).delete()
+
+        except Musician.DoesNotExist:
+            try:
+                profile = user.band
+                profile.bio = bio
+                band_name = data.get('band_name') if not 'multipart' in request.content_type else request.POST.get('band_name')
+                if band_name:
+                    profile.name = band_name
+                if picture:
+                    profile.profile_picture = picture
+                profile.save()
+            except Band.DoesNotExist:
+                pass
+
+        return JsonResponse({'success': True})
+    
+    return redirect('gigs:my_profile')
+
+@login_required
+def delete_account(request):
+    """Permanently deletes the logged-in user and logs them out."""
+    if request.method == 'POST':
+        user = request.user
+        logout(request)
+        user.delete()
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False})
+
+
+# ==========================================
+# --- AJAX ACTIONS (Gigs, Apps, Bookmarks) ---
+# ==========================================
+
+@login_required
+def create_gig_listing(request):
+    """Allows a Band to post a new Gig via AJAX."""
+    if request.method == 'POST':
+        try:
+            band = request.user.band
+        except Band.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'not_a_band'})
+
+        data = json.loads(request.body)
+        title = data.get('title', '').strip()
+        req_instruments = data.get('req_instruments', '').strip()
+        deadline = data.get('date', '')
+        description = data.get('description', '').strip()
+        location = data.get('location', '').strip()
+
+        if not all([title, req_instruments, deadline, description, location]):
+            return JsonResponse({'success': False, 'error': 'missing_fields'})
+
+        listing = Listing.objects.create(
+            band=band,
+            title=title,
+            req_instruments=req_instruments,
+            deadline=deadline,
+            description=description,
+            location=location,
+            is_urgent=False
+        )
+
+        return JsonResponse({
+            'success': True,
+            'listing': {
+                'id': listing.id,
+                'title': listing.title,
+                'req_instruments': listing.req_instruments,
+                'deadline': str(listing.deadline),
+                'location': listing.location,
+                'description': listing.description,
+            }
+        })
+        
+    # If GET request, return the template
+    try:
+        # Just verifying the user is actually a band before showing the form
+        band = request.user.band 
+        return render(request, 'gigs/create_gig.html')
+    except Band.DoesNotExist:
+        # If a musician tries to type /gigs/create/ in the URL, bounce them away
+        return redirect('gigs:dashboard')
+    
+@login_required
+def delete_listing(request, listing_id):
+    if request.method == 'POST':
+        try:
+            listing = Listing.objects.get(id=listing_id, band=request.user.band)
+            listing.delete()
+            return JsonResponse({'success': True})
+        except Listing.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'not_found'})
+    
+    return JsonResponse({'success': False, 'error': 'invalid_request'})
+
+def apply_gig(request, gig_id):
+    """Creates an Application linking a Musician to a Gig."""
+    if request.method == 'POST':
+        if not request.user.is_authenticated:
+            return JsonResponse({'success': False, 'error': 'not_logged_in'})
+        
+        listing = get_object_or_404(Listing, id=gig_id)
+        
+        # Prevent double applications
+        if Application.objects.filter(applicant=request.user, listing=listing).exists():
+            return JsonResponse({'success': False, 'error': 'already_applied'})
+        
+        Application.objects.create(applicant=request.user, listing=listing)
+        return JsonResponse({'success': True})
+
+def withdraw_gig(request, gig_id):
+    """Deletes an Application linking a Musician to a Gig."""
+    if request.method == 'POST':
+        listing = get_object_or_404(Listing, id=gig_id)
+        Application.objects.filter(applicant=request.user, listing=listing).delete()
+        return JsonResponse({'success': True})
+
+def save_gig(request, gig_id):
+    """Adds the Gig to the user's Bookmarked Gigs list."""
+    if request.method == 'POST':
+        if not request.user.is_authenticated:
+            return JsonResponse({'success': False, 'error': 'not_logged_in'})
+            
+        listing = get_object_or_404(Listing, id=gig_id)
+        listing.bookmarks.add(request.user) # Database magic! Adds relationship.
+        return JsonResponse({'success': True})
+
+def unsave_gig(request, gig_id):
+    """Removes the Gig from the user's Bookmarked Gigs list."""
+    if request.method == 'POST':
+        if not request.user.is_authenticated:
+            return JsonResponse({'success': False, 'error': 'not_logged_in'})
+            
+        listing = get_object_or_404(Listing, id=gig_id)
+        listing.bookmarks.remove(request.user) # Database magic! Removes relationship.
+        return JsonResponse({'success': True})
+
+def save_band(request, band_id):
+    """Adds a Band to a Musician's Bookmarked Bands list."""
+    if request.method == 'POST':
+        if not request.user.is_authenticated:
+            return JsonResponse({'success': False, 'error': 'not_logged_in'})
+        if not hasattr(request.user, 'musician'):
+            return JsonResponse({'success': False, 'error': 'only_musicians_can_bookmark_bands'})
+            
+        band = get_object_or_404(Band, id=band_id)
+        request.user.musician.bookmarked_bands.add(band)
+        return JsonResponse({'success': True})
+
+def unsave_band(request, band_id):
+    """Removes a Band from a Musician's Bookmarked Bands list."""
+    if request.method == 'POST':
+        if not request.user.is_authenticated:
+            return JsonResponse({'success': False, 'error': 'not_logged_in'})
+        if not hasattr(request.user, 'musician'):
+            return JsonResponse({'success': False, 'error': 'only_musicians_can_bookmark_bands'})
+            
+        band = get_object_or_404(Band, id=band_id)
+        request.user.musician.bookmarked_bands.remove(band)
+        return JsonResponse({'success': True})
+
+
+# ==========================================
+# --- REVIEWS & FEEDBACK ---
+# ==========================================
+
+@login_required
+def submit_review(request, gig_id):
+    """Allows a Musician to submit a review for a Band after a gig."""
+    gig = get_object_or_404(Listing, id=gig_id)
+    
+    if request.method == 'POST':
+        rating = request.POST.get('rating')
+        comment = request.POST.get('feedback')
+        reviewee = gig.band.user
+
+        if not rating:
+            return render(request, 'gigs/gig_review.html', {
+                'gig': gig,
+                'error': 'Please select a rating'
+            })
+
+        Review.objects.create(
+            reviewer=request.user,
+            reviewee=reviewee,
+            rating=int(rating),
+            comment=comment
+        )
+        return redirect('gigs:gig_detail', gig_id=gig_id)
+
+    return render(request, 'gigs/gig_review.html', {'gig': gig})
+
+@login_required
+def submit_musician_review(request, musician_id):
+    """Allows a Band to submit a review for a Musician."""
+    musician = get_object_or_404(Musician, id=musician_id)
+
+    if request.method == 'POST':
+        rating = request.POST.get('rating')
+        comment = request.POST.get('feedback')
+
+        if not rating:
+            return render(request, 'gigs/musician_review.html', {
+                'musician': musician,
+                'error': 'Please select a rating'
+            })
+
+        Review.objects.create(
+            reviewer=request.user,
+            reviewee=musician.user,
+            rating=int(rating),
+            comment=comment
+        )
+        return redirect('gigs:musician_profile', id=musician_id)
+
+    return render(request, 'gigs/musician_review.html', {'musician': musician})

@@ -1,0 +1,76 @@
+{% extends 'gigs/base.html' %}
+{% load static %}
+
+{% block title_block %}
+{{ musician.user.username }}
+{% endblock %}
+
+{% block header_block %}
+{% endblock %} {% block body_block %}
+<div class="text-center m-4">
+  <h2>{{ musician.user.first_name }} {{ musician.user.last_name }}</h2>
+  <p class="text-muted">@{{ musician.user.username }}</p>
+</div>
+
+<hr class="mx-5" />
+
+<div class="row justify-content-center">
+  <div class="col-4 text-center">
+    <img src="{% static 'find_my_gig/images/pfp-placeholder.png' %}" class="profile-pic" />
+    {% if musician.age != None %}
+    <p><strong>Age:</strong> {{ musician.age }}</p>
+    {% endif %}
+    {% if musician.instruments %}
+    <p><strong>Instruments:</strong> {{ musician.instruments }}</p>
+    {% endif %}
+    {% if musician.bio %}
+      <p><strong>About:</strong> {{ musician.bio }}</p>
+    {% endif %}
+    {% if musician.media_link %}
+      <p><strong>Media:</strong> <a href="{{ musician.media_link }}" target="_blank">{{ musician.media_link }}</a></p>
+    {% endif %}
+  </div>
+
+  {% if musician.location %}
+  <div class="col-4 text-center">
+    <p><strong>Location:</strong> {{ musician.location }}</p>
+    <p>insert google maps pic here</p>
+  </div>
+  {% endif %}
+
+  <div class="col-4 text-center">
+    <h4>Reviews</h4>
+
+    {% if reviews %}
+    <div id="review-container">
+      {% for review in reviews %}
+        <div class="review-item {% if forloop.counter > 3 %}extra-review{% endif %}"
+            {% if forloop.counter > 3 %}style="display:none;"{% endif %}>
+          <p><strong>{{ review.reviewer.username }}</strong></p>
+          <p>⭐ {{ review.rating }}/5</p>
+          <p>{{ review.comment }}</p>
+          <hr>
+        </div>
+      {% endfor %}
+    </div>
+
+    {% if reviews|length > 3 %}
+      <button 
+        class="btn btn-secondary btn-sm"
+        onclick="document.querySelectorAll('.extra-review').forEach(el => el.style.display='block');
+        this.style.display='none';">
+        Show More
+      </button>
+    {% endif %}
+  {% else %}
+    <p>No reviews yet.</p>
+  {% endif %}
+
+  {% if user.is_authenticated %}
+    <a href="{% url 'gigs:submit_musician_review' musician.id %}" class="btn btn-primary nice-button background-color review-link w-100 my-2">
+      Leave a Review
+    </a>
+  {% endif %}
+</div>
+</div>
+{% endblock %}
