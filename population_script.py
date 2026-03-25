@@ -1,184 +1,178 @@
 import os
-import django
-from datetime import date, timedelta  
-from dotenv import load_dotenv       
+import random
+from datetime import timedelta
+from django.utils import timezone
 
-load_dotenv()
-
-# Setup Django
+# Set up Django Environment
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'find_my_gig.settings')
+import django
 django.setup()
 
-import gigs.models as models
+import requests
+from django.core.files.base import ContentFile
 from django.contrib.auth.models import User
+from gigs.models import Musician, Band, Listing
 
 # ==========================================
-# --- HELPER FUNCTIONS ---
+# 1. HELPER DATA & FUNCTIONS
 # ==========================================
+INSTRUMENTS = ['Guitar', 'Bass', 'Drums', 'Vocals', 'Other']
+LOCATIONS = ['Glasgow', 'Edinburgh', 'Manchester', 'London', 'Liverpool', 'Leeds', 'Bristol', 'Newcastle']
 
-def add_user(username, password, email, isAdmin=False):
-    user, created = User.objects.get_or_create(username=username, defaults={'email': email})
-    if created:
-        user.set_password(password)
-    if isAdmin:
-        user.is_staff = True
-        user.is_superuser = True
-    user.save()
-    return user
+BAND_NAMES = [
+    "The Midnight Howlers", "Crimson Riot", "Neon Syndicate", "The Jazz Cats", 
+    "Glasgow Symphony", "Echoes of Eden", "Velvet Thunder", "Rusty Strings", 
+    "The Underground", "Sonic Boom"
+]
 
-def add_musician(user, instruments, bio, age, media_link, location, profile_picture=""):
-    musician, created = models.Musician.objects.get_or_create(user=user, defaults={
-        'instruments': instruments,
-        'bio': bio,
-        'age': age,
-        'media_link': media_link,
-        'location': location,
-        'profile_picture': profile_picture
-    })
-    return musician
+BAND_BIOS = [
+    "We are a high-energy alt-rock outfit blending 90s grunge with modern indie sensibilities. Known for our chaotic live shows and tight rhythm section, we're currently recording our second EP.",
+    "A 5-piece funk and soul collective playing exclusively vintage gear. We do mostly weddings and corporate gigs, meaning the pay is great but the standards are exceptionally high. Professionalism is a must.",
+    "Formed in a damp university basement last year, we play loud, fast punk rock. We don't care about perfect technique; we just want aggressive energy and people who can jump around on stage.",
+    "An experimental synth-pop duo heavily influenced by Depeche Mode and The Cure. We rely heavily on backing tracks and MIDI triggers, so timing to a click track is absolutely essential for anyone joining us.",
+    "We are a gigging blues-rock trio. Think Stevie Ray Vaughan meets The Black Keys. We gig 2-3 times a month locally and are looking to expand our sound for an upcoming summer festival run.",
+    "Traditional folk and acoustic group. We feature fiddles, mandolins, and acoustic guitars. Our vibe is very laid back, focusing on rich vocal harmonies and storytelling.",
+    "A working cover band playing all the hits from the 70s to today. We treat this like a business: show up on time, know your parts, get paid. We play every weekend without fail.",
+    "Heavy metal/metalcore band with heavy breakdowns and melodic choruses. We practice twice a week and are booking a 10-day UK tour for next spring. Dedication is our number one requirement.",
+    "An instrumental post-rock band focusing on atmospheric soundscapes and heavy crescendos. Our songs are 10 minutes long and require a lot of dynamic control and effects pedals.",
+    "A modern country and Americana band. We write original music but throw in some Johnny Cash and Dolly Parton to keep the bar crowds happy. Looking for musicians who know how to serve the song."
+]
 
-def add_band(user, band_name, location, bio, profile_picture=""):
-    band, created = models.Band.objects.get_or_create(user=user, defaults={
-        'name': band_name,
-        'bio': bio,
-        'location': location,
-        'profile_picture': profile_picture
-    })
-    return band
+MUSICIAN_BIOS = [
+    "Classically trained but raised on classic rock. I've got 10 years of live gigging experience, pro gear (Fender/Gibson mostly), and my own transport. Looking for serious, paid projects only.",
+    "Self-taught and strictly play by ear. I might not know the music theory behind it, but I can groove in the pocket better than anyone. Influences include Vulfpeck, James Brown, and Red Hot Chili Peppers.",
+    "I'm a music student at the local conservatory looking to branch out from jazz and classical. My sight-reading is flawless and I can learn a 20-song setlist in a weekend.",
+    "Total gear nerd here. I have a massive pedalboard and love creating weird, ambient soundscapes. I'm not looking to play 12-bar blues; I want to join an indie/shoegaze project.",
+    "Frontman with 5 years of experience commanding a crowd. I can hit the high notes, but more importantly, I know how to hype up an audience. I come with my own Shure SM58 and in-ear monitors.",
+    "Just moved to the area and looking to jam! I've been playing in bedroom projects for a few years and finally want to get on stage. Easy going, quick learner, and no ego.",
+    "Session musician available for studio work and live fill-ins. I charge reasonable rates, show up perfectly prepared, and don't drink on the job. Let me know what you need.",
+    "I play aggressive, fast, and loud. If your band plays doom metal, thrash, or hardcore, I'm your person. I hit hard and have the calluses to prove it.",
+    "Acoustic player primarily, specializing in fingerstyle and folk. I have a great home recording setup so I'm very open to remote collaboration and writing sessions.",
+    "Rhythm is my life. I play strictly to a click track and lock in perfectly with the bass. I have a full DW kit and my own transportation. Looking for an established band that is already gigging."
+]
 
-def add_listing(band, title, req_instruments, deadline, is_urgent, description, location):
-    listing, created = models.Listing.objects.get_or_create(band=band, title=title, defaults={
-        'req_instruments': req_instruments,
-        'deadline': deadline,
-        'is_urgent': is_urgent,
-        'description': description,
-        'location': location
-    })
-    return listing
+GIG_TITLES = [
+    "Looking for a shredder!", "Emergency fill-in needed", "Wedding band needs vocals",
+    "Studio bassist wanted", "Drummer for Europe tour", "Acoustic guitarist for cafe",
+    "Pianist for corporate event", "Seeking harsh vocalist", "Need a reliable bassist",
+    "Synth player wanted for 80s cover band"
+]
 
-def add_application(applicant, listing, status='Pending'):
-    application, created = models.Application.objects.get_or_create(applicant=applicant, listing=listing, defaults={
-        'status': status
-    })
-    return application
+GIG_DESCRIPTIONS = [
+    "URGENT: Our lead player broke their wrist and we have a headline show next Saturday. We play a mix of modern indie and classic rock. Setlist is 45 mins. Paid gig (£150). Must be able to learn 10 songs by Thursday rehearsal.",
+    "We are a working wedding band looking to replace a departing member. You must have pro gear, formal stage wear, and reliable transport. We gig 40+ weekends a year. Serious inquiries only.",
+    "Looking for someone to complete our lineup for a 2-week UK tour supporting a major national act. All travel and accommodation paid for, plus a nightly per diem. Must have tour experience and a valid passport.",
+    "Starting a brand new original project in the vein of Paramore and Fall Out Boy. We have a rehearsal space locked down and 5 demos fully written. Just need the right person to bring them to life.",
+    "Need a session player for a 2-day studio booking next month. We will send you the scratch tracks and sheet music in advance. Standard MU rates apply. Please send links to your previous studio work.",
+    "Laid back acoustic duo looking to become a trio. We play quiet corner pubs on Sunday afternoons. The money isn't great but the beer is free and the vibes are excellent.",
+    "Looking for a hired gun for a corporate function. It's a 3-hour set of standard Top 40 covers. £200 for the night. You must be able to dress sharply and act professionally.",
+    "We are going into the studio next week and our current member just bailed. We need someone who can learn fast, write their own parts on the fly, and handle the pressure of tracking to a click.",
+    "Looking for a permanent addition to our metal project. Must be capable of playing at 200 BPM and have stage presence. We practice every Tuesday and Thursday without fail.",
+    "Experimental jazz/funk fusion band looking for a missing piece. You must be comfortable with odd time signatures, extended improvisation, and reading complex charts."
+]
+
+def download_image(seed_text, size=300):
+    """Downloads a unique random image based on a text seed."""
+    url = f"https://picsum.photos/seed/{seed_text}/{size}/{size}"
+    response = requests.get(url)
+    if response.status_code == 200:
+        return ContentFile(response.content, name=f"{seed_text}.jpg")
+    return None
+
+def clear_data():
+    """Clears existing users to prevent duplicates."""
+    print("🗑️ Clearing old data...")
+    User.objects.all().delete()
+    print("✅ Database cleared.\n")
+
 
 # ==========================================
-# --- MAIN POPULATION LOGIC ---
+# 2. POPULATION SCRIPT
 # ==========================================
-
 def populate():
-    print("1. Creating Users & Musicians...")
-    musicians_data = [
-        ("GuitarHero99", "Guitar", "20 years of shredding.", 35, "Glasgow"),
-        ("BassBoss", "Bass", "Slappin da bass.", 28, "Edinburgh"),
-        ("DrumMachine", "Drums", "I hit things hard and on beat.", 24, "London"),
-        ("VocalQueen", "Vocals", "Classically trained soprano.", 30, "Manchester"),
-        ("SynthWizard", "Other", "Keyboards and synthesizers.", 22, "Bristol"),
-        ("JazzPaws", "Piano", "Smooth jazz specialist.", 45, "Glasgow"),
-        ("MetalHead", "Guitar", "Looking for heavy riffs only.", 21, "Birmingham"),
-        ("GrooveMaster", "Bass", "Funk and soul groove master.", 33, "Liverpool"),
-        ("BeatKeeper", "Drums", "Reliable session drummer.", 29, "Leeds"),
-        ("Screamer123", "Vocals", "Death metal vocals.", 26, "Sheffield"),
-        ("AcousticSoul", "Guitar", "Chill acoustic vibes.", 23, "Edinburgh"),
-        ("RhythmKing", "Guitar", "Rhythm guitar is the backbone.", 40, "London"),
-        ("TheGoldenReviewer", "Piano", "I review everyone!", 31, "Glasgow"), # Our Gold Badge tester
-        ("TheSilverReviewer", "Bass", "I review some people.", 28, "Edinburgh"), # Our Silver Badge tester
-        ("TheBronzeReviewer", "Drums", "I rarely review.", 25, "London"), # Our Bronze Badge tester
-    ]
+    clear_data()
     
-    musician_users = []
-    for username, inst, bio, age, loc in musicians_data:
-        u = add_user(username, "password123", f"{username}@test.com")
-        add_musician(u, inst, bio, age, "", loc)
-        musician_users.append(u)
-
-    print("2. Creating Users & Bands...")
-    bands_data = [
-        ("SonicBoom", "Sonic Boom", "Loudest band in the UK.", "Glasgow"),
-        ("VelvetUnderground2", "Velvet Underground 2", "Indie rock covers.", "Edinburgh"),
-        ("TheMidnightHowlers", "The Midnight Howlers", "Blues and rock.", "Manchester"),
-        ("NeonKnights", "Neon Knights", "80s Synth Pop.", "Bristol"),
-        ("SymphonyOfDestruction", "Symphony of Destruction", "Thrash metal.", "Birmingham"),
-        ("ChillWave", "Chill Wave", "Lo-Fi beats and live instruments.", "Leeds"),
-        ("TheLocalLads", "The Local Lads", "Pub rock band.", "Liverpool"),
-        ("ElectricEchoes", "Electric Echoes", "Shoegaze and ambient.", "London"),
-    ]
-
-    band_users = []
-    bands = []
-    for username, name, bio, loc in bands_data:
-        u = add_user(username, "password123", f"{username}@test.com")
-        b = add_band(u, name, loc, bio)
-        band_users.append(u)
-        bands.append(b)
-
-    print("3. Creating 20 Gig Listings (Geocoding via Google Maps API in background)...")
-    gigs_data = [
-        (bands[0], "Lead Guitarist Needed ASAP", "Guitar", 5, True, "Our lead broke his arm. Need a fill-in!", "King Tuts, Glasgow"),
-        (bands[0], "Session Drummer", "Drums", 14, False, "Need tracks recorded for our EP.", "Barrowland Ballroom, Glasgow"),
-        (bands[1], "Indie Bassist", "Bass", 30, False, "Looking for a permanent member.", "Sneaky Pete's, Edinburgh"),
-        (bands[2], "Blues Vocalist", "Vocals", 7, True, "Frontman needed for upcoming pub tour.", "The Deaf Institute, Manchester"),
-        (bands[3], "Keyboard/Synth Player", "Other", 45, False, "Must love the 80s.", "The Fleece, Bristol"),
-        (bands[4], "Thrash Metal Drummer", "Drums", 3, True, "Double kick pedal experience required.", "O2 Academy, Birmingham"),
-        (bands[5], "Acoustic Guitarist", "Guitar", 20, False, "Chill coffee shop vibes.", "Brudenell Social Club, Leeds"),
-        (bands[6], "Pub Singer", "Vocals", 10, True, "Singing covers for drunk crowds.", "The Cavern Club, Liverpool"),
-        (bands[7], "Ambient Bass Player", "Bass", 60, False, "Must have lots of effect pedals.", "Camden Assembly, London"),
-        (bands[1], "Rhythm Guitar", "Guitar", 15, False, "Need someone to hold down the chords.", "The Liquid Room, Edinburgh"),
-        (bands[2], "Harmonica Player", "Other", 25, False, "Blues band needs some harp.", "Band on the Wall, Manchester"),
-        (bands[4], "Screaming Vocals", "Vocals", 8, True, "Can you scream for 45 minutes straight?", "The Asylum, Birmingham"),
-        (bands[0], "Touring Bassist", "Bass", 40, False, "UK tour coming up next month.", "O2 Academy Glasgow"),
-        (bands[3], "Electronic Drummer", "Drums", 35, False, "Looking for Roland SPD-SX experience.", "Exchange, Bristol"),
-        (bands[6], "Lead Singer", "Vocals", 12, True, "Need a charismatic frontman.", "O2 Academy Liverpool"),
-        (bands[7], "Second Guitar", "Guitar", 50, False, "Adding depth to our sound.", "The Underworld, London"),
-        (bands[5], "Saxophone", "Other", 18, False, "Jazz up our lo-fi beats.", "Belgrave Music Hall, Leeds"),
-        (bands[1], "Backup Vocals", "Vocals", 22, False, "Harmonies are key.", "La Belle Angele, Edinburgh"),
-        (bands[2], "Blues Piano", "Piano", 28, False, "Jerry Lee Lewis style.", "Albert Hall, Manchester"),
-        (bands[0], "Heavy Metal Bass", "Bass", 6, True, "Must play with a pick.", "Cathouse Rock Club, Glasgow"),
-    ]
-
-    all_listings = []
-    for band, title, inst, days_out, urgent, desc, loc in gigs_data:
-        listing = add_listing(
-            band=band, title=title, req_instruments=inst,
-            deadline=date.today() + timedelta(days=days_out),
-            is_urgent=urgent, description=desc, location=loc
-        )
-        all_listings.append(listing)
-
-    print("4. Generating Badge Test Data (Auto-writing Reviews)...")
-    # Grab our specific testing users
-    gold_user = User.objects.get(username="TheGoldenReviewer")
-    silver_user = User.objects.get(username="TheSilverReviewer")
-    bronze_user = User.objects.get(username="TheBronzeReviewer")
+    bands_list = []
     
-    # We will review all the band users to rack up the count quickly
-    for i in range(21): # Needs 20+ for Gold
-        models.Review.objects.create(reviewer=gold_user, reviewee=band_users[i % len(band_users)], rating=5, comment="Great!")
-    
-    for i in range(12): # Needs 10+ for Silver
-        models.Review.objects.create(reviewer=silver_user, reviewee=band_users[i % len(band_users)], rating=4, comment="Good!")
+    # --- CREATE 10 BANDS ---
+    print("🎸 Creating 10 Bands (Downloading unique images...)")
+    for i in range(10):
+        username = f"band_user_{i+1}"
+        band_name = BAND_NAMES[i]
         
-    for i in range(6):  # Needs 5+ for Bronze
-        models.Review.objects.create(reviewer=bronze_user, reviewee=band_users[i % len(band_users)], rating=3, comment="Okay.")
+        user = User.objects.create_user(username=username, email=f"{username}@test.com", password="Password123!")
+        user.first_name = "Band"
+        user.last_name = f"Manager {i+1}"
+        user.save()
+        
+        band = Band.objects.create(
+            user=user,
+            name=band_name,
+            bio=random.choice(BAND_BIOS),
+            location=random.choice(LOCATIONS),
+        )
+        
+        # Download and attach a unique image
+        image_file = download_image(f"band_unique_seed_{i}")
+        if image_file:
+            band.profile_picture.save(f"band_{i}.jpg", image_file)
+            
+        bands_list.append(band)
+        print(f"  - Created Band: {band.name}")
 
-    print("5. Generating Random Applications & Bookmarks...")
-    # Apply GuitarHero99 to the first gig
-    add_application(applicant=musician_users[0], listing=all_listings[0])
-    add_application(applicant=musician_users[0], listing=all_listings[9])
-    
-    # Bookmark a gig for the Gold Reviewer so they have something in their dashboard
-    all_listings[2].bookmarks.add(gold_user)
+    print("\n")
+
+
+    # --- CREATE 30 MUSICIANS ---
+    print("🥁 Creating 30 Musicians (Downloading unique images...)")
+    for i in range(30):
+        username = f"musician_{i+1}"
+        
+        user = User.objects.create_user(username=username, email=f"{username}@test.com", password="Password123!")
+        user.first_name = f"Talent"
+        user.last_name = f"Num{i+1}"
+        user.save()
+        
+        musician = Musician.objects.create(
+            user=user,
+            bio=random.choice(MUSICIAN_BIOS),
+            age=random.randint(18, 55),
+            instruments=random.choice(INSTRUMENTS),
+        )
+        
+        # Download and attach a unique image
+        image_file = download_image(f"musician_unique_seed_{i}")
+        if image_file:
+            musician.profile_picture.save(f"musician_{i}.jpg", image_file)
+            
+        print(f"  - Created Musician: @{user.username} ({musician.instruments})")
+
+    print("\n")
+
+
+    # --- CREATE 30 GIG LISTINGS ---
+    print("📅 Creating 30 Gig Listings...")
+    for i in range(30):
+        owning_band = random.choice(bands_list)
+        future_date = timezone.now() + timedelta(days=random.randint(1, 60))
+        
+        listing = Listing.objects.create(
+            band=owning_band,
+            title=random.choice(GIG_TITLES),
+            req_instruments=random.choice(INSTRUMENTS),
+            deadline=future_date,
+            description=random.choice(GIG_DESCRIPTIONS),
+            location=owning_band.location,
+            is_urgent=random.choice([True, False, False]),
+            
+            # Generating fake UK coordinates around Glasgow/Manchester
+            latitude=round(random.uniform(53.0, 56.0), 4),
+            longitude=round(random.uniform(-4.0, -1.0), 4)
+        )
+        print(f"  - Created Gig: '{listing.title}' for {owning_band.name}")
+
+    print("\n🎉 POPULATION COMPLETE! 🎉")
+    print("Log in with any username (e.g., 'musician_1' or 'band_user_1') and password: Password123!")
 
 if __name__ == '__main__':
-    print("Starting Mega Population Script... (This might take a minute due to Google Maps API limits)")
-    
-    # Optional: Clear the database before running to prevent duplicate clutter
-    models.Application.objects.all().delete()
-    models.Listing.objects.all().delete()
-    models.Review.objects.all().delete()
-    models.Band.objects.all().delete()
-    models.Musician.objects.all().delete()
-    User.objects.exclude(is_superuser=True).delete()
-    
     populate()
-    print("\nDatabase successfully populated! 🎉")

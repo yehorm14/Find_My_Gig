@@ -23,48 +23,35 @@ logger = logging.getLogger(__name__)
 
 def home(request):
     """Handles the main landing page (/). Redirects logged-in users to their dashboard."""
-    # If they are already logged in, skip the landing page and send them to their dashboard!
     if request.user.is_authenticated:
         return redirect('gigs:dashboard')
         
-    # If they are a guest, show them the normal marketing home page
     context = {'welcome_message': 'Welcome to Find My Gig!'}
     return render(request, 'gigs/home.html', context)
 
 
 def gig_listings(request):
-    """
-    Handles the main Gig list page. 
-    Strictly filters the database by dropdown options (instrument, date) and applies sorting.
-    """
+    """Handles the main Gig list page with dropdown filtering and sorting."""
     gigs_queryset = Listing.objects.all()
 
-    # GET parameters from the dropdown filters
     instrument_filter = request.GET.get('instrument', '')
     date_query = request.GET.get('date', '')
     sort_by = request.GET.get('sort', '')
 
-    # Filter logic
     if instrument_filter:
         gigs_queryset = gigs_queryset.filter(req_instruments__icontains=instrument_filter)
     if date_query:
         gigs_queryset = gigs_queryset.filter(deadline=date_query)
 
-    # Sorting logic
     if sort_by == 'name':
         gigs_queryset = gigs_queryset.order_by('title')
     else:
-        gigs_queryset = gigs_queryset.order_by('deadline') # Default: most urgent first
+        gigs_queryset = gigs_queryset.order_by('deadline') 
     
-    # Check which gigs the user has already applied to
     applied_gig_ids = []
-    if request.user.is_authenticated:
-        applied_gig_ids = Application.objects.filter(
-            applicant=request.user
-        ).values_list('listing_id', flat=True)
-    
     bookmarked_gig_ids = []
     if request.user.is_authenticated:
+        applied_gig_ids = Application.objects.filter(applicant=request.user).values_list('listing_id', flat=True)
         bookmarked_gig_ids = request.user.saved_gigs.values_list('id', flat=True)
 
     context = {
@@ -85,7 +72,6 @@ def gig_detail(request, gig_id):
     has_applied = False
     is_bookmarked = False
     
-    # Check if the logged-in user has interacted with this gig
     if request.user.is_authenticated:
         has_applied = listing.applications_received.filter(applicant=request.user).exists()
         is_bookmarked = listing.bookmarks.filter(id=request.user.id).exists()
@@ -104,7 +90,6 @@ def musicians_list(request):
     musicians = Musician.objects.all()
     instrument_filter = request.GET.get('instrument', '')
     
-    # Apply strict filter from the dropdown
     if instrument_filter:
         musicians = musicians.filter(instruments__icontains=instrument_filter)
         
@@ -118,13 +103,13 @@ def musician_detail(request, id):
     context = {
         'musician': musician,
         'reviews': reviews,
+        'google_maps_frontend_key': settings.GOOGLE_MAPS_FRONTEND_KEY,
     }
     return render(request, 'gigs/musician_detail.html', context)
 
 def bands_list(request):
     """Shows the page for browsing all registered bands and venues."""
     bands = Band.objects.all()
-    # You can add search/filter logic here later just like the musicians list!
     return render(request, 'gigs/bands_list.html', {'bands': bands})
 
 def band_detail(request, id):
@@ -132,11 +117,16 @@ def band_detail(request, id):
     band = get_object_or_404(Band, id=id)
     is_bookmarked = False
     
-    # Check if the logged-in user is a musician who bookmarked this band
     if request.user.is_authenticated and hasattr(request.user, 'musician'):
         is_bookmarked = request.user.musician.bookmarked_bands.filter(id=band.id).exists()
         
-    return render(request, 'gigs/band_detail.html', {'band': band, 'is_bookmarked': is_bookmarked})
+    context = {
+        'band': band, 
+        'is_bookmarked': is_bookmarked,
+        'google_maps_frontend_key': settings.GOOGLE_MAPS_FRONTEND_KEY,
+    }
+        
+    return render(request, 'gigs/band_detail.html', context)
 
 # ==========================================
 # --- USER DASHBOARD & MANAGEMENT ---
