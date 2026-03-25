@@ -144,16 +144,12 @@ def band_detail(request, id):
 
 @login_required
 def dashboard(request):
-    """The main hub for a logged-in user. Routes to templates with profile context."""
-    context = {}
-    
+    """The main hub for a logged-in user. Routes to different cards based on account type."""
     if hasattr(request.user, 'musician'):
-        context['profile'] = request.user.musician
-        return render(request, 'gigs/musician_dashboard.html', context)
+        return render(request, 'gigs/musician_dashboard.html')
     else:
-        context['profile'] = request.user.band
-        return render(request, 'gigs/band_dashboard.html', context)
-    
+        return render(request, 'gigs/band_dashboard.html')
+
 @login_required
 def my_applications(request):
     """Shows a Musician all the gigs they have applied for."""
@@ -188,7 +184,7 @@ def my_listings(request):
 
 @login_required
 def my_profile(request):
-    """Shows the user's editable profile settings (routes to Musician or Band template)."""
+    """Shows the user's editable profile settings (handles both Musicians and Bands)."""
     try:
         profile = request.user.musician
         profile_type = 'musician'
@@ -201,17 +197,11 @@ def my_profile(request):
         except Band.DoesNotExist:
             return redirect('gigs:home')
 
-    # Bundle the data up
-    context = {
+    return render(request, 'gigs/my_profile.html', {
         'profile': profile,
         'profile_type': profile_type,
         'media_links': media_links
-    }
-
-    if profile_type == 'musician':
-        return render(request, 'gigs/my_profile_musician.html', context)
-    else:
-        return render(request, 'gigs/my_profile_band.html', context)
+    })
 
 @login_required
 def create_gig_page(request):

@@ -2,21 +2,14 @@
    1. VARIABLES & RESET
    ========================================================================== */
 :root {
-    /* Core Palette */
-    --bg-dark: #121212;          /* The deep background color */
-    --card-bg: #1e1e24;          /* The slightly lighter card color */
-    
-    /* Neon Accents */
-    --neon-cyan: #00ffaa;        /* The primary Find My Gig green/cyan */
-    --neon-cyan-dark: #00cc88;   /* Darker shade for hover states */
-    --neon-red: #ff4757;         /* Used for delete/withdraw actions */
-    
-    /* Text & Borders */
+    --bg-dark: #121212;
+    --card-bg: #1e1e24;
+    --neon-cyan: #00ffaa;
+    --neon-cyan-dark: #00cc88;
+    --neon-red: #ff4757;
     --text-main: #e0e0e0;
     --text-muted: #888899;
     --border-dim: #2a2a35;
-    
-    /* Animation Speeds */
     --transition-fast: 0.2s ease;
 }
 
@@ -25,65 +18,21 @@ body {
     color: var(--text-main);
     min-height: 100vh;
     margin: 0;
-    padding-top: 85px; 
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-.fixed-top {
-    backdrop-filter: blur(10px);
-    background-color: rgba(18, 18, 18, 0.9) !important;
-}
-
-
 /* ==========================================================================
-   2. TYPOGRAPHY & UTILITIES
+   2. UTILITIES
    ========================================================================== */
-.gig-accent-text { 
-    color: var(--neon-cyan); 
-    font-weight: bold; 
-}
-
-.text-muted-custom { 
-    color: var(--text-muted); 
-}
-
-.uppercase-label { 
-    text-transform: uppercase; 
-    letter-spacing: 0.05rem; 
-    font-size: 0.75rem; 
-    font-weight: 700; 
-}
-
-.detail-label {
-    text-transform: uppercase;
-    letter-spacing: 0.05rem;
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: var(--text-muted);
-    display: block;
-    margin-bottom: 4px;
-}
-
-.description-text { 
-    line-height: 1.7; 
-    color: var(--text-main); 
-}
-
-/* Structural Utilities */
-.action-border { 
-    border-top: 1px solid var(--border-dim); 
-    margin-top: 2rem; 
-    padding-top: 1rem; 
-}
-
-.border-bottom-accent {
-    border-bottom: 2px solid var(--neon-cyan);
-    display: inline-block;
-}
-
+.primary-color { background-color: var(--card-bg); }
+.background-color { background-color: var(--bg-dark); }
+.text-color { color: var(--text-main); }
+.gig-accent-text { color: var(--neon-cyan); font-weight: bold; }
+.text-muted-custom { color: var(--text-muted); }
+.uppercase-label { text-transform: uppercase; letter-spacing: 0.05rem; font-size: 0.75rem; font-weight: 700; }
 
 /* ==========================================================================
-   3. LINKS & BUTTONS
+   3. BUTTONS & LINKS
    ========================================================================== */
 .site-title {
     color: #ffffff;
@@ -101,6 +50,22 @@ body {
     transform: scale(1.02); 
 }
 
+.nav-status-text {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.nav-username {
+    color: var(--neon-cyan); 
+    font-weight: 800; 
+    font-size: 0.85rem;
+    margin-left: 4px;
+    text-transform: none; 
+    letter-spacing: 0.5px;
+}
+
 .subtle-link {
     color: var(--neon-cyan);
     text-decoration: none;
@@ -114,48 +79,32 @@ body {
     text-decoration: underline; 
 }
 
-/* Master Button Styles */
-.apply-btn, .bookmarked-btn, .withdraw-btn {
-    border-radius: 50rem !important; /* Forces the pill shape */
-    font-weight: 600 !important;
-    transition: transform var(--transition-fast), background-color var(--transition-fast) !important;
+.nice-button, .apply-btn, .bookmarked-btn {
+    border-radius: 50rem;
+    font-weight: 600;
+    transition: transform var(--transition-fast), background-color var(--transition-fast);
+}
+
+.apply-btn, .bookmarked-btn {
+    background-color: var(--neon-cyan) !important;
+    color: #000 !important;
     border: none !important;
 }
 
-/* Apply & Action Buttons */
-.apply-btn {
-    background-color: var(--neon-cyan) !important;
-    color: #000 !important;
-}
-
-.apply-btn:hover {
+.apply-btn:hover, .bookmarked-btn:hover {
     background-color: var(--neon-cyan-dark) !important;
     transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(0, 255, 170, 0.3);
 }
 
-/* Saved State Button */
-.bookmarked-btn {
-    background-color: transparent !important;
-    color: var(--neon-cyan) !important;
-    border: 2px solid var(--neon-cyan) !important;
-}
-
-/* Danger / Withdraw Button */
 .withdraw-btn {
     background-color: var(--neon-red) !important;
     color: white !important;
+    border: none !important;
+    font-weight: bold;
 }
-
-.withdraw-btn:hover {
-    background-color: #ff2a3f !important;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3);
-}
-
 
 /* ==========================================================================
-   4. CARDS & CONTAINERS
+   4. COMPONENTS (CARDS & CONTAINERS)
    ========================================================================== */
 .listing-card, .dashboard-card {
     background-color: var(--card-bg);
@@ -166,21 +115,23 @@ body {
     transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
 }
 
-/* The "Lift" Hover Effect */
+/* The "Lift" Effect */
 .listing-card:hover, .dashboard-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 25px rgba(0, 255, 170, 0.15);
     border-color: var(--neon-cyan);
 }
 
-/* Custom Scrollbar for Long Lists */
+.gig-title { color: #ffffff; font-weight: 600; font-size: 1.25rem; }
+
+/* Listings Container Scrollbar */
 .listings-container {
-    max-height: 70vh;
+    height: 70vh;
     overflow-y: auto;
     border: 1px solid var(--border-dim);
     border-radius: 12px;
     padding: 15px;
-    background-color: rgba(30, 30, 36, 0.5); /* Slightly transparent background */
+    background-color: rgba(30, 30, 36, 0.5);
 }
 
 .listings-container::-webkit-scrollbar { width: 8px; }
@@ -188,45 +139,31 @@ body {
 .listings-container::-webkit-scrollbar-thumb { background: #4a4a5a; border-radius: 10px; }
 .listings-container::-webkit-scrollbar-thumb:hover { background: var(--neon-cyan); }
 
-/* Tiny UI Badges */
+/* Badges */
 .badge-urgent { background-color: var(--neon-red); color: white; }
 .badge-instrument { background-color: #373748; color: var(--text-main); border: 1px solid #4a4a5a; }
-
 
 /* ==========================================================================
    5. FORMS & INPUTS
    ========================================================================== */
 .form-select, .form-control {
-    background-color: var(--bg-dark) !important;
+    background-color: var(--card-bg) !important;
     color: var(--text-main) !important;
-    border: 1px solid var(--border-dim) !important;
-    border-radius: 8px;
-    padding: 0.6rem 1rem;
+    border: 1px solid var(--border-dim);
 }
 
 .form-select:focus, .form-control:focus {
-    background-color: #1a1a20 !important;
+    background-color: #2a2a35 !important;
     border-color: var(--neon-cyan) !important;
     box-shadow: 0 0 0 0.25rem rgba(0, 255, 170, 0.25) !important;
 }
 
-/* Custom styling for Radio buttons in the Signup form */
 .form-check-input { background-color: var(--card-bg); border-color: #4a4a5a; }
 .form-check-input:checked { background-color: var(--neon-cyan); border-color: var(--neon-cyan); }
-
-/* The invisible radio input trick for your pill buttons */
-.btn-check:checked + .btn-outline-light {
-    background-color: var(--neon-cyan);
-    color: #000;
-    border-color: var(--neon-cyan);
-    font-weight: bold;
-}
-
 
 /* ==========================================================================
    6. SPECIALIZED UI (MAPS, STARS, PROFILE)
    ========================================================================== */
-/* Google Maps */
 .gig-mini-map, .map-placeholder {
     height: 350px;
     width: 100%;
@@ -234,65 +171,58 @@ body {
     background-color: var(--card-bg);
 }
 
-.gig-mini-map { 
-    border: 1px solid var(--border-dim); 
-    box-shadow: 0 8px 20px rgba(0,0,0,0.4); 
-}
+.gig-mini-map { border: 1px solid var(--border-dim); box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
+.map-placeholder { border: 1px dashed #4a4a5a; display: flex; align-items: center; justify-content: center; color: var(--text-muted); }
 
-.map-placeholder { 
-    border: 1px dashed #4a4a5a; 
-}
-
-/* Profile Pictures */
 .profile-pic {
+    width: 120px;
+    height: 120px;
     object-fit: cover;
     border-radius: 50%;
     border: 3px solid var(--neon-cyan);
-    transition: transform var(--transition-fast);
 }
 
-.profile-pic-label:hover .profile-pic {
-    transform: scale(1.05);
+.dashboard-icon {
+    filter: brightness(0) saturate(100%) invert(67%) sepia(87%) saturate(1469%) hue-rotate(113deg) brightness(101%) contrast(102%);
+    width: 40%;
+    margin-bottom: 15px;
 }
 
-/* Star Rating System */
-.star-rating { 
-    direction: rtl; 
-    display: inline-block; 
-}
-
+/* Star Rating */
+.star-rating { direction: rtl; display: inline-block; }
 .star-rating input { display: none; }
-
-.star-rating label { 
-    color: #4a4a5a; 
-    font-size: 28px; 
-    padding: 0 2px; 
-    cursor: pointer; 
-    transition: color var(--transition-fast); 
-}
-
-.star-rating label:hover, 
-.star-rating label:hover ~ label, 
-.star-rating input:checked ~ label { 
-    color: var(--neon-cyan); 
-}
-
+.star-rating label { color: #4a4a5a; font-size: 28px; padding: 0 2px; cursor: pointer; transition: color var(--transition-fast); }
+.star-rating label:hover, .star-rating label:hover~label, .star-rating input:checked~label { color: var(--neon-cyan); }
 
 /* ==========================================================================
-   7. JAVASCRIPT ANIMATIONS & STATUS ALERTS
+   7. PAGE FRAGMENTS (NAVBAR, DETAILS)
    ========================================================================== */
-/* The Shake Animation for failed logins */
+.navbar { border-bottom: 1px solid var(--border-dim); }
+.border-accent { border-color: var(--neon-cyan) !important; }
+
+.detail-label {
+    text-transform: uppercase;
+    letter-spacing: 0.05rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    
+    color: var(--text-muted);
+    display: block;
+    margin-bottom: 4px;
+}
+
+.description-text { line-height: 1.7; color: var(--text-main); }
+.action-border { border-top: 1px solid var(--border-dim); margin-top: 2rem; padding-top: 1rem; }
+
+/* Animations */
 @keyframes shake {
     0%, 100% { transform: translateX(0); }
     25% { transform: translateX(-8px); }
     75% { transform: translateX(8px); }
 }
+.form-shake { animation: shake 0.5s ease; }
 
-.form-shake { 
-    animation: shake 0.5s ease; 
-}
-
-/* The dynamic status bars injected by utilities.js */
+/* Status Messages */
 .status-success, .status-error {
     display: none;
     padding: 12px;
@@ -300,17 +230,6 @@ body {
     font-weight: bold;
     margin-bottom: 15px;
     border: 1px solid;
-    text-align: center;
 }
-
-.status-success { 
-    background: rgba(0, 255, 170, 0.1); 
-    color: var(--neon-cyan); 
-    border-color: var(--neon-cyan); 
-}
-
-.status-error { 
-    background: rgba(255, 71, 87, 0.1); 
-    color: var(--neon-red); 
-    border-color: var(--neon-red); 
-}
+.status-success { background: rgba(0, 255, 170, 0.1); color: var(--neon-cyan); border-color: var(--neon-cyan); }
+.status-error { background: rgba(255, 71, 87, 0.1); color: var(--neon-red); border-color: var(--neon-red); }
