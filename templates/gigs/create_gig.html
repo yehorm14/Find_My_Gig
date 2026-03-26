@@ -11,87 +11,98 @@ List a Gig
 <div id="status-message"></div>
 
 <div class="text-center m-4">
-  <h2>List a Gig</h2>
+  <h1 class="display-4" style="font-weight: 800; color: #fff;">
+      List a <span class="gig-accent-text">Gig</span>
+  </h1>
+  <p class="lead text-muted-custom">
+      Create a new opportunity and find the perfect musician.
+    </p>
 </div>
 
-<hr class="mx-5" />
 
 <div class="row justify-content-center">
-  <div class="col">
-    <form method="POST" action="">
-      {% csrf_token %}
-      <div class="row justify-content-center m-4">
-        <div class="col text-center">
-          <div class="row m-4">
-            <label for="listingTitle" class="form-label" id="gig-title" name="title" required
-              >Title of Listing</label
+  <div class="col-lg-10">
+      <div class="listing-card p-4 p-md-5">
+        <form method="POST" action="">
+          {% csrf_token %}
+          <h4 class="mb-4 border-bottom-accent pb-2">Gig Details</h4>
+
+          <div class="row g-4 mb-5">
+
+            <div class="col-6">
+              <label for="listing-title" class="detail-label">Title</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="listing-title"
+                  name="title"
+                  placeholder="e.g. Lead guitarist needed for indie band"
+                  required
+                />
+            </div>
+            <div class="row g-4 mb-5">
+              <label for="position" class="form-label">Position</label>
+              <select class="form-select" id="gig-position" name="position" required>
+                <option value="">Select an instrument</option>
+                <option value="guitar">Guitar</option>
+                <option value="bass">Bass</option>
+                <option value="drums">Drums</option>
+                <option value="piano">Piano</option>
+                <option value="vocals">Vocals</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div class="row">
+              <div class="col-md-6">
+              <label for="gig-date" class="detail-label">Date</label>
+              <input
+                type="date"
+                class="form-control"
+                id="gig-date"
+                name="gig_date"
+                required
+              />
+            </div>
+
+            <div class="col-md-6">
+              <label for="gig-location" class="detail-label">Location</label>
+              <input
+                type="text"
+                class="form-control"
+                id="gig-location"
+                name="location"
+                placeholder="City or venue"
+                required
+              />
+            </div>
+
+          </div>
+
+          <div class="row g-4 mb-4">
+            <div class="col-12">
+              <label for="description" class="form-label">Description</label>
+              <textarea
+                class="form-control"
+                id="gig-description"
+                rows="5"
+                name="description"
+                required
+              ></textarea>
+            </div>
+          </div>
+          <hr style="border-color: var(--border-dim);">
+
+          <div class="d-flex justify-content-end mt-4">
+            <button
+              type="button"
+              id="create-gig-btn"
+              class="btn btn-primary btn-lg nice-button primary-color"
             >
-            <input
-              type="text"
-              class="form-control"
-              id="listing-title"
-              name="title"
-              required
-            />
+              Post Gig
+            </button>
           </div>
-          <div class="row m-4">
-            <label for="position" class="form-label">Position</label>
-            <select class="form-select" id="gig-position" name="position" required>
-              <option value="">Select an instrument</option>
-              <option value="guitar">Guitar</option>
-              <option value="bass">Bass</option>
-              <option value="drums">Drums</option>
-              <option value="piano">Piano</option>
-              <option value="vocals">Vocals</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
-          <div class="row m-4">
-            <label for="gig-date" class="form-label">Date</label>
-            <input
-              type="date"
-              class="form-control"
-              id="gig-date"
-              name="gig_date"
-              required
-            />
-          </div>
-        </div>
-
-        <div class="col text-center">
-          <div class="row m-4">
-            <label for="description" class="form-label">Description</label>
-            <textarea
-              class="form-control"
-              id="gig-description"
-              rows="5"
-              name="description"
-              required
-            ></textarea>
-          </div>
-          <div class="row m-4">
-            <label for="location" class="form-label">Location</label>
-            <input
-              type="text"
-              class="form-control"
-              id="gig-location"
-              name="location"
-              required
-            />
-          </div>
-        </div>
+        </form>
       </div>
-
-      <div class="row justify-content-center my-5">
-        <button
-          type="button"
-          id="create-gig-btn"
-          class="btn btn-primary btn-lg nice-button primary-color"
-        >
-          List
-        </button>
-      </div>
-    </form>
   </div>
 </div>
 {% endblock %}
