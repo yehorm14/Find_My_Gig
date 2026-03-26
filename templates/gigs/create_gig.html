@@ -1,112 +1,77 @@
 {% extends 'gigs/base.html' %}
-
 {% load static %}
 
-{% block title_block %}
-List a Gig
-{% endblock %}
+{% block title_block %}List a Gig{% endblock %}
 
-{% block header_block %}
-{% endblock %} {% block body_block %}
+{% block body_block %}
 <div id="status-message"></div>
 
-<div class="text-center m-4">
-  <h1 class="display-4" style="font-weight: 800; color: #fff;">
-      List a <span class="gig-accent-text">Gig</span>
-  </h1>
-  <p class="lead text-muted-custom">
-      Create a new opportunity and find the perfect musician.
-    </p>
-</div>
+<div class="container mt-5 px-4 px-md-5 mb-5">
+  
+  <div class="text-center mb-5">
+    <h1 class="display-4" style="font-weight: 800; color: #fff;">
+        List a <span class="gig-accent-text">Gig</span>
+    </h1>
+    <p class="lead text-muted-custom">Create a new opportunity and find the perfect musician.</p>
+  </div>
 
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="listing-card p-4 p-md-5">
+          <form method="POST" action="">
+            {% csrf_token %}
+            <h4 class="mb-4 border-bottom-accent pb-2">Gig Details</h4>
 
-<div class="row justify-content-center">
-  <div class="col-lg-10">
-      <div class="listing-card p-4 p-md-5">
-        <form method="POST" action="">
-          {% csrf_token %}
-          <h4 class="mb-4 border-bottom-accent pb-2">Gig Details</h4>
-
-          <div class="row g-4 mb-5">
-
-            <div class="col-6">
-              <label for="listing-title" class="detail-label">Title</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="listing-title"
-                  name="title"
-                  placeholder="e.g. Lead guitarist needed for indie band"
-                  required
-                />
-              <div class="col-6 my-5">
-              <label for="position" class="detail-label">Position</label>
-              <select class="form-select" id="gig-position" name="position" style="color: #888899 !important" required>
-                <option value="">Select an instrument</option>
-                <option value="guitar">Guitar</option>
-                <option value="bass">Bass</option>
-                <option value="drums">Drums</option>
-                <option value="piano">Piano</option>
-                <option value="vocals">Vocals</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-            </div>
-            <div class="row">
+            <div class="row g-4 mb-4">
               <div class="col-md-6">
-              <label for="gig-date" class="detail-label" >Date</label>
-              <input 
-                style="color: #888899 !important"
-                type="date"
-                class="form-control"
-                id="gig-date"
-                name="gig_date"
-                required
-              />
+                <label for="listing-title" class="detail-label">Title</label>
+                  <input type="text" class="form-control" id="listing-title" name="title" placeholder="e.g. Lead guitarist needed for indie band" required />
+              </div>
+              
+              <div class="col-md-6">
+                <label for="gig-position" class="detail-label">Position</label>
+                <select class="form-select" id="gig-position" name="position" style="color: #fff !important" required>
+                  <option value="">Select an instrument</option>
+                  <option value="guitar">Guitar</option>
+                  <option value="bass">Bass</option>
+                  <option value="drums">Drums</option>
+                  <option value="piano">Piano</option>
+                  <option value="vocals">Vocals</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+
+              <div class="col-md-6">
+                <label for="gig-date" class="detail-label">Date</label>
+                <input type="date" class="form-control" id="gig-date" name="gig_date" style="color: #fff !important" required />
+              </div>
+
+              <div class="col-md-6">
+                <label for="gig-location" class="detail-label">Location</label>
+                <input type="text" class="form-control" id="gig-location" name="location" placeholder="City or venue" required />
+              </div>
+              
+              <div class="col-12">
+                <label for="gig-description" class="detail-label">Description</label>
+                <textarea class="form-control" id="gig-description" rows="5" name="description" placeholder="Describe the gig, the sound you want, and any requirements..." required></textarea>
+              </div>
             </div>
 
-            <div class="col-md-6">
-              <label for="gig-location" class="detail-label">Location</label>
-              <input
-                type="text"
-                class="form-control"
-                id="gig-location"
-                name="location"
-                placeholder="City or venue"
-                required
-              />
+            <hr style="border-color: var(--border-dim);">
+
+            <div class="d-flex justify-content-end mt-4">
+              <button type="button" id="create-gig-btn" class="btn apply-btn rounded-pill px-5 py-2" style="font-size: 1.1rem;">
+                Post Gig
+              </button>
             </div>
-
-          </div>
-
-          <div class="row g-4 mb-4">
-            <div class="col-12">
-              <label for="description" class="detail-label">Description</label>
-              <textarea
-                class="form-control"
-                id="gig-description"
-                rows="5"
-                name="description"
-                required
-              ></textarea>
-            </div>
-          </div>
-          <hr style="border-color: var(--border-dim);">
-
-          <div class="d-flex justify-content-end mt-4">
-            <button
-              type="button"
-              id="create-gig-btn"
-              class="btn btn-primary btn-lg nice-button primary-color"
-            >
-              Post Gig
-            </button>
-          </div>
-        </form>
-      </div>
+            
+          </form>
+        </div>
+    </div>
   </div>
 </div>
 {% endblock %}
+
 {% block scripts_block %}
     <script src="{% static 'find_my_gig/js/dashboard.js' %}"></script>
 {% endblock %}

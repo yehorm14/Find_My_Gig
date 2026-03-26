@@ -1,9 +1,7 @@
 {% extends 'gigs/base.html' %}
 {% load static %}
 
-{% block title_block %}
-{{ musician.user.username }} | Profile
-{% endblock %}
+{% block title_block %}{{ musician.user.username }} | Profile{% endblock %}
 
 {% block body_block %}
 <div id="status-message" class="container mt-3"></div>
@@ -11,9 +9,7 @@
 <div class="container mt-4 px-4 px-md-5 mb-5">
     
     <nav aria-label="breadcrumb" class="mb-4">
-        <a href="{% url 'gigs:musicians_list' %}" 
-           onclick="if(document.referrer) { window.history.back(); return false; }" 
-           class="subtle-link d-inline-flex align-items-center">
+        <a href="{% url 'gigs:musicians_list' %}" class="subtle-link d-inline-flex align-items-center" id="go-back-btn">
             ← Go Back
         </a>
     </nav>
@@ -37,7 +33,7 @@
                     </div>
                 {% endif %}
 
-                <div class="text-start mt-4 pt-4 w-100 action-border">
+                <div class="text-start mt-4 pt-4 w-100 border-top-accent">
                     {% if musician.age %}
                         <div class="mb-3">
                             <span class="detail-label">Age</span>
@@ -66,12 +62,12 @@
                 </div>
 
                 {% if user.is_authenticated %}
-                    <div class="mt-auto pt-4 action-border w-100 d-flex flex-column gap-3">
+                    <div class="mt-auto pt-4 border-top-accent w-100 d-flex flex-column gap-3">
                         <a href="{% url 'gigs:submit_musician_review' musician.id %}" class="btn btn-outline-light rounded-pill w-100 py-2">
                             Leave a Review
                         </a>
                         
-                        {% if hasattr user 'band' %}
+                        {% if profile_type == 'band' %}
                             <button type="button" class="btn apply-btn rounded-pill w-100 py-2" data-bs-toggle="modal" data-bs-target="#interestModal">
                                 Reach Out
                             </button>
@@ -84,13 +80,13 @@
 
         <div class="col-lg-7 mb-4">
             <div class="listing-card p-4">
-                <h5 class="mb-4 border-bottom-accent">Community Reviews</h5>
+                <h5 class="mb-4 border-bottom-accent pb-2">Community Reviews</h5>
 
                 {% if reviews %}
                     <div id="review-container">
                         {% for review in reviews %}
-                            <div class="review-item bg-transparent p-3 mb-3 rounded border {% if forloop.counter > 3 %}extra-review{% endif %}" 
-                                 style="border-color: var(--border-dim) !important; {% if forloop.counter > 3 %}display:none;{% endif %}">
+                            <div class="review-item bg-transparent p-3 mb-3 rounded border {% if forloop.counter > 3 %}extra-review d-none{% endif %}" 
+                                     style="border-color: var(--border-dim) !important;">
                                 
                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                     <strong class="gig-accent-text">{{ review.reviewer.username }}</strong>
@@ -133,9 +129,21 @@
     </div>
   </div>
 </div>
-
 {% endblock %}
 
 {% block scripts_block %}
     <script src="{% static 'find_my_gig/js/gigs.js' %}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const goBackBtn = document.getElementById('go-back-btn');
+            if (goBackBtn) {
+                goBackBtn.addEventListener('click', function(e) {
+                    if (document.referrer) {
+                        e.preventDefault();
+                        window.history.back();
+                    }
+                });
+            }
+        });
+    </script>
 {% endblock %}
