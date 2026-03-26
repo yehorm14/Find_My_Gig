@@ -36,17 +36,6 @@ urlpatterns = [
 
     # Reviewing and Saving Bands
     path('musicians/<int:musician_id>/review/', views.submit_musician_review, name='submit_musician_review'),
-    path('bands/<int:band_id>/save/', views.save_band, name='save_band'),
-    path('bands/<int:band_id>/unsave/', views.unsave_band, name='unsave_band'),
-
-
-    # ==========================================
-    # --- 3. DOUBLE TRACK (Scouting & Invites) ---
-    # ==========================================
-    path('musicians/<int:musician_id>/save/', views.save_musician, name='save_musician'),
-    path('musicians/<int:musician_id>/unsave/', views.unsave_musician, name='unsave_musician'),
-    path('musicians/<int:musician_id>/invite/', views.invite_musician, name='invite_musician'),
-    path('invitations/<int:invite_id>/respond/', views.respond_invitation, name='respond_invitation'),
 
 
     # ==========================================

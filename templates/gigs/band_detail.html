@@ -55,23 +55,8 @@
                     {% endif %}
                 </div>
 
-                <div class="mt-4 pt-4 action-border text-center">
-                    {% if user.is_authenticated and user.musician %}
-                        <button type="button" id="save-band-btn"
-                                class="btn {% if is_bookmarked %}btn-outline-light{% else %}apply-btn{% endif %} rounded-pill px-5 py-2 w-100"
-                                data-band-id="{{ band.id }}"
-                                data-bookmarked="{{ is_bookmarked|yesno:'true,false' }}">
-                          {% if is_bookmarked %}★ Saved to Favorites{% else %}☆ Save Band{% endif %}
-                        </button>
-                    {% endif %}
-                </div>
-
             </div>
         </div>
     </div>
 </div>
-{% endblock %}
-
-{% block scripts_block %}
-    <script src="{% static 'find_my_gig/js/gigs.js' %}"></script>
 {% endblock %}

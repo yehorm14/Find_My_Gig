@@ -57,10 +57,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 .then(data => {
                     if (data.success) {
                         bookmarkBtn.textContent = isSaving ? '★ Bookmarked' : '☆ Bookmark';
-                        // Toggle the logic classes
                         bookmarkBtn.classList.toggle('bookmark-btn');
                         bookmarkBtn.classList.toggle('bookmarked-btn');
-                        // Toggle the visual CSS colors!
                         bookmarkBtn.classList.toggle('btn-outline-light');
                         bookmarkBtn.classList.toggle('btn-light');
                         showStatusMessage('status-message', isSaving ? 'Gig saved!' : 'Removed from saved.', 'success');
@@ -95,10 +93,10 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    btn.textContent = isApplied ? 'Apply' : 'Withdraw';
+                    const isApplied = btn.dataset.applied === 'true';
+                    btn.textContent = isApplied ? 'Apply Now' : 'Withdraw';
                     btn.dataset.applied = isApplied ? 'false' : 'true';
-                    btn.classList.toggle('btn-primary');
-                    btn.classList.toggle('btn-danger');
+                    btn.className = isApplied ? 'btn apply-btn' : 'btn withdraw-btn';
                     showStatusMessage('gig-detail-status', isApplied ? 'Application withdrawn.' : 'Application submitted!', 'success');
                 } else {
                     showStatusMessage('gig-detail-status', data.error || 'Something went wrong', 'error');
@@ -127,8 +125,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (data.success) {
                     btn.textContent = isBookmarked ? '☆ Bookmark' : '★ Bookmarked';
                     btn.dataset.bookmarked = isBookmarked ? 'false' : 'true';
-                    btn.classList.toggle('bookmark-btn');
-                    btn.classList.toggle('bookmarked-btn');
                     btn.classList.toggle('btn-outline-light');
                     btn.classList.toggle('btn-light');
                     showStatusMessage('gig-detail-status', isBookmarked ? 'Gig removed from saved.' : 'Gig saved!', 'success');
@@ -139,101 +135,10 @@ document.addEventListener('DOMContentLoaded', function () {
             .catch(() => showStatusMessage('gig-detail-status', 'Network Error', 'error'));
         });
     }
-
-    // ==========================================================================
-    // 3. BAND DETAIL PAGE LOGIC (Musicians Saving Bands)
-    // ==========================================================================
-    const saveBandBtn = document.getElementById('save-band-btn');
-    if (saveBandBtn) {
-        saveBandBtn.addEventListener('click', function () {
-            if (!isLoggedIn()) { redirectToLogin(); return; }
-
-            const bandId = this.dataset.bandId;
-            const isBookmarked = this.dataset.bookmarked === 'true';
-            const btn = this;
-            const url = isBookmarked ? `/bands/${bandId}/unsave/` : `/bands/${bandId}/save/`;
-
-            fetch(url, {
-                method: 'POST',
-                headers: { 'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/json' }
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    btn.textContent = isBookmarked ? '☆ Save Band' : '★ Saved to Favorites';
-                    btn.dataset.bookmarked = isBookmarked ? 'false' : 'true';
-                    btn.classList.toggle('btn-outline-light');
-                    btn.classList.toggle('apply-btn');
-                    showStatusMessage('status-message', isBookmarked ? 'Band removed from favorites' : 'Band saved to favorites!', 'success');
-                } else {
-                    showStatusMessage('status-message', data.error || 'Something went wrong', 'error');
-                }
-            })
-            .catch(() => showStatusMessage('status-message', 'Network error. Try again.', 'error'));
-        });
-    }
-
-    // ==========================================================================
-    // 4. MUSICIAN DETAIL PAGE LOGIC (Bands Scouting & Inviting)
-    // ==========================================================================
-    const scoutMusicianBtn = document.getElementById('scout-musician-btn');
-    if (scoutMusicianBtn) {
-        scoutMusicianBtn.addEventListener('click', function () {
-            if (!isLoggedIn()) { redirectToLogin(); return; }
-
-            const id = this.dataset.musicianId;
-            const isScouted = this.dataset.scouted === 'true';
-            const url = isScouted ? `/musicians/${id}/unsave/` : `/musicians/${id}/save/`;
-
-            fetch(url, {
-                method: 'POST',
-                headers: { 'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/json' }
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    this.textContent = isScouted ? '☆ Scout Musician' : '★ On Your Roster';
-                    this.dataset.scouted = isScouted ? 'false' : 'true';
-                    this.classList.toggle('btn-outline-light');
-                    this.classList.toggle('apply-btn');
-                    showStatusMessage('status-message', isScouted ? 'Removed from roster' : 'Added to roster!', 'success');
-                }
-            });
-        });
-    }
-
-    const confirmInviteBtn = document.getElementById('confirm-invite-btn');
-    if (confirmInviteBtn) {
-        confirmInviteBtn.addEventListener('click', function () {
-            const musicianId = this.dataset.musicianId;
-            const gigSelect = document.getElementById('invite-gig-select');
-            if (!gigSelect) return;
-            const listingId = gigSelect.value;
-
-            fetch(`/musicians/${musicianId}/invite/`, {
-                method: 'POST',
-                headers: { 'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/json' },
-                body: JSON.stringify({ listing_id: listingId })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    showStatusMessage('status-message', 'Invitation sent successfully!', 'success');
-                    const modalEl = document.getElementById('inviteModal');
-                    const modal = bootstrap.Modal.getInstance(modalEl);
-                    if (modal) modal.hide();
-                } else {
-                    showStatusMessage('status-message', data.error || 'Failed to send invite.', 'error');
-                }
-            })
-            .catch(() => showStatusMessage('status-message', 'Network error.', 'error'));
-        });
-    }
-
 });
 
 // ==========================================================================
-// 5. GOOGLE MAPS LOGIC 
+// 3. GOOGLE MAPS LOGIC 
 // ==========================================================================
 function initMap() {
     const mapElements = document.querySelectorAll('.gig-mini-map');
@@ -254,5 +159,4 @@ function initMap() {
         }
     });
 }
-
 window.initMap = initMap;

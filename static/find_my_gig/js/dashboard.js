@@ -226,47 +226,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // RESPOND TO GIG INVITATION (Accept or Decline)
-    document.querySelectorAll('.respond-invite-btn').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-            const inviteId = this.dataset.inviteId;
-            const action = this.dataset.action; // "Accepted" or "Declined"
-            const inviteCard = this.closest('.listing-card');
-
-            const confirmed = confirm(`Are you sure you want to ${action.toLowerCase()} this invitation?`);
-
-            if (confirmed) {
-                fetch(`/invitations/${inviteId}/respond/`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': getCookie('csrftoken'),
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ action: action })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Remove the invite card from the screen
-                        inviteCard.style.transition = 'opacity 0.3s ease';
-                        inviteCard.style.opacity = '0';
-                        setTimeout(() => inviteCard.remove(), 300);
-                        
-                        if (action === 'Accepted') {
-                            showStatusMessage('status-message', 'Invitation Accepted! You are now applied to the gig.', 'success');
-                            setTimeout(() => window.location.reload(), 1500); 
-                        } else {
-                            showStatusMessage('status-message', 'Invitation Declined.', 'success');
-                        }
-                    } else {
-                        showStatusMessage('status-message', data.error || 'Something went wrong', 'error');
-                    }
-                })
-                .catch(() => showStatusMessage('status-message', 'Network Error', 'error'));
-            }
-        });
-    });
-
     //Create Gig Listing
     const createGigBtn = document.getElementById('create-gig-btn');
     
@@ -349,10 +308,8 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // REMOVE SAVED GIG & BAND FROM BOOKMARKS
+    // REMOVE SAVED GIG
     document.addEventListener('click', function(e) {
-        
-        // Remove Saved Gig
         if (e.target.classList.contains('remove-saved-gig-btn')) {
             e.preventDefault();
             const btn = e.target;
@@ -371,34 +328,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (data.success) {
                     savedGigCard?.remove();
                     showStatusMessage('status-message', 'Gig removed from saved', 'success');
-                } else {
-                    showStatusMessage('status-message', 'Failed to remove bookmark', 'error');
-                }
-            })
-            .catch(error => {
-                showStatusMessage('status-message', 'Failed to remove bookmark', 'error');
-            });
-        }
-
-        // Remove Saved Band
-        if (e.target.classList.contains('remove-saved-band-btn')) {
-            e.preventDefault();
-            const btn = e.target;
-            const bandId = btn.dataset.bandId;
-            const savedBandCard = document.getElementById('saved-band-' + bandId); // Targets the ID we added earlier
-
-            fetch(`/gigs/bands/${bandId}/unsave/`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': getCookie('csrftoken'),
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    savedBandCard?.remove();
-                    showStatusMessage('status-message', 'Band removed from favorites', 'success');
                 } else {
                     showStatusMessage('status-message', 'Failed to remove bookmark', 'error');
                 }
@@ -461,57 +390,3 @@ function addMediaLinkToList(url,mediaId){
         mediaList.appendChild(listItem);
     }
 }
-
-document.addEventListener('DOMContentLoaded', function() {
-    
-    // =======================================================
-    // MUSICIAN ACTION: Respond to Gig Invitations
-    // =======================================================
-    const inviteButtons = document.querySelectorAll('.respond-invite-btn');
-    
-    inviteButtons.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const inviteId = this.dataset.inviteId;
-            const action = this.dataset.action; // Will be 'Accepted' or 'Declined'
-            
-            // Confirm if declining
-            if (action === 'Declined' && !confirm('Are you sure you want to decline this gig invitation?')) {
-                return;
-            }
-
-            fetch(`/gigs/invitations/${inviteId}/respond/`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': getCookie('csrftoken'),
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ action: action })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    showStatusMessage('status-message', `Invitation ${action.toLowerCase()}!`, 'success');
-                    
-                    // Remove the invite card from the screen immediately
-                    const inviteCard = document.getElementById(`invite-${inviteId}`);
-                    if (inviteCard) {
-                        inviteCard.style.transition = "opacity 0.4s ease";
-                        inviteCard.style.opacity = "0";
-                        setTimeout(() => inviteCard.remove(), 400);
-                    }
-
-                    // If they accepted, reload the page so the gig appears in their "Applications" list below
-                    if (action === 'Accepted') {
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 1000);
-                    }
-                } else {
-                    showStatusMessage('status-message', data.error || 'Failed to process invitation.', 'error');
-                }
-            })
-            .catch(() => showStatusMessage('status-message', 'Network error.', 'error'));
-        });
-    });
-
-});
