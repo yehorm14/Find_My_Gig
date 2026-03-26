@@ -22,12 +22,22 @@ urlpatterns = [
     path('gigs/create/', views.create_gig_listing, name='create_gig'),
     path('gigs/<int:gig_id>/gig_review/', views.submit_review, name='submit_review'),
     path('musicians/<int:musician_id>/review/', views.submit_musician_review, name='submit_musician_review'),
+    path('bands/<int:band_id>/save/', views.save_band, name='save_band'),
+    path('bands/<int:band_id>/unsave/', views.unsave_band, name='unsave_band'),
 
     # --- USER PROFILES ROUTING ---
     path('musicians/', views.musicians_list, name='musicians_list'),
     path('musicians/<int:id>/', views.musician_detail, name='musician_profile'),
     path('bands/', views.bands_list, name='bands_list'), 
     path('bands/<int:id>/', views.band_detail, name='band_profile'),
+    
+    # Scouting (Bookmarking Musicians)
+    path('musicians/<int:musician_id>/save/', views.save_musician, name='save_musician'),
+    path('musicians/<int:musician_id>/unsave/', views.unsave_musician, name='unsave_musician'),
+
+    # Invitations
+    path('musicians/<int:musician_id>/invite/', views.invite_musician, name='invite_musician'),
+    path('invitations/<int:invite_id>/respond/', views.respond_invitation, name='respond_invitation'),
 
     # --- USER PORTAL ---
     path('dashboard/', views.dashboard, name='dashboard'),

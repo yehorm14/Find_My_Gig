@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
-            const firstname = document.getElementById('firstname')?.value.trim() || '';   // ADD
+            const firstname = document.getElementById('firstname')?.value.trim() || '';   
             const surname = document.getElementById('surname')?.value.trim() || ''; 
             const bandName = document.getElementById('band-name')?.value.trim() || '';
             const profileAbout = document.getElementById('profile-about')?.value.trim() || '';
@@ -38,7 +38,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 formData.append('media_links', JSON.stringify(pendingMediaLinks));
                 formData.append('delete_media', JSON.stringify(linksToDelete));
 
-
                 fetch('/dashboard/my-profile/update/',{
                     method: 'POST',
                     headers: {
@@ -50,7 +49,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     return response.json();
                 })
                 .then(function(data){
-                handleProfileUpdateResponse(data);
+                    handleProfileUpdateResponse(data);
                 })
                 .catch(function (){
                     showStatusMessage('status-message', 'Profile updated successfully', 'success');
@@ -69,7 +68,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     instruments: profileInstruments,
                     media_links: pendingMediaLinks,
                     delete_media: linksToDelete
-
                 };
 
                 fetch('/dashboard/my-profile/update/',{
@@ -100,11 +98,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const profilePicturePreview = document.getElementById('profile-picture-preview');
 
     if (profilePictureInput && profilePicturePreview) {
-
         profilePictureInput.addEventListener('change', function () {
-
             const file = this.files[0];
-
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function (e) {
@@ -137,11 +132,8 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             pendingMediaLinks.push(mediaUrl);
-
             addMediaLinkToList(mediaUrl, 'pending-' + pendingMediaLinks.length);
-
             mediaInput.value = '';
-
             showStatusMessage('status-message', 'Link added - press Update to save', 'success');
         });
     }
@@ -151,7 +143,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (mediaList) {
         mediaList.addEventListener('click', function (e) {
-
             if (e.target.classList.contains('delete-media-btn')) {
                 const mediaId = e.target.dataset.mediaId;
                 const mediaItem = e.target.parentElement;
@@ -177,7 +168,6 @@ document.addEventListener('DOMContentLoaded', function () {
     if (deleteAccountBtn) {
         deleteAccountBtn.addEventListener('click', function (e) {
             e.preventDefault();
-
             const confirmed = confirm('Are you sure you want to delete your account? This cannot be undone.');
 
             if (confirmed){
@@ -206,9 +196,8 @@ document.addEventListener('DOMContentLoaded', function () {
     //Withdraw application
     document.querySelectorAll('.withdraw-application-btn').forEach(function (btn) {
         btn.addEventListener('click', function () {
-
             const gigId = this.dataset.gigId;
-            const applicationCard = this.closest('.application-card');
+            const applicationCard = this.closest('.listing-card');
 
             const confirmed = confirm('Are you sure you want to withdraw this application?');
 
@@ -237,6 +226,47 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+    // RESPOND TO GIG INVITATION (Accept or Decline)
+    document.querySelectorAll('.respond-invite-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            const inviteId = this.dataset.inviteId;
+            const action = this.dataset.action; // "Accepted" or "Declined"
+            const inviteCard = this.closest('.listing-card');
+
+            const confirmed = confirm(`Are you sure you want to ${action.toLowerCase()} this invitation?`);
+
+            if (confirmed) {
+                fetch(`/gigs/invitations/${inviteId}/respond/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ action: action })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Remove the invite card from the screen
+                        inviteCard.style.transition = 'opacity 0.3s ease';
+                        inviteCard.style.opacity = '0';
+                        setTimeout(() => inviteCard.remove(), 300);
+                        
+                        if (action === 'Accepted') {
+                            showStatusMessage('status-message', 'Invitation Accepted! You are now applied to the gig.', 'success');
+                            setTimeout(() => window.location.reload(), 1500); 
+                        } else {
+                            showStatusMessage('status-message', 'Invitation Declined.', 'success');
+                        }
+                    } else {
+                        showStatusMessage('status-message', data.error || 'Something went wrong', 'error');
+                    }
+                })
+                .catch(() => showStatusMessage('status-message', 'Network Error', 'error'));
+            }
+        });
+    });
+
     //Create Gig Listing
     const createGigBtn = document.getElementById('create-gig-btn');
     
@@ -248,28 +278,8 @@ document.addEventListener('DOMContentLoaded', function () {
             const gigDescription = document.getElementById('gig-description')?.value?.trim();
             const gigLocation = document.getElementById('gig-location')?.value?.trim();
 
-            if (!gigTitle) {
-                showStatusMessage('status-message', 'Please enter a title for your listing', 'error');
-                return;
-            }
-
-            if (!gigPosition) {
-                showStatusMessage('status-message', 'Please select a position', 'error');
-                return;
-            }
-
-            if (!gigDate) {
-                showStatusMessage('status-message', 'Please select a date', 'error');
-                return;
-            }
-
-            if (!gigDescription) {
-                showStatusMessage('status-message', 'Please enter a description', 'error');
-                return;
-            }
-
-            if (!gigLocation) {
-                showStatusMessage('status-message', 'Please enter a location', 'error');
+            if (!gigTitle || !gigPosition || !gigDate || !gigDescription || !gigLocation) {
+                showStatusMessage('status-message', 'Please fill out all fields', 'error');
                 return;
             }
 
@@ -303,91 +313,112 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-
-
     //Delete Listing
     const myListingsList = document.getElementById('my-listings-list');
 
     if (myListingsList) {
-    myListingsList.addEventListener('click', function (e) {
-        if (e.target.classList.contains('delete-listing-btn')) {
-            
-            const listingId = e.target.dataset.listingId;
-            const listingCard = e.target.closest('.listing-card');
+        myListingsList.addEventListener('click', function (e) {
+            if (e.target.classList.contains('delete-listing-btn')) {
+                const listingId = e.target.dataset.listingId;
+                const listingCard = e.target.closest('.listing-card');
+                const confirmed = confirm('Are you sure you want to delete this listing?');
 
-            const confirmed = confirm('Are you sure you want to delete this listing?');
-
-            if (confirmed) {
-                fetch(`/dashboard/my-listings/${listingId}/delete/`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': getCookie('csrftoken'),
-                        'Content-Type': 'application/json'
-                    }
-                })
-                .then(function (response) {
-                    return response.json();
-                })
-                .then(function (data) {
-                    if (data.success) {
+                if (confirmed) {
+                    fetch(`/dashboard/my-listings/${listingId}/delete/`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken'),
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(function (response) {
+                        return response.json();
+                    })
+                    .then(function (data) {
+                        if (data.success) {
+                            listingCard.remove();
+                            showStatusMessage('status-message', 'Listing deleted', 'success');
+                        }
+                    })
+                    .catch(function () {
                         listingCard.remove();
                         showStatusMessage('status-message', 'Listing deleted', 'success');
-                    }
-                })
-                .catch(function () {
-                    listingCard.remove();
-                    showStatusMessage('status-message', 'Listing deleted', 'success');
-                });
+                    });
+                }
             }
-        }
-    });
-    }
-
-
-    //Remove saved gig
-    document.addEventListener('click', function(e) {
-        if (e.target.classList.contains('remove-saved-gig-btn')) {
-        e.preventDefault();
-
-        const btn = e.target;
-        const gigId = btn.dataset.gigId;
-        const savedGigCard = btn.closest('.listing-card'); 
-
-        fetch(`/gigs/${gigId}/unsave/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': getCookie('csrftoken'),
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                savedGigCard?.remove();
-                showStatusMessage('status-message', 'Gig removed from saved', 'success');
-            } else {
-                showStatusMessage('status-message', 'Failed to remove bookmark', 'error');
-            }
-        })
-        .catch(error => {
-            console.error(error);
-            showStatusMessage('status-message', 'Failed to remove bookmark', 'error');
         });
     }
-});
+
+    // REMOVE SAVED GIG & BAND FROM BOOKMARKS
+    document.addEventListener('click', function(e) {
+        
+        // Remove Saved Gig
+        if (e.target.classList.contains('remove-saved-gig-btn')) {
+            e.preventDefault();
+            const btn = e.target;
+            const gigId = btn.dataset.gigId;
+            const savedGigCard = btn.closest('.col-md-6'); // Safely removes the grid wrapper
+
+            fetch(`/gigs/${gigId}/unsave/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    savedGigCard?.remove();
+                    showStatusMessage('status-message', 'Gig removed from saved', 'success');
+                } else {
+                    showStatusMessage('status-message', 'Failed to remove bookmark', 'error');
+                }
+            })
+            .catch(error => {
+                showStatusMessage('status-message', 'Failed to remove bookmark', 'error');
+            });
+        }
+
+        // Remove Saved Band
+        if (e.target.classList.contains('remove-saved-band-btn')) {
+            e.preventDefault();
+            const btn = e.target;
+            const bandId = btn.dataset.bandId;
+            const savedBandCard = document.getElementById('saved-band-' + bandId); // Targets the ID we added earlier
+
+            fetch(`/gigs/bands/${bandId}/unsave/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    savedBandCard?.remove();
+                    showStatusMessage('status-message', 'Band removed from favorites', 'success');
+                } else {
+                    showStatusMessage('status-message', 'Failed to remove bookmark', 'error');
+                }
+            })
+            .catch(error => {
+                showStatusMessage('status-message', 'Failed to remove bookmark', 'error');
+            });
+        }
+    });
+
 });
 
-//helper functions
-
+// Helper Functions
 function handleProfileUpdateResponse(data) {
     if (data.success) {
         showStatusMessage('status-message', 'Profile updated successfully', 'success');
         pendingMediaLinks = [];
         linksToDelete = [];
-
     } else if (data.error === 'username_taken') {
         showStatusMessage('status-message', 'That username is already taken, please choose another', 'error');
-    
     } else {
         showStatusMessage('status-message', 'Something went wrong, try again', 'error');
     }
@@ -404,10 +435,8 @@ function isValidUrl(url){
 
 function addMediaLinkToList(url,mediaId){
     const mediaList = document.getElementById('media-links-list');
-
     if (mediaList) {
         const listItem = document.createElement('li');
-
         const link = document.createElement('a');
         link.href = url;
         link.textContent = url;
@@ -429,62 +458,6 @@ function addMediaLinkToList(url,mediaId){
             listItem.appendChild(link);
             listItem.appendChild(deleteBtn);
         }
-
         mediaList.appendChild(listItem);
     }
 }
-
-function clearCreateGigForm() {
-    const fields = [
-        'lisitng-title',
-        'gig-description',
-        'gig-location',
-        'gig-date'
-    ];
-    fields.forEach(function (id) {
-        const field = document.getElementById(id);
-        if (field) field.value = '';
-    });
-
-    const positionField = document.getElementById('gig-position');
-    if (positionField) positionField.selectedIndex = 0;
-}
-
-function addListingToPage(listing) {
-    const listingsList = document.getElementById('my-listings-list');
-
-    if (listingsList && listing) {
-        const listingCard = document.createElement('div');
-        listingCard.classList.add('listing-card');
-
-        listingCard.innerHTML = `
-            <div class="row align-items-center">
-                <div class="col-md-4">
-                    <h4 style="color: #fff; font-weight: 700;">${listing.title}</h4>
-                    <p class="mb-1 text-muted-custom">🎸 Position: ${listing.req_instruments}</p>
-                    <p class="mb-0 text-muted-custom">⏳ Date: ${listing.deadline}</p>
-                </div>
-
-                <div class="col-md-5">
-                    <p class="description-text mb-1">${listing.description}</p>
-                    <p class="gig-accent-text mb-0">📍 ${listing.location}</p>
-                </div>
-
-                <div class="col-md-3 d-flex flex-column align-items-end justify-content-center">
-                    <button type="button"
-                        class="delete-listing-btn btn btn-outline-danger rounded-pill w-100 my-2"
-                        data-listing-id="${listing.id}">
-                        Delete Listing
-                    </button>
-                </div>
-            </div>
-        `;
-
-        listingsList.appendChild(listingCard);
-    }
-}
-
-
-
-
-

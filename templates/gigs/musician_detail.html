@@ -2,75 +2,157 @@
 {% load static %}
 
 {% block title_block %}
-{{ musician.user.username }}
+{{ musician.user.username }} | Profile
 {% endblock %}
 
-{% block header_block %}
-{% endblock %} {% block body_block %}
-<div class="text-center m-4">
-  <h2>{{ musician.user.first_name }} {{ musician.user.last_name }}</h2>
-  <p class="text-muted">@{{ musician.user.username }}</p>
-</div>
+{% block body_block %}
+<div id="status-message" class="container mt-3"></div>
 
-<hr class="mx-5" />
+<div class="container mt-4 px-4 px-md-5 mb-5">
+    
+    <nav aria-label="breadcrumb" class="mb-4">
+        <a href="{% url 'gigs:musicians_list' %}" 
+           onclick="if(document.referrer) { window.history.back(); return false; }" 
+           class="subtle-link d-inline-flex align-items-center">
+            ← Go Back
+        </a>
+    </nav>
 
-<div class="row justify-content-center">
-  <div class="col-4 text-center">
-    <img src="{% static 'find_my_gig/images/pfp-placeholder.png' %}" class="profile-pic" />
-    {% if musician.age != None %}
-    <p><strong>Age:</strong> {{ musician.age }}</p>
-    {% endif %}
-    {% if musician.instruments %}
-    <p><strong>Instruments:</strong> {{ musician.instruments }}</p>
-    {% endif %}
-    {% if musician.bio %}
-      <p><strong>About:</strong> {{ musician.bio }}</p>
-    {% endif %}
-    {% if musician.media_link %}
-      <p><strong>Media:</strong> <a href="{{ musician.media_link }}" target="_blank">{{ musician.media_link }}</a></p>
-    {% endif %}
-  </div>
+    <div class="row">
+        
+        <div class="col-lg-5 mb-4">
+            <div class="listing-card p-4 text-center h-100 d-flex flex-column">
+                
+                <img src="{% if musician.profile_picture %}{{ musician.profile_picture.url }}{% else %}{% static 'find_my_gig/images/pfp-placeholder.png' %}{% endif %}" 
+                     class="profile-pic mx-auto mb-3" 
+                     style="width: 150px; height: 150px; border-width: 3px;" 
+                     alt="Profile Picture">
+                
+                <h2 class="mb-1" style="font-weight: 800; color: #fff;">{{ musician.user.first_name }} {{ musician.user.last_name }}</h2>
+                <p class="gig-accent-text h5 mb-3">@{{ musician.user.username }}</p>
 
-  {% if musician.location %}
-  <div class="col-4 text-center">
-    <p><strong>Location:</strong> {{ musician.location }}</p>
-    <p>insert google maps pic here</p>
-  </div>
-  {% endif %}
+                {% if musician.instruments %}
+                    <div class="mb-3">
+                        <span class="badge badge-instrument rounded-pill px-3 py-2 h6">🎸 {{ musician.instruments }}</span>
+                    </div>
+                {% endif %}
 
-  <div class="col-4 text-center">
-    <h4>Reviews</h4>
+                <div class="text-start mt-4 pt-4 w-100 action-border">
+                    {% if musician.age %}
+                        <div class="mb-3">
+                            <span class="detail-label">Age</span>
+                            <p class="h6 text-light">{{ musician.age }}</p>
+                        </div>
+                    {% endif %}
 
-    {% if reviews %}
-    <div id="review-container">
-      {% for review in reviews %}
-        <div class="review-item {% if forloop.counter > 3 %}extra-review{% endif %}"
-            {% if forloop.counter > 3 %}style="display:none;"{% endif %}>
-          <p><strong>{{ review.reviewer.username }}</strong></p>
-          <p>⭐ {{ review.rating }}/5</p>
-          <p>{{ review.comment }}</p>
-          <hr>
+                    <div class="mb-3">
+                        <span class="detail-label">About</span>
+                        <p class="description-text small">{{ musician.bio|default:"No bio provided yet." }}</p>
+                    </div>
+
+                    {% if musician.media_link or musician.media_links.all %}
+                        <div class="mb-3">
+                            <span class="detail-label">Media Links</span>
+                            <div class="d-flex flex-column gap-2 mt-2">
+                                {% if musician.media_link %}
+                                    <a href="{{ musician.media_link }}" target="_blank" class="btn btn-outline-light btn-sm rounded-pill text-truncate text-start px-3 py-2">🔗 {{ musician.media_link }}</a>
+                                {% endif %}
+                                {% for link in musician.media_links.all %}
+                                    <a href="{{ link.url }}" target="_blank" class="btn btn-outline-light btn-sm rounded-pill text-truncate text-start px-3 py-2">🔗 {{ link.url }}</a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+
+                {% if user.is_authenticated %}
+                    <div class="mt-auto pt-4 action-border w-100 d-flex flex-column gap-3">
+                        
+                        {% if user.band %}
+                            <button type="button" id="scout-musician-btn"
+                                    class="btn {% if is_scouted %}btn-outline-light{% else %}apply-btn{% endif %} rounded-pill w-100 py-2"
+                                    data-musician-id="{{ musician.id }}"
+                                    data-scouted="{{ is_scouted|yesno:'true,false' }}"
+                                    style="font-size: 1.1rem;">
+                              {% if is_scouted %}★ On Your Roster{% else %}☆ Scout Musician{% endif %}
+                            </button>
+
+                            <button type="button" class="btn btn-outline-light rounded-pill w-100 py-2" 
+                                    data-bs-toggle="modal" data-bs-target="#inviteModal" style="font-size: 1.1rem;">
+                                📩 Invite to Gig
+                            </button>
+                        {% endif %}
+
+                        <a href="{% url 'gigs:submit_musician_review' musician.id %}" class="btn btn-outline-light rounded-pill w-100 py-2">
+                            Leave a Review
+                        </a>
+                    </div>
+                {% endif %}
+
+            </div>
         </div>
-      {% endfor %}
+
+        <div class="col-lg-7 mb-4">
+            <div class="listing-card p-4">
+                <h5 class="mb-4 border-bottom-accent">Community Reviews</h5>
+
+                {% if reviews %}
+                    <div id="review-container">
+                        {% for review in reviews %}
+                            <div class="review-item bg-transparent p-3 mb-3 rounded border {% if forloop.counter > 3 %}extra-review{% endif %}" 
+                                 style="border-color: var(--border-dim) !important; {% if forloop.counter > 3 %}display:none;{% endif %}">
+                                
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <strong class="gig-accent-text">{{ review.reviewer.username }}</strong>
+                                    <span class="badge" style="background-color: var(--bg-dark); color: #ffd700; border: 1px solid var(--border-dim);">
+                                        ⭐ {{ review.rating }}/5
+                                    </span>
+                                </div>
+                                <p class="text-light mb-0 small">{{ review.comment }}</p>
+                                
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <h1 class="display-4 text-muted mb-3">📝</h1>
+                        <p class="text-muted-custom mb-0">No reviews yet for this musician.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
     </div>
-
-    {% if reviews|length > 3 %}
-      <button 
-        class="btn btn-secondary btn-sm"
-        onclick="document.querySelectorAll('.extra-review').forEach(el => el.style.display='block');
-        this.style.display='none';">
-        Show More
-      </button>
-    {% endif %}
-  {% else %}
-    <p>No reviews yet.</p>
-  {% endif %}
-
-  {% if user.is_authenticated %}
-    <a href="{% url 'gigs:submit_musician_review' musician.id %}" class="btn btn-primary nice-button background-color review-link w-100 my-2">
-      Leave a Review
-    </a>
-  {% endif %}
 </div>
+
+<div class="modal fade" id="inviteModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="background-color: var(--card-bg); border: 1px solid var(--border-dim);">
+      <div class="modal-header border-bottom-0">
+        <h5 class="modal-title text-white" style="font-weight: 700;">Invite {{ musician.user.username }}</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        {% if band_listings %}
+            <p class="text-muted-custom small mb-3">Select one of your active gigs to invite this musician to:</p>
+            <select id="invite-gig-select" class="form-select mb-4">
+                {% for gig in band_listings %}
+                    <option value="{{ gig.id }}">{{ gig.title }} ({{ gig.req_instruments }})</option>
+                {% endfor %}
+            </select>
+            <button type="button" id="confirm-invite-btn" data-musician-id="{{ musician.id }}" class="btn apply-btn rounded-pill w-100 py-2">Send Invitation</button>
+        {% else %}
+            <div class="text-center py-4">
+                <p class="text-muted-custom">You don't have any active gig listings right now.</p>
+                <a href="{% url 'gigs:create_gig_page' %}" class="btn btn-outline-light rounded-pill px-4 mt-2">Create a Gig</a>
+            </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
 </div>
+{% endblock %}
+
+{% block scripts_block %}
+    <script src="{% static 'find_my_gig/js/gigs.js' %}"></script>
 {% endblock %}

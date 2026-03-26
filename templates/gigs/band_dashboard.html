@@ -15,7 +15,7 @@ Band Dashboard | Find My Gig
     <h1 class="display-4" style="font-weight: 800; color: #fff;">
         Welcome, <span class="gig-accent-text">{{ profile.name }}</span>
     </h1>
-    <p class="lead text-muted-custom">Manage your gig listings, update your profile, and scout for talent.</p>
+    <p class="lead text-muted-custom">Manage your gigs and scout local talent.</p>
   </div>
 
   <div class="row justify-content-center g-4">
@@ -25,30 +25,31 @@ Band Dashboard | Find My Gig
         <div class="dashboard-card h-100 text-center d-flex flex-column align-items-center justify-content-center p-5">
           <h1 class="display-3 mb-3">📋</h1>
           <h4 class="mb-2" style="color: #fff; font-weight: 700;">My Listings</h4>
-          <p class="text-muted-custom mb-0">Post new gigs and manage active jobs</p>
+          <p class="text-muted-custom mb-0">Post and manage your active gigs</p>
         </div>
       </a>
     </div>
 
     <div class="col-md-6 col-lg-4 d-flex align-items-stretch">
       <a href="{% url 'gigs:musicians_list' %}" class="text-decoration-none w-100">
-        <div class="dashboard-card h-100 text-center d-flex flex-column align-items-center justify-content-center p-5" style="border-color: var(--neon-cyan);">
+        <div class="dashboard-card h-100 text-center d-flex flex-column align-items-center justify-content-center p-5">
           <h1 class="display-3 mb-3">🎸</h1>
           <h4 class="mb-2" style="color: #fff; font-weight: 700;">Find Musicians</h4>
-          <p class="text-muted-custom mb-0">Browse and scout local talent</p>
+          <p class="text-muted-custom mb-0">Browse and scout local musicians</p>
         </div>
       </a>
     </div>
 
     <div class="col-md-6 col-lg-4 d-flex align-items-stretch">
-      <a href="{% url 'gigs:my_profile' %}" class="text-decoration-none w-100">
-        <div class="dashboard-card h-100 text-center d-flex flex-column align-items-center justify-content-center p-5">
-          <h1 class="display-3 mb-3">⚙️</h1>
-          <h4 class="mb-2" style="color: #fff; font-weight: 700;">Band Profile</h4>
-          <p class="text-muted-custom mb-0">Update your bio and band logo</p>
+      <a href="{% url 'gigs:my_bookmarks' %}" class="text-decoration-none w-100">
+        <div class="dashboard-card h-100 text-center d-flex flex-column align-items-center justify-content-center p-5" style="border-color: var(--neon-cyan);">
+          <h1 class="display-3 mb-3" style="color: var(--neon-cyan);">🎯</h1>
+          <h4 class="mb-2" style="color: #fff; font-weight: 700;">Talent Roster</h4>
+          <p class="text-muted-custom mb-0">View and invite scouted musicians</p>
         </div>
       </a>
     </div>
+
   </div>
 </div>
 {% endblock %}
