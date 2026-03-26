@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
 
     // ==========================================================================
-    // 1. GIG LIST PAGE LOGIC (APPLY / BOOKMARK)
+    // 1. GIG LIST PAGE LOGIC (APPLY / BOOKMARK via Event Delegation)
     // ==========================================================================
     const gigsList = document.getElementById('gigs-list');
 
@@ -72,7 +72,69 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // ==========================================================================
-    // 2. BAND/VENUE INTERACTION LOGIC (SEND INTEREST)
+    // 2. SINGLE GIG DETAIL PAGE LOGIC 
+    // ==========================================================================
+    const gigDetailApplyBtn = document.getElementById('gig-detail-apply-btn');
+    if (gigDetailApplyBtn) {
+        gigDetailApplyBtn.addEventListener('click', function () {
+            if (!isLoggedIn()) { redirectToLogin(); return; }
+
+            const gigId = this.dataset.gigId;
+            const isApplied = this.dataset.applied === 'true';
+            const btn = this;
+            const url = isApplied ? `/gigs/${gigId}/withdraw/` : `/gigs/${gigId}/apply/`;
+
+            if (isApplied && !confirm('Are you sure you want to withdraw your application?')) return;
+
+            fetch(url, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/json' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    btn.dataset.applied = isApplied ? 'false' : 'true';
+                    btn.textContent = isApplied ? 'Apply Now' : 'Withdraw Application';
+                    btn.className = isApplied ? 'btn apply-btn rounded-pill px-4 py-2' : 'btn withdraw-btn rounded-pill px-4 py-2';
+                    showStatusMessage('gig-detail-status', isApplied ? 'Application withdrawn.' : 'Application submitted!', 'success');
+                } else {
+                    showStatusMessage('gig-detail-status', data.error || 'Something went wrong', 'error');
+                }
+            })
+            .catch(() => showStatusMessage('gig-detail-status', 'Network Error', 'error'));
+        });
+    }
+    
+    const gigDetailBookmarkBtn = document.getElementById('gig-detail-bookmark-btn');
+    if (gigDetailBookmarkBtn) {
+        gigDetailBookmarkBtn.addEventListener('click', function () {
+            if (!isLoggedIn()) { redirectToLogin(); return; }
+
+            const gigId = this.dataset.gigId;
+            const isBookmarked = this.dataset.bookmarked === 'true';
+            const btn = this;
+            const url = isBookmarked ? `/gigs/${gigId}/unsave/` : `/gigs/${gigId}/save/`;
+
+            fetch(url, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/json' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    btn.dataset.bookmarked = isBookmarked ? 'false' : 'true';
+                    btn.textContent = isBookmarked ? '☆ Bookmark' : '★ Bookmarked';
+                    showStatusMessage('gig-detail-status', isBookmarked ? 'Gig removed from saved.' : 'Gig saved!', 'success');
+                } else {
+                    showStatusMessage('gig-detail-status', 'Something went wrong, try again', 'error');
+                }
+            })
+            .catch(() => showStatusMessage('gig-detail-status', 'Network Error', 'error'));
+        });
+    }
+
+    // ==========================================================================
+    // 3. BAND/VENUE INTERACTION LOGIC (SEND INTEREST)
     // ==========================================================================
     const sendInterestBtn = document.getElementById('send-interest-btn');
     if (sendInterestBtn) {
@@ -93,7 +155,6 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    // Requires Bootstrap JS to be loaded
                     const modalElement = document.getElementById('interestModal');
                     if(modalElement) {
                         const modal = bootstrap.Modal.getInstance(modalElement);
@@ -111,10 +172,10 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 // ==========================================================================
-// 3. GOOGLE MAPS INITIALIZATION (Must be globally accessible)
+// 4. GOOGLE MAPS INITIALIZATION (Must be globally accessible)
 // ==========================================================================
 function initMap() {
-    const mapElements = document.querySelectorAll('.gig-mini-map');
+    const mapElements = document.querySelectorAll('.gig-mini-map, .gig-map-large');
 
     mapElements.forEach((mapDiv) => {
         const lat = parseFloat(mapDiv.getAttribute('data-lat'));

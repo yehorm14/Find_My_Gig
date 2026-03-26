@@ -55,3 +55,14 @@ function formatDate(dateString) {
     const options = { day: 'numeric', month: 'long', year: 'numeric' };
     return date.toLocaleDateString('en-GB', options);
 }
+
+// ==========================================================================
+// FORCE FRESH DATA ON BACK NAVIGATION (Bust the bfcache)
+// ==========================================================================
+window.addEventListener('pageshow', function (event) {
+    // 'event.persisted' is true if the page was loaded from the browser's cache
+    if (event.persisted) {
+        // Force the browser to silently reload the page and ask Django for fresh data
+        window.location.reload();
+    }
+});

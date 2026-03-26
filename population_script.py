@@ -1,7 +1,11 @@
 import os
+import shutil 
 import random
 from datetime import timedelta
 from django.utils import timezone
+from django.conf import settings 
+
+# Set up Django Environment...
 
 # Set up Django Environment
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'find_my_gig.settings')
@@ -96,21 +100,47 @@ GIG_DESCRIPTIONS = [
 ]
 
 def download_image(seed_text, size=300):
-    """Downloads a unique random image based on a text seed."""
+    """Downloads a unique random image based on a text seed, utilizing User-Agent to prevent 403s."""
     url = f"https://picsum.photos/seed/{seed_text}/{size}/{size}"
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+    
     try:
-        response = requests.get(url, timeout=10)
-        if response.status_code == 200:
-            return ContentFile(response.content, name=f"{seed_text}.jpg")
-    except Exception as e:
-        print(f"Warning: Could not download image for {seed_text}.")
-    return None
+        response = requests.get(url, headers=headers, timeout=5)
+        response.raise_for_status()
+        return ContentFile(response.content)
+    except requests.exceptions.RequestException as e:
+        print(f"  [!] Warning: Could not download image for {seed_text}. Error: {e}")
+        return None
 
 def clear_data():
-    """Clears existing users to prevent duplicates."""
-    print("🗑️ Clearing old data...")
-    User.objects.all().delete()
+    """Clears existing users to prevent duplicates, but safely keeps Superusers (Admins)."""
+    print("🗑️ Clearing old data (preserving Admin accounts)...")
+    User.objects.filter(is_superuser=False).delete()
     print("✅ Database cleared.\n")
+
+def clear_media():
+    """Wipes the files inside profile_images without deleting the locked folder itself."""
+    print("🧹 Clearing old profile images...")
+    
+    # Safely build the path to profile_images directory
+    media_dir = os.path.join(settings.MEDIA_ROOT, 'profile_images')
+    
+    if os.path.exists(media_dir):
+        # Iterate through the files inside the directory and delete them individually
+        for filename in os.listdir(media_dir):
+            file_path = os.path.join(media_dir, filename)
+            try:
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+            except Exception as e:
+                print(f"  [!] Could not delete {filename}. It might be open in another program. Error: {e}")
+    else:
+        # If the folder doesn't exist at all yet, create it safely
+        os.makedirs(media_dir, exist_ok=True)
+        
+    print("✅ Media cleared.\n")
 
 
 # ==========================================
@@ -118,6 +148,7 @@ def clear_data():
 # ==========================================
 def populate():
     clear_data()
+    clear_media()
     
     bands_list = []
     
@@ -167,13 +198,15 @@ def populate():
             bio=random.choice(MUSICIAN_BIOS),
             age=random.randint(18, 55),
             instruments=random.choice(INSTRUMENTS),
+            location=random.choice(UK_VENUES)['city'],  # Populating required Location
+            media_link="https://www.youtube.com/watch?v=dQw4w9WgXcQ" # Dummy link for UI testing
         )
         
         image_file = download_image(f"musician_unique_seed_{i}")
         if image_file:
             musician.profile_picture.save(f"musician_{i}.jpg", image_file)
             
-        print(f"  - Created Musician: @{user.username} ({musician.instruments})")
+        print(f"  - Created Musician: @{user.username} ({musician.instruments} from {musician.location})")
 
     print("\n")
 
