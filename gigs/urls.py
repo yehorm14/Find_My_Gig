@@ -15,7 +15,7 @@ urlpatterns = [
     path('', views.home, name='home'),
     path('gigs/', views.gig_listings, name='gig_listings'),
     path('gigs/<int:gig_id>/', views.gig_detail, name='gig_detail'),
-    path('create-gig/', views.create_gig_page, name='create_gig_page'), # The HTML page rendering
+    path('create-gig/', views.create_gig, name='create_gig'),
 
     # Gig AJAX Actions
     path('gigs/<int:gig_id>/apply/', views.apply_gig, name='apply_gig'),

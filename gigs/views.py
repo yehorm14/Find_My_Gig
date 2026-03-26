@@ -245,7 +245,7 @@ def my_profile(request):
         return render(request, 'gigs/my_profile_band.html', context)
 
 @login_required
-def create_gig_page(request):
+def create_gig(request):
     try:
         request.user.band
     except Band.DoesNotExist:
