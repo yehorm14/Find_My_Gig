@@ -15,7 +15,8 @@ class UserSignUpForm(UserCreationForm):
         for field_name, field in self.fields.items():
             field.widget.attrs['class'] = 'form-control mb-2'
             field.widget.attrs['style'] = 'background-color: var(--card-bg, #2a2a35); color: #fff; border: 1px solid var(--border-dim, #444);'
-            field.widget.attrs['placeholder'] = f'Enter your {field.label.lower()}'
+            if field.label:
+                field.widget.attrs['placeholder'] = f'Enter your {field.label.lower()}'
 
 class MusicianProfileForm(forms.ModelForm):
     class Meta:
