@@ -116,8 +116,11 @@ Once your code is pushed and your branch is fully up-to-date with `main`:
 
 ---
 
-## Acknowledgements & External Sources
-* **Mapping:** Google Maps API was used for location routing and gig display.
-* **Styling:** [Insert CSS Framework used, e.g., Bootstrap]
-* **Icons/Images:** [Insert any external icon libraries or image sources used]
-* **Other:** [Insert any other external code snippets or libraries used during development]
+### External Sources & Acknowledgments
+
+* **Mapping:** Google Maps API (used for both frontend dynamic map rendering and backend geocoding for gig locations).
+* **Styling:** Bootstrap 5 (Responsive CSS framework used for the core UI, grid layouts, and dark-mode styling).
+* **Icons/Images:** * Bootstrap Icons (used for the interactive star-rating UI in the review forms).
+  * Picsum Photos API (`https://picsum.photos/`) (used in `population_script.py` to automatically fetch and generate dummy profile pictures for testing).
+* **Other Python Libraries:** * `requests` (Used for backend API communication).
+  * `Pillow` (Required by Django for processing and saving uploaded `ImageField` media).
