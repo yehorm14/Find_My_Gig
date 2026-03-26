@@ -30,6 +30,14 @@ urlpatterns = [
     path('musicians/<int:id>/', views.musician_detail, name='musician_profile'),
     path('bands/', views.bands_list, name='bands_list'), 
     path('bands/<int:id>/', views.band_detail, name='band_profile'),
+    
+    # Scouting (Bookmarking Musicians)
+    path('musicians/<int:musician_id>/save/', views.save_musician, name='save_musician'),
+    path('musicians/<int:musician_id>/unsave/', views.unsave_musician, name='unsave_musician'),
+
+    # Invitations
+    path('musicians/<int:musician_id>/invite/', views.invite_musician, name='invite_musician'),
+    path('invitations/<int:invite_id>/respond/', views.respond_invitation, name='respond_invitation'),
 
     # --- USER PORTAL ---
     path('dashboard/', views.dashboard, name='dashboard'),

@@ -6,6 +6,8 @@
 {% endblock %}
 
 {% block body_block %}
+<div id="status-message" class="container mt-3"></div>
+
 <div class="container mt-4 px-4 px-md-5 mb-5">
     
     <nav aria-label="breadcrumb" class="mb-4">
@@ -16,7 +18,7 @@
         </a>
     </nav>
 
-    <div class="row justify-content-center">
+    <div class="row">
         
         <div class="col-lg-5 mb-4">
             <div class="listing-card p-4 text-center h-100 d-flex flex-column">
@@ -64,8 +66,24 @@
                 </div>
 
                 {% if user.is_authenticated %}
-                    <div class="mt-auto pt-4 action-border w-100">
-                        <a href="{% url 'gigs:submit_musician_review' musician.id %}" class="btn apply-btn rounded-pill w-100 py-2" style="font-size: 1.1rem;">
+                    <div class="mt-auto pt-4 action-border w-100 d-flex flex-column gap-3">
+                        
+                        {% if user.band %}
+                            <button type="button" id="scout-musician-btn"
+                                    class="btn {% if is_scouted %}btn-outline-light{% else %}apply-btn{% endif %} rounded-pill w-100 py-2"
+                                    data-musician-id="{{ musician.id }}"
+                                    data-scouted="{{ is_scouted|yesno:'true,false' }}"
+                                    style="font-size: 1.1rem;">
+                              {% if is_scouted %}★ On Your Roster{% else %}☆ Scout Musician{% endif %}
+                            </button>
+
+                            <button type="button" class="btn btn-outline-light rounded-pill w-100 py-2" 
+                                    data-bs-toggle="modal" data-bs-target="#inviteModal" style="font-size: 1.1rem;">
+                                📩 Invite to Gig
+                            </button>
+                        {% endif %}
+
+                        <a href="{% url 'gigs:submit_musician_review' musician.id %}" class="btn btn-outline-light rounded-pill w-100 py-2">
                             Leave a Review
                         </a>
                     </div>
@@ -75,7 +93,6 @@
         </div>
 
         <div class="col-lg-7 mb-4">
-            
             <div class="listing-card p-4">
                 <h5 class="mb-4 border-bottom-accent">Community Reviews</h5>
 
@@ -96,15 +113,6 @@
                             </div>
                         {% endfor %}
                     </div>
-
-                    {% if reviews|length > 3 %}
-                        <div class="text-center mt-4">
-                            <button class="btn btn-outline-light rounded-pill px-4 btn-sm"
-                                    onclick="document.querySelectorAll('.extra-review').forEach(el => el.style.display='block'); this.style.display='none';">
-                                Show All Reviews
-                            </button>
-                        </div>
-                    {% endif %}
                 {% else %}
                     <div class="text-center py-5">
                         <h1 class="display-4 text-muted mb-3">📝</h1>
@@ -116,7 +124,35 @@
         
     </div>
 </div>
+
+<div class="modal fade" id="inviteModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="background-color: var(--card-bg); border: 1px solid var(--border-dim);">
+      <div class="modal-header border-bottom-0">
+        <h5 class="modal-title text-white" style="font-weight: 700;">Invite {{ musician.user.username }}</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        {% if band_listings %}
+            <p class="text-muted-custom small mb-3">Select one of your active gigs to invite this musician to:</p>
+            <select id="invite-gig-select" class="form-select mb-4">
+                {% for gig in band_listings %}
+                    <option value="{{ gig.id }}">{{ gig.title }} ({{ gig.req_instruments }})</option>
+                {% endfor %}
+            </select>
+            <button type="button" id="confirm-invite-btn" data-musician-id="{{ musician.id }}" class="btn apply-btn rounded-pill w-100 py-2">Send Invitation</button>
+        {% else %}
+            <div class="text-center py-4">
+                <p class="text-muted-custom">You don't have any active gig listings right now.</p>
+                <a href="{% url 'gigs:create_gig_page' %}" class="btn btn-outline-light rounded-pill px-4 mt-2">Create a Gig</a>
+            </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}
 
 {% block scripts_block %}
-    {% endblock %}
+    <script src="{% static 'find_my_gig/js/gigs.js' %}"></script>
+{% endblock %}

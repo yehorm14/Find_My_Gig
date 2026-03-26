@@ -226,6 +226,47 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+    // RESPOND TO GIG INVITATION (Accept or Decline)
+    document.querySelectorAll('.respond-invite-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            const inviteId = this.dataset.inviteId;
+            const action = this.dataset.action; // "Accepted" or "Declined"
+            const inviteCard = this.closest('.listing-card');
+
+            const confirmed = confirm(`Are you sure you want to ${action.toLowerCase()} this invitation?`);
+
+            if (confirmed) {
+                fetch(`/gigs/invitations/${inviteId}/respond/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ action: action })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Remove the invite card from the screen
+                        inviteCard.style.transition = 'opacity 0.3s ease';
+                        inviteCard.style.opacity = '0';
+                        setTimeout(() => inviteCard.remove(), 300);
+                        
+                        if (action === 'Accepted') {
+                            showStatusMessage('status-message', 'Invitation Accepted! You are now applied to the gig.', 'success');
+                            setTimeout(() => window.location.reload(), 1500); 
+                        } else {
+                            showStatusMessage('status-message', 'Invitation Declined.', 'success');
+                        }
+                    } else {
+                        showStatusMessage('status-message', data.error || 'Something went wrong', 'error');
+                    }
+                })
+                .catch(() => showStatusMessage('status-message', 'Network Error', 'error'));
+            }
+        });
+    });
+
     //Create Gig Listing
     const createGigBtn = document.getElementById('create-gig-btn');
     
