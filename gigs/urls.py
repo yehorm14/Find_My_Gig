@@ -51,6 +51,7 @@ urlpatterns = [
     path('dashboard/my-bookmarks/', views.my_bookmarks, name='my_bookmarks'),
     path('dashboard/my-listings/', views.my_listings, name='my_listings'),
     path('dashboard/my-profile/', views.my_profile, name='my_profile'),
+    path('dashboard/my-reach-outs/', views.my_reach_outs, name='my_reach_outs'),
     
     # --- Dashboard Settings & Management Actions ---
     path('dashboard/my-profile/update/', views.update_profile, name='update_profile'),

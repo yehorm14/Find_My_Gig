@@ -13,27 +13,37 @@
     <h1 class="display-4" style="font-weight: 800; color: #fff;">
         Welcome, <span class="gig-accent-text">{{ profile.name }}</span>
     </h1>
-    <p class="lead text-muted-custom">Manage your active listings and browse local talent.</p>
+    <p class="lead text-muted-custom">Manage your active listings, browse local talent, and track your reach outs.</p>
   </div>
 
-  <div class="row justify-content-center g-4 mx-auto" style="max-width: 900px;">
+  <div class="row justify-content-center g-4 mx-auto" style="max-width: 1000px;">
     
-    <div class="col-md-6 d-flex align-items-stretch">
+    <div class="col-md-4 d-flex align-items-stretch">
       <a href="{% url 'gigs:my_listings' %}" class="text-decoration-none w-100">
-        <div class="dashboard-card h-100 text-center d-flex flex-column align-items-center justify-content-center p-5">
+        <div class="dashboard-card h-100 text-center d-flex flex-column align-items-center justify-content-center p-4 p-lg-5">
           <h1 class="display-3 mb-3">📋</h1>
           <h4 class="mb-2" style="color: #fff; font-weight: 700;">My Listings</h4>
-          <p class="text-muted-custom mb-0">Post and manage your active gigs</p>
+          <p class="text-muted-custom mb-0 small">Post and manage your active gigs</p>
         </div>
       </a>
     </div>
 
-    <div class="col-md-6 d-flex align-items-stretch">
+    <div class="col-md-4 d-flex align-items-stretch">
       <a href="{% url 'gigs:musicians_list' %}" class="text-decoration-none w-100">
-        <div class="dashboard-card h-100 text-center d-flex flex-column align-items-center justify-content-center p-5">
+        <div class="dashboard-card h-100 text-center d-flex flex-column align-items-center justify-content-center p-4 p-lg-5">
           <h1 class="display-3 mb-3">🎸</h1>
           <h4 class="mb-2" style="color: #fff; font-weight: 700;">Find Musicians</h4>
-          <p class="text-muted-custom mb-0">Browse local musicians</p>
+          <p class="text-muted-custom mb-0 small">Browse local musicians</p>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-md-4 d-flex align-items-stretch">
+      <a href="{% url 'gigs:my_reach_outs' %}" class="text-decoration-none w-100">
+        <div class="dashboard-card h-100 text-center d-flex flex-column align-items-center justify-content-center p-4 p-lg-5">
+          <h1 class="display-3 mb-3">📤</h1>
+          <h4 class="mb-2" style="color: #fff; font-weight: 700;">Reach Outs</h4>
+          <p class="text-muted-custom mb-0 small">View musicians you've contacted</p>
         </div>
       </a>
     </div>

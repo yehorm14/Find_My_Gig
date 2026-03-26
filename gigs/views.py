@@ -18,7 +18,7 @@ from gigs.models import (
     Application, 
     Review, 
     MediaLink, 
-    BandInterest 
+    BandInterest
 )
 from gigs.forms import UserSignUpForm, MusicianProfileForm, BandProfileForm
 
@@ -248,6 +248,23 @@ def my_profile(request):
         return render(request, 'gigs/my_profile_band.html', context)
         
     return redirect('gigs:home')
+
+@login_required
+def my_reach_outs(request):
+    """View for a Band to see the musicians they have contacted."""
+    
+    # Security check: Ensure the user actually has a band profile
+    if not hasattr(request.user, 'band'):
+        return redirect('gigs:dashboard') 
+        
+    # Fetch all interests sent by this band, newest first
+    reach_outs = BandInterest.objects.filter(band=request.user.band).order_by('-created_at')
+    
+    context = {
+        'reach_outs': reach_outs
+    }
+    
+    return render(request, 'gigs/my_reach_outs.html', context)
 
 
 @login_required
