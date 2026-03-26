@@ -461,3 +461,57 @@ function addMediaLinkToList(url,mediaId){
         mediaList.appendChild(listItem);
     }
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // =======================================================
+    // MUSICIAN ACTION: Respond to Gig Invitations
+    // =======================================================
+    const inviteButtons = document.querySelectorAll('.respond-invite-btn');
+    
+    inviteButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const inviteId = this.dataset.inviteId;
+            const action = this.dataset.action; // Will be 'Accepted' or 'Declined'
+            
+            // Confirm if declining
+            if (action === 'Declined' && !confirm('Are you sure you want to decline this gig invitation?')) {
+                return;
+            }
+
+            fetch(`/gigs/invitations/${inviteId}/respond/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ action: action })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    showStatusMessage('status-message', `Invitation ${action.toLowerCase()}!`, 'success');
+                    
+                    // Remove the invite card from the screen immediately
+                    const inviteCard = document.getElementById(`invite-${inviteId}`);
+                    if (inviteCard) {
+                        inviteCard.style.transition = "opacity 0.4s ease";
+                        inviteCard.style.opacity = "0";
+                        setTimeout(() => inviteCard.remove(), 400);
+                    }
+
+                    // If they accepted, reload the page so the gig appears in their "Applications" list below
+                    if (action === 'Accepted') {
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                    }
+                } else {
+                    showStatusMessage('status-message', data.error || 'Failed to process invitation.', 'error');
+                }
+            })
+            .catch(() => showStatusMessage('status-message', 'Network error.', 'error'));
+        });
+    });
+
+});
