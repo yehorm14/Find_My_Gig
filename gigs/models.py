@@ -3,6 +3,7 @@ import requests
 from django.db import models
 from django.contrib.auth.models import User
 from django.conf import settings
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 logger = logging.getLogger(__name__)
 
@@ -113,7 +114,9 @@ class Application(models.Model):
 class Review(models.Model):
     reviewer = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reviews_written")
     reviewee = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reviews_received")
-    rating = models.IntegerField()
+    rating = models.IntegerField(validators= [
+        MinValueValidator(0), MaxValueValidator(5)
+    ])
     comment = models.CharField(max_length=200)
 
     def __str__(self):
