@@ -1,18 +1,17 @@
 import os
-import shutil 
+import shutil
 import random
+import requests
 from datetime import timedelta
 from django.utils import timezone
-from django.conf import settings 
 
-# Set up Django Environment...
-
-# Set up Django Environment
+# 1. SET UP THE DJANGO ENVIRONMENT FIRST
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'find_my_gig.settings')
 import django
 django.setup()
 
-import requests
+# 2. NOW IMPORT DJANGO UTILS AND MODELS
+from django.conf import settings
 from django.core.files.base import ContentFile
 from django.contrib.auth.models import User
 from gigs.models import Musician, Band, Listing

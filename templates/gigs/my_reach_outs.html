@@ -1,0 +1,51 @@
+{% extends 'gigs/base.html' %}
+{% load static %}
+
+{% block title_block %}My Reach Outs | Find My Gig{% endblock %}
+
+{% block body_block %}
+<div class="container mt-5 px-4 px-md-5 mb-5">
+  
+  <div class="text-center mb-5">
+    <h1 class="display-4" style="font-weight: 800; color: #fff;">My <span class="gig-accent-text">Reach Outs</span></h1>
+    <p class="lead text-muted-custom">Keep track of the musicians you've contacted.</p>
+  </div>
+
+  <hr class="mb-5" style="border-color: var(--border-dim);">
+
+  <div class="row justify-content-center">
+    <div class="col-lg-8" id="outbox-list">
+      
+      {% for reach_out in reach_outs %}
+        <div class="listing-card p-4 mb-4">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                    <h4 style="font-weight: 700; color: #fff; margin-bottom: 0;">{{ reach_out.musician.user.first_name }} {{ reach_out.musician.user.last_name }}</h4>
+                    <span class="gig-accent-text small">@{{ reach_out.musician.user.username }}</span>
+                </div>
+                <small class="text-muted-custom">{{ reach_out.created_at|date:"M d, Y" }}</small>
+            </div>
+            
+            <div class="p-3 mb-4 rounded" style="background-color: var(--bg-dark); border: 1px solid var(--border-dim);">
+                <p class="text-muted-custom small mb-1 uppercase-label">You sent:</p>
+                <p class="description-text mb-0">"{{ reach_out.message }}"</p>
+            </div>
+            
+            <div class="d-flex justify-content-end">
+                <a href="{% url 'gigs:musician_detail' reach_out.musician.id %}" class="btn apply-btn rounded-pill px-4">View Musician Profile</a>
+            </div>
+        </div>
+        
+      {% empty %}
+        <div class="text-center py-5">
+            <h1 class="display-1 text-muted mb-3">📤</h1>
+            <h4 class="text-muted-custom">Your outbox is empty.</h4>
+            <p class="text-muted-custom mb-4">You haven't sent messages to any musicians yet.</p>
+            <a href="{% url 'gigs:musicians_list' %}" class="btn apply-btn rounded-pill px-5 py-2">Find Talent</a>
+        </div>
+      {% endfor %}
+      
+    </div>
+  </div>
+</div>
+{% endblock %}
