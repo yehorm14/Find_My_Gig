@@ -1,14 +1,14 @@
 document.addEventListener('DOMContentLoaded', function () {
 
     // ==========================================================================
-    // 1. GIG LIST PAGE LOGIC (APPLY / BOOKMARK)
+    // 1. GIG LIST PAGE LOGIC (APPLY / BOOKMARK via Event Delegation)
     // ==========================================================================
     const gigsList = document.getElementById('gigs-list');
 
     if (gigsList) {
         gigsList.addEventListener('click', function (e) {
             
-            // --- Apply / Withdraw ---
+            // --- Apply / Withdraw Actions ---
             const applyBtn = e.target.closest('.apply-btn') || e.target.closest('.withdraw-btn');
             if (applyBtn) {
                 const isApplying = applyBtn.classList.contains('apply-btn');
@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 .catch(() => showStatusMessage('status-message', 'Network error.', 'error'));
             }
 
-            // --- Bookmark / Unbookmark ---
+            // --- Bookmark / Unbookmark Actions ---
             const bookmarkBtn = e.target.closest('.bookmark-btn') || e.target.closest('.bookmarked-btn');
             if (bookmarkBtn) {
                 const gigId = bookmarkBtn.dataset.gigId;
@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // ==========================================================================
-    // 2. SINGLE GIG DETAIL PAGE LOGIC
+    // 2. SINGLE GIG DETAIL PAGE LOGIC 
     // ==========================================================================
     const gigDetailApplyBtn = document.getElementById('gig-detail-apply-btn');
     if (gigDetailApplyBtn) {
@@ -93,10 +93,9 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    const isApplied = btn.dataset.applied === 'true';
-                    btn.textContent = isApplied ? 'Apply Now' : 'Withdraw';
                     btn.dataset.applied = isApplied ? 'false' : 'true';
-                    btn.className = isApplied ? 'btn apply-btn' : 'btn withdraw-btn';
+                    btn.textContent = isApplied ? 'Apply Now' : 'Withdraw Application';
+                    btn.className = isApplied ? 'btn apply-btn rounded-pill px-4 py-2' : 'btn withdraw-btn rounded-pill px-4 py-2';
                     showStatusMessage('gig-detail-status', isApplied ? 'Application withdrawn.' : 'Application submitted!', 'success');
                 } else {
                     showStatusMessage('gig-detail-status', data.error || 'Something went wrong', 'error');
@@ -123,10 +122,8 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    btn.textContent = isBookmarked ? '☆ Bookmark' : '★ Bookmarked';
                     btn.dataset.bookmarked = isBookmarked ? 'false' : 'true';
-                    btn.classList.toggle('btn-outline-light');
-                    btn.classList.toggle('btn-light');
+                    btn.textContent = isBookmarked ? '☆ Bookmark' : '★ Bookmarked';
                     showStatusMessage('gig-detail-status', isBookmarked ? 'Gig removed from saved.' : 'Gig saved!', 'success');
                 } else {
                     showStatusMessage('gig-detail-status', 'Something went wrong, try again', 'error');
@@ -135,13 +132,50 @@ document.addEventListener('DOMContentLoaded', function () {
             .catch(() => showStatusMessage('gig-detail-status', 'Network Error', 'error'));
         });
     }
+
+    // ==========================================================================
+    // 3. BAND/VENUE INTERACTION LOGIC (SEND INTEREST)
+    // ==========================================================================
+    const sendInterestBtn = document.getElementById('send-interest-btn');
+    if (sendInterestBtn) {
+        sendInterestBtn.addEventListener('click', function () {
+            const musicianId = this.dataset.musicianId;
+            const message = document.getElementById('interest-message').value.trim();
+
+            if (!message) {
+                alert("Please write a message first.");
+                return;
+            }
+
+            fetch(`/musicians/${musicianId}/send-interest/`, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: message })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const modalElement = document.getElementById('interestModal');
+                    if(modalElement) {
+                        const modal = bootstrap.Modal.getInstance(modalElement);
+                        modal.hide();
+                    }
+                    showStatusMessage('status-message', 'Message sent successfully!', 'success');
+                } else {
+                    alert(data.error);
+                }
+            })
+            .catch(() => alert('Network error.'));
+        });
+    }
+
 });
 
 // ==========================================================================
-// 3. GOOGLE MAPS LOGIC 
+// 4. GOOGLE MAPS INITIALIZATION (Must be globally accessible)
 // ==========================================================================
 function initMap() {
-    const mapElements = document.querySelectorAll('.gig-mini-map');
+    const mapElements = document.querySelectorAll('.gig-mini-map, .gig-map-large');
 
     mapElements.forEach((mapDiv) => {
         const lat = parseFloat(mapDiv.getAttribute('data-lat'));

@@ -1,9 +1,7 @@
 {% extends 'gigs/base.html' %}
 {% load static %}
 
-{% block title_block %}
-Sign Up | Find My Gig
-{% endblock %}
+{% block title_block %}Sign Up{% endblock %}
 
 {% block body_block %}
 <div class="container mt-5 pt-4 mb-5">
@@ -11,7 +9,9 @@ Sign Up | Find My Gig
     <div class="col-md-8 col-lg-6">
       
       <div class="text-center mb-4">
-        <h1 class="display-5" style="font-weight: 800; color: #fff;">Join the <span class="gig-accent-text">Community</span></h1>
+        <h1 class="display-5" style="font-weight: 800; color: #fff;">
+          Join the <span class="gig-accent-text">Community</span>
+        </h1>
         <p class="text-muted-custom">Create an account to find gigs or book talent.</p>
       </div>
 
@@ -58,6 +58,7 @@ Sign Up | Find My Gig
           <hr style="border-color: var(--border-dim); margin: 2rem 0;">
 
           <div class="row g-3">
+            
             <div class="col-12">
               <label for="username" class="detail-label">Username</label>
               <input type="text" class="form-control" id="username" name="username" required />
@@ -87,6 +88,7 @@ Sign Up | Find My Gig
               <input type="password" class="form-control" id="confirm-password" name="password2" required />
               <span id="confirm-password-error" class="field-error text-danger small"></span>
             </div>
+
           </div>
 
           <div class="mt-5">

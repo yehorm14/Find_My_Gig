@@ -1,9 +1,7 @@
 {% extends 'gigs/base.html' %}
 {% load static %}
 
-{% block title_block %}
-My Applications | Find My Gig
-{% endblock %}
+{% block title_block %}My Applications | Find My Gig{% endblock %}
 
 {% block body_block %}
 <div id="status-message" class="container mt-3"></div>
@@ -15,7 +13,7 @@ My Applications | Find My Gig
     <p class="lead text-muted-custom">Track the status of the gigs you've applied to.</p>
   </div>
 
-  <hr class="mb-5" style="border-color: #2a2a35;">
+  <hr class="mb-5" style="border-color: var(--border-dim);">
 
   <div class="row justify-content-center" id="gigs-list">
     <div class="col-lg-10">
@@ -68,7 +66,7 @@ My Applications | Find My Gig
         
       {% empty %}
         <div class="text-center py-5">
-            <h1 class="display-1 text-muted mb-3">📭</h1>
+            <h1 class="display-1 text-muted mb-3">📄</h1>
             <h4 class="text-muted-custom">You haven't applied to any gigs yet.</h4>
             <a href="{% url 'gigs:gig_listings' %}" class="btn apply-btn rounded-pill px-4 py-2 mt-3">Browse Gigs</a>
         </div>

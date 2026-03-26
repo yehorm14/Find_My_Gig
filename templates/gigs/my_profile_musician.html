@@ -1,9 +1,7 @@
 {% extends 'gigs/base.html' %}
 {% load static %}
 
-{% block title_block %}
-Musician Profile | Find My Gig
-{% endblock %}
+{% block title_block %}Musician Profile | Find My Gig{% endblock %}
 
 {% block body_block %}
 <div id="status-message" class="container mt-3"></div>
@@ -49,6 +47,7 @@ Musician Profile | Find My Gig
           <h4 class="mb-4 border-bottom-accent pb-2">Public Profile</h4>
 
           <div class="row g-4 mb-5">
+            
             <div class="col-md-4 text-center d-flex flex-column align-items-center justify-content-center border-end" style="border-color: var(--border-dim) !important;">
               <label for="profile-picture-input" class="profile-pic-label position-relative mb-3" style="cursor: pointer;">
                 <img id="profile-picture-preview"
@@ -74,7 +73,7 @@ Musician Profile | Find My Gig
 
               <div class="mb-4">
                 <label for="profile-instruments" class="detail-label">Primary Instrument</label>
-                <select class="form-select" id="profile-instruments" name="instruments">
+                <select class="form-select" id="profile-instruments" name="instruments" style="color: #fff !important;">
                   <option value="">Select instrument</option>
                   <option value="Guitar" {% if profile.instruments == 'Guitar' %}selected{% endif %}>Guitar</option>
                   <option value="Bass"   {% if profile.instruments == 'Bass' %}selected{% endif %}>Bass</option>
