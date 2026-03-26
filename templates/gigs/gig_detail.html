@@ -9,16 +9,22 @@
 <div class="container mt-4 px-4 px-md-5">
     
     <nav aria-label="breadcrumb" class="mb-4">
-        <a href="{% url 'gigs:gig_listings' %}" class="subtle-link d-inline-flex align-items-center">
-            ← Back to all gigs
+        <a href="{% url 'gigs:gig_listings' %}" 
+           onclick="if(document.referrer) { window.history.back(); return false; }" 
+           class="subtle-link d-inline-flex align-items-center">
+            ← Go Back
         </a>
     </nav>
 
     <div class="mb-5">
         <h1 class="display-4" style="font-weight: 800; color: #fff;">{{ listing.title }}</h1>
-        <h4 class="gig-accent-text">{{ listing.band.name }}</h4>
+        <h4>
+            <a href="{% url 'gigs:band_detail' listing.band.id %}" class="gig-accent-text" style="text-decoration: none; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                {{ listing.band.name }}
+            </a>
+        </h4>
     </div>
-
+    
     <div class="row">
         <div class="col-lg-6 mb-4">
             <div class="listing-card p-4 h-100 d-flex flex-column">

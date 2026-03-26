@@ -2,60 +2,98 @@
 {% load static %}
 
 {% block title_block %}
-My Bookmarks | Find My Gig
+{% if profile_type == 'band' %}Talent Roster{% else %}My Bookmarks{% endif %} | Find My Gig
 {% endblock %}
 
 {% block body_block %}
-<div class="container mt-5 px-4 px-md-5">
+<div class="container mt-5 px-4 px-md-5 mb-5">
   
   <div class="text-center mb-5">
-    <h1 class="display-4" style="font-weight: 800; color: #fff;">My <span class="gig-accent-text">Bookmarks</span></h1>
-    <p class="lead text-muted-custom">Everything you've saved for later.</p>
+    <h1 class="display-4" style="font-weight: 800; color: #fff;">
+        {% if profile_type == 'band' %}Talent <span class="gig-accent-text">Roster</span>
+        {% else %}My <span class="gig-accent-text">Bookmarks</span>{% endif %}
+    </h1>
+    <p class="lead text-muted-custom">
+        {% if profile_type == 'band' %}Musicians you have scouted for future gigs.
+        {% else %}Everything you've saved for later.{% endif %}
+    </p>
   </div>
 
-  <hr class="mb-5" style="border-color: #2a2a35;">
+  <hr class="mb-5" style="border-color: var(--border-dim);">
 
-  <div class="mb-5">
-    <h3 class="mb-4" style="color: #fff; font-weight: 700;">📌 Saved Gigs</h3>
-    <div class="row">
-      {% for gig in saved_gigs %}
-        <div class="col-md-6 col-lg-4 d-flex align-items-stretch mb-4">
-            <div class="listing-card w-100 d-flex flex-column">
-                <h4 class="gig-title mb-1">{{ gig.title }}</h4>
-                <p class="text-muted-custom mb-2">{{ gig.band.name }}</p>
-                <p class="mb-3">📍 <span class="gig-accent-text">{{ gig.location }}</span></p>
-                <div class="mt-auto pt-3 border-top-accent">
-                    <a href="{% url 'gigs:gig_detail' gig.id %}" class="btn btn-outline-light w-100 rounded-pill mb-2">View Details</a>
-                    <button type="button" class="btn btn-outline-danger w-100 rounded-pill remove-saved-gig-btn" data-gig-id="{{ gig.id }}">Remove Bookmark</button>
+  {% if profile_type == 'musician' %}
+      <div class="mb-5">
+        <h3 class="mb-4" style="color: #fff; font-weight: 700;">★ Saved Gigs</h3>
+        <div class="row">
+          {% for gig in saved_gigs %}
+            <div class="col-md-6 col-lg-4 d-flex align-items-stretch mb-4">
+                <div class="listing-card w-100 d-flex flex-column p-4">
+                    <h4 class="gig-title mb-1">{{ gig.title }}</h4>
+                    <p class="text-muted-custom mb-2">{{ gig.band.name }}</p>
+                    <p class="mb-3">📍 <span class="gig-accent-text">{{ gig.location }}</span></p>
+                    <div class="mt-auto pt-3 border-top-accent">
+                        <a href="{% url 'gigs:gig_detail' gig.id %}" class="btn btn-outline-light w-100 rounded-pill mb-2">View Details</a>
+                        <button type="button" class="btn btn-outline-danger w-100 rounded-pill remove-saved-gig-btn" data-gig-id="{{ gig.id }}">Remove Bookmark</button>
+                    </div>
                 </div>
             </div>
+          {% empty %}
+            <div class="col-12"><p class="text-muted-custom">You haven't saved any gigs yet.</p></div>
+          {% endfor %}
         </div>
-      {% empty %}
-        <div class="col-12"><p class="text-muted-custom">You haven't saved any gigs yet.</p></div>
-      {% endfor %}
-    </div>
-  </div>
+      </div>
 
-  <div class="mb-5">
-    <h3 class="mb-4" style="color: #fff; font-weight: 700;">🎸 Saved Bands</h3>
-    <div class="row">
-      {% for band in saved_bands %}
-        <div class="col-md-6 col-lg-4 d-flex align-items-stretch mb-4">
-            <div class="listing-card w-100 d-flex align-items-center p-3">
-                <img src="{% if band.profile_picture %}{{ band.profile_picture.url }}{% else %}{% static 'find_my_gig/images/pfp-placeholder.png' %}{% endif %}" 
-                     class="profile-pic me-3" style="width: 70px; height: 70px; border-width: 2px;" alt="{{ band.name }}">
-                <div class="flex-grow-1">
-                    <h5 class="mb-1" style="color: #fff;">{{ band.name }}</h5>
-                    <p class="text-muted-custom mb-0" style="font-size: 0.85rem;">📍 {{ band.location }}</p>
+      <div class="mb-5">
+        <h3 class="mb-4" style="color: #fff; font-weight: 700;">★ Saved Bands</h3>
+        <div class="row">
+          {% for band in saved_bands %}
+            <div class="col-md-6 col-lg-4 d-flex align-items-stretch mb-4" id="saved-band-{{ band.id }}">
+                <div class="listing-card w-100 d-flex align-items-center p-3 flex-wrap">
+                    <img src="{% if band.profile_picture %}{{ band.profile_picture.url }}{% else %}{% static 'find_my_gig/images/pfp-placeholder.png' %}{% endif %}" 
+                         class="profile-pic me-3" style="width: 70px; height: 70px; border-width: 2px;" alt="{{ band.name }}">
+                    <div class="flex-grow-1 mb-2 mb-sm-0">
+                        <h5 class="mb-1" style="color: #fff;">{{ band.name }}</h5>
+                        <p class="text-muted-custom mb-0" style="font-size: 0.85rem;">📍 {{ band.location }}</p>
+                    </div>
+                    <div class="d-flex flex-column gap-2 w-100 mt-3 border-top-accent pt-3">
+                        <a href="{% url 'gigs:band_detail' band.id %}" class="btn btn-outline-light rounded-pill btn-sm w-100">View Profile</a>
+                        <button type="button" class="btn btn-outline-danger rounded-pill btn-sm w-100 remove-saved-band-btn" data-band-id="{{ band.id }}">Remove</button>
+                    </div>
                 </div>
-                <a href="{% url 'gigs:band_profile' band.id %}" class="btn apply-btn rounded-pill px-3 py-1 text-uppercase" style="font-size: 0.75rem;">View</a>
             </div>
+          {% empty %}
+            <div class="col-12"><p class="text-muted-custom">You haven't saved any bands yet.</p></div>
+          {% endfor %}
         </div>
-      {% empty %}
-        <div class="col-12"><p class="text-muted-custom">You haven't saved any bands yet.</p></div>
-      {% endfor %}
-    </div>
-  </div>
+      </div>
+
+  {% elif profile_type == 'band' %}
+      <div class="mb-5">
+        <h3 class="mb-4" style="color: #fff; font-weight: 700;">🎯 Scouted Musicians</h3>
+        <div class="row">
+          {% for mus in scouted_musicians %}
+            <div class="col-md-6 col-lg-4 d-flex align-items-stretch mb-4" id="scouted-musician-{{ mus.id }}">
+                <div class="listing-card w-100 d-flex align-items-center p-3 flex-wrap">
+                    <img src="{% if mus.profile_picture %}{{ mus.profile_picture.url }}{% else %}{% static 'find_my_gig/images/pfp-placeholder.png' %}{% endif %}" 
+                         class="profile-pic me-3" style="width: 70px; height: 70px; border-width: 2px;" alt="{{ mus.user.username }}">
+                    <div class="flex-grow-1 mb-2 mb-sm-0">
+                        <h5 class="mb-1" style="color: #fff;">{{ mus.user.first_name }} {{ mus.user.last_name }}</h5>
+                        <p class="text-muted-custom mb-0" style="font-size: 0.85rem;">🎸 {{ mus.instruments }}</p>
+                    </div>
+                    <div class="d-flex flex-column gap-2 w-100 mt-3 border-top-accent pt-3">
+                        <a href="{% url 'gigs:musician_detail' mus.id %}" class="btn apply-btn rounded-pill btn-sm w-100">View & Invite</a>
+                    </div>
+                </div>
+            </div>
+          {% empty %}
+            <div class="col-12 text-center py-5">
+                <p class="text-muted-custom">Your roster is empty. Go find some talent!</p>
+                <a href="{% url 'gigs:musicians_list' %}" class="btn btn-outline-light rounded-pill mt-3 px-4">Browse Musicians</a>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+  {% endif %}
 
 </div>
 {% endblock %}

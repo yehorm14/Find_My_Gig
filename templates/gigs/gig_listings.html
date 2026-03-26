@@ -67,17 +67,10 @@ Gigs
                     
                     {% if user.is_authenticated and user.musician %}
                     <div class="d-flex gap-2 mb-3">
-                        <button type="button" id="gig-detail-apply-btn-{{ gig.id }}"
-                                class="{% if gig.id in applied_gig_ids %}withdraw-btn{% else %}apply-btn{% endif %} btn btn-primary nice-button w-50"
+                        <button type="button" 
+                                class="btn {% if gig.id in applied_gig_ids %}withdraw-btn btn-danger{% else %}apply-btn btn-primary{% endif %} nice-button w-100"
                                 data-gig-id="{{ gig.id }}">
                           {% if gig.id in applied_gig_ids %}Withdraw{% else %}Apply{% endif %}
-                        </button>
-
-                        <button type="button" id="gig-detail-bookmark-btn"
-                                class="btn btn-outline-light rounded-pill px-4 py-2"
-                                data-gig-id="{{ listing.id }}"
-                                data-bookmarked="{{ is_bookmarked|yesno:'true,false' }}">
-                          {% if is_bookmarked %}★ Bookmarked{% else %}☆ Bookmark{% endif %}
                         </button>
                     </div>
                     {% endif %}

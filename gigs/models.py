@@ -43,6 +43,7 @@ class Band(models.Model):
     location = models.CharField(max_length=100)
     bio = models.CharField(max_length=500)
     profile_picture = models.ImageField(upload_to='profile_images', blank=True, default='profile_images/pfp-placeholder.png')
+    scouted_musicians = models.ManyToManyField('Musician', related_name='scouted_by_bands', blank=True)
 
     @property
     def community_badge(self):
@@ -128,3 +129,20 @@ class MediaLink(models.Model):
 
     def __str__(self):
         return self.url
+    
+class Invitation(models.Model):
+    """Tracks when a Band formally invites a Musician to a specific Gig."""
+    STATUS_CHOICES = (
+        ('Pending', 'Pending'),
+        ('Accepted', 'Accepted'),
+        ('Declined', 'Declined'),
+    )
+    
+    band = models.ForeignKey(Band, on_delete=models.CASCADE, related_name='sent_invitations')
+    musician = models.ForeignKey(Musician, on_delete=models.CASCADE, related_name='received_invitations')
+    listing = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name='invitations')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.band.name} invited {self.musician.user.username} to {self.listing.title}"

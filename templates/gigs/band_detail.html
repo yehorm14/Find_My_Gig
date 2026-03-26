@@ -6,45 +6,72 @@
 {% endblock %}
 
 {% block body_block %}
-<div class="container mt-5 px-4 px-md-5">
+<div id="status-message" class="container mt-3"></div>
+
+<div class="container mt-4 px-4 px-md-5 mb-5">
     
     <nav aria-label="breadcrumb" class="mb-4">
-        <a href="{% url 'gigs:gig_listings' %}" class="subtle-link d-inline-flex align-items-center">
-            ← Back to gigs
+        <a href="{% url 'gigs:bands_list' %}" 
+           onclick="if(document.referrer) { window.history.back(); return false; }" 
+           class="subtle-link d-inline-flex align-items-center">
+            ← Go Back
         </a>
     </nav>
 
+    <div class="d-flex align-items-center justify-content-center gap-4 mb-5 text-center text-md-start flex-wrap">
+        <img src="{% if band.profile_picture %}{{ band.profile_picture.url }}{% else %}{% static 'find_my_gig/images/pfp-placeholder.png' %}{% endif %}" 
+             class="profile-pic" 
+             style="width: 140px; height: 140px; border-width: 3px;" 
+             alt="{{ band.name }}">
+        <div>
+            <h1 class="display-4 mb-1" style="font-weight: 800; color: #fff;">{{ band.name }}</h1>
+            <p class="gig-accent-text h5 mb-0">📍 {{ band.location|default:"Location not specified" }}</p>
+        </div>
+    </div>
+
     <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="listing-card p-5 text-center">
-                <img src="{% if band.profile_picture %}{{ band.profile_picture.url }}{% else %}{% static 'find_my_gig/images/pfp-placeholder.png' %}{% endif %}" 
-                     class="profile-pic mb-4" 
-                     style="width: 150px; height: 150px;" 
-                     alt="{{ band.name }}">
+        <div class="col-lg-8 mb-4">
+            <div class="listing-card p-5">
                 
-                <h1 class="display-5 mb-2" style="font-weight: 800; color: #fff;">{{ band.name }}</h1>
-                <p class="text-muted-custom mb-4">📍 {{ band.location }}</p>
-                
-                <hr class="mb-4" style="border-color: #2a2a35;">
-                
-                <div class="text-start mb-4">
-                    <span class="detail-label">About the Band</span>
-                    <p class="description-text">{{ band.bio }}</p>
+                <h5 class="mb-3 border-bottom-accent">About the Band</h5>
+                <p class="description-text mb-5">{{ band.bio|default:"No bio provided yet." }}</p>
+
+                <h5 class="mb-3 border-bottom-accent">Active Gig Listings</h5>
+                <div class="mb-4">
+                    {% if band.listing_set.all %}
+                        <div class="list-group">
+                            {% for gig in band.listing_set.all %}
+                                <a href="{% url 'gigs:gig_detail' gig.id %}" class="list-group-item list-group-item-action bg-transparent text-light mb-2 rounded p-3" style="border: 1px solid var(--border-dim); transition: border-color 0.2s;" onmouseover="this.style.borderColor='var(--neon-cyan)'" onmouseout="this.style.borderColor='var(--border-dim)'">
+                                    <div class="d-flex w-100 justify-content-between align-items-center">
+                                        <h6 class="mb-1" style="font-weight: 700;">{{ gig.title }}</h6>
+                                        <small class="gig-accent-text">{{ gig.deadline|date:"M d, Y" }}</small>
+                                    </div>
+                                    <p class="mb-0 small text-muted-custom">🎸 Position: {{ gig.req_instruments }}</p>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted-custom small text-center py-4">This band currently has no open listings.</p>
+                    {% endif %}
                 </div>
 
-                {% if user.is_authenticated and user.musician %}
-                    <div class="mt-4 pt-4 action-border">
+                <div class="mt-4 pt-4 action-border text-center">
+                    {% if user.is_authenticated and user.musician %}
                         <button type="button" id="save-band-btn"
-                                class="btn {% if is_bookmarked %}btn-outline-light{% else %}apply-btn{% endif %} rounded-pill px-5 py-2"
+                                class="btn {% if is_bookmarked %}btn-outline-light{% else %}apply-btn{% endif %} rounded-pill px-5 py-2 w-100"
                                 data-band-id="{{ band.id }}"
                                 data-bookmarked="{{ is_bookmarked|yesno:'true,false' }}">
                           {% if is_bookmarked %}★ Saved to Favorites{% else %}☆ Save Band{% endif %}
                         </button>
-                    </div>
-                {% endif %}
+                    {% endif %}
+                </div>
 
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts_block %}
+    <script src="{% static 'find_my_gig/js/gigs.js' %}"></script>
 {% endblock %}

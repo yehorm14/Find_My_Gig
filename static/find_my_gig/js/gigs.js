@@ -1,217 +1,117 @@
 document.addEventListener('DOMContentLoaded', function () {
 
-    //APPLY / WITHDRAW BUTTON
+    // ==========================================================================
+    // 1. GIG LIST PAGE LOGIC (APPLY / BOOKMARK)
+    // ==========================================================================
     const gigsList = document.getElementById('gigs-list');
 
     if (gigsList) {
         gigsList.addEventListener('click', function (e) {
-            //apply
-            if (e.target.classList.contains('apply-btn')) {
-                const btn = e.target;
-                const gigId = btn.dataset.gigId;
+            
+            // --- Apply / Withdraw ---
+            const applyBtn = e.target.closest('.apply-btn') || e.target.closest('.withdraw-btn');
+            if (applyBtn) {
+                const isApplying = applyBtn.classList.contains('apply-btn');
+                const gigId = applyBtn.dataset.gigId;
 
-                if (!isLoggedIn()) {
-                    redirectToLogin();
-                    return;
-                }
+                if (!isLoggedIn()) { redirectToLogin(); return; }
+                if (!isApplying && !confirm('Are you sure you want to withdraw your application?')) return;
 
-                fetch(`/gigs/${gigId}/apply/`, {
+                const url = isApplying ? `/gigs/${gigId}/apply/` : `/gigs/${gigId}/withdraw/`;
+
+                fetch(url, {
                     method: 'POST',
-                    headers: {
-                        'X-CSRFToken': getCookie('csrftoken'),
-                        'Content-Type': 'application/json'
-                    }
+                    headers: { 'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/json' }
                 })
-                .then(function (response) {
-                    return response.json();
-                })
-                .then(function (data) {
-                    if (data.success) {
-                        btn.textContent = 'Withdraw';
-                        btn.classList.remove('apply-btn');
-                        btn.classList.add('withdraw-btn');
-                        showStatusMessage('status-message', 'Application submitted', 'success');
-                    } else if (data.error === 'already_applied') {
-                        showStatusMessage('status-message', 'You have already applied for this gig', 'error');
-                    } else {
-                        showStatusMessage('status-message', 'Something went wrong, try again', 'error');
-                    }
-                })
-                .catch(function () {
-                    btn.textContent = 'Withdraw';
-                    btn.classList.remove('apply-btn');
-                    btn.classList.add('withdraw-btn');
-                    showStatusMessage('status-message', 'Application submitted', 'success');
-                });
-            }
-
-            //Withdraw Button
-            if (e.target.classList.contains('withdraw-btn')) {
-                const btn = e.target;
-                const gigId = btn.dataset.gigId;
-
-                const confirmed = confirm('Are you sure you want to withdraw your application?');
-
-                if (confirmed) {
-                    fetch(`/gigs/${gigId}/withdraw/`, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRFToken': getCookie('csrftoken'),
-                            'Content-Type': 'application/json'
-                        }
-                    })
-                    .then(function (response) {
-                        return response.json();
-                    })
-                    .then(function (data) {
-                        if (data.success) {
-                            btn.textContent = 'Apply';
-                            btn.classList.remove('withdraw-btn');
-                            btn.classList.add('apply-btn');
-                            showStatusMessage('status-message', 'Application withdrawn', 'success');
-                        } else {
-                            showStatusMessage('status-message', 'Something went wrong, try again', 'error');
-                        }
-                    })
-                    .catch(function () {
-                        btn.textContent = 'Apply';
-                        btn.classList.remove('withdraw-btn');
-                        btn.classList.add('apply-btn');
-                        showStatusMessage('status-message', 'Application withdrawn', 'success');
-                    });
-                }
-            }
-
-            //Bookmark Button
-            if (e.target.classList.contains('bookmark-btn')) {
-                const btn = e.target;
-                const gigId = btn.dataset.gigId;
-
-                if (!isLoggedIn()) {
-                    redirectToLogin();
-                    return;
-                }
-
-                fetch(`/gigs/${gigId}/save/`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': getCookie('csrftoken'),
-                        'Content-Type': 'application/json'
-                    }
-                })
-                .then(response => response.json())
+                .then(res => res.json())
                 .then(data => {
                     if (data.success) {
-                        btn.textContent = '★ Bookmarked';
-                        btn.classList.remove('bookmark-btn');
-                        btn.classList.add('bookmarked-btn');
-                        showStatusMessage('status-message', 'Gig saved', 'success');
+                        applyBtn.textContent = isApplying ? 'Withdraw' : 'Apply';
+                        applyBtn.classList.toggle('apply-btn');
+                        applyBtn.classList.toggle('withdraw-btn');
+                        applyBtn.classList.toggle('btn-primary');
+                        applyBtn.classList.toggle('btn-danger');
+                        showStatusMessage('status-message', isApplying ? 'Application submitted!' : 'Application withdrawn.', 'success');
                     } else {
-                        showStatusMessage('status-message', 'Something went wrong, try again', 'error');
-                    }
-                });
-            }
-
-            // Bookmarked Button (saved → unsaved)
-            if (e.target.classList.contains('bookmarked-btn')) {
-                const btn = e.target;
-                const gigId = btn.dataset.gigId;
-
-                fetch(`/gigs/${gigId}/unsave/`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': getCookie('csrftoken'),
-                        'Content-Type': 'application/json'
+                        showStatusMessage('status-message', data.error || 'Something went wrong', 'error');
                     }
                 })
-                .then(response => response.json())
+                .catch(() => showStatusMessage('status-message', 'Network error.', 'error'));
+            }
+
+            // --- Bookmark / Unbookmark ---
+            const bookmarkBtn = e.target.closest('.bookmark-btn') || e.target.closest('.bookmarked-btn');
+            if (bookmarkBtn) {
+                const gigId = bookmarkBtn.dataset.gigId;
+                const isSaving = bookmarkBtn.classList.contains('bookmark-btn');
+
+                if (!isLoggedIn()) { redirectToLogin(); return; }
+
+                const url = isSaving ? `/gigs/${gigId}/save/` : `/gigs/${gigId}/unsave/`;
+
+                fetch(url, {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/json' }
+                })
+                .then(res => res.json())
                 .then(data => {
                     if (data.success) {
-                        btn.textContent = '★ Bookmark';
-                        btn.classList.remove('bookmarked-btn');
-                        btn.classList.add('bookmark-btn');
-                        showStatusMessage('status-message', 'Gig removed from saved', 'success');
+                        bookmarkBtn.textContent = isSaving ? '★ Bookmarked' : '☆ Bookmark';
+                        // Toggle the logic classes
+                        bookmarkBtn.classList.toggle('bookmark-btn');
+                        bookmarkBtn.classList.toggle('bookmarked-btn');
+                        // Toggle the visual CSS colors!
+                        bookmarkBtn.classList.toggle('btn-outline-light');
+                        bookmarkBtn.classList.toggle('btn-light');
+                        showStatusMessage('status-message', isSaving ? 'Gig saved!' : 'Removed from saved.', 'success');
                     } else {
-                        showStatusMessage('status-message', 'Something went wrong, try again', 'error');
+                        showStatusMessage('status-message', data.error || 'Something went wrong', 'error');
                     }
-                });
+                })
+                .catch(() => showStatusMessage('status-message', 'Network error.', 'error'));
             }
         });
     }
 
-    //Single Gig detail page
+    // ==========================================================================
+    // 2. SINGLE GIG DETAIL PAGE LOGIC
+    // ==========================================================================
     const gigDetailApplyBtn = document.getElementById('gig-detail-apply-btn');
-
     if (gigDetailApplyBtn) {
         gigDetailApplyBtn.addEventListener('click', function () {
-
-            if (!isLoggedIn()) {
-                redirectToLogin();
-                return;
-            }
+            if (!isLoggedIn()) { redirectToLogin(); return; }
 
             const gigId = this.dataset.gigId;
             const isApplied = this.dataset.applied === 'true';
             const btn = this;
-
             const url = isApplied ? `/gigs/${gigId}/withdraw/` : `/gigs/${gigId}/apply/`;
 
-            if (isApplied) {
-                const confirmed = confirm('Are you sure you want to withdraw your application?');
-                if (!confirmed) return;
-            }
+            if (isApplied && !confirm('Are you sure you want to withdraw your application?')) return;
 
             fetch(url, {
                 method: 'POST',
-                headers: {
-                    'X-CSRFToken': getCookie('csrftoken'),
-                    'Content-Type': 'application/json'
-                }
+                headers: { 'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/json' }
             })
-            .then(function (response) {
-                return response.json();
-            })
-            .then(function (data) {
+            .then(res => res.json())
+            .then(data => {
                 if (data.success) {
-                    if (isApplied) {
-                        btn.textContent = 'Apply';
-                        btn.dataset.applied = 'false';
-                        showStatusMessage('gig-detail-status', 'Application withdrawn', 'success');
-                    } else {
-                        btn.textContent = 'Withdraw';
-                        btn.dataset.applied = 'true';
-                        showStatusMessage('gig-detail-status', 'Application submitted', 'success');
-                    }
-                } else if (data.error === 'already_applied') {
-                    showStatusMessage('gig-detail-status', 'You have already applied for this gig', 'error');
+                    btn.textContent = isApplied ? 'Apply' : 'Withdraw';
+                    btn.dataset.applied = isApplied ? 'false' : 'true';
+                    btn.classList.toggle('btn-primary');
+                    btn.classList.toggle('btn-danger');
+                    showStatusMessage('gig-detail-status', isApplied ? 'Application withdrawn.' : 'Application submitted!', 'success');
                 } else {
-                    showStatusMessage('gig-detail-status', 'Something went wrong, try again', 'error');
+                    showStatusMessage('gig-detail-status', data.error || 'Something went wrong', 'error');
                 }
             })
-            .catch(function () {
-                if (isApplied) {
-                    btn.textContent = 'Apply';
-                    btn.dataset.applied = 'false';
-                    showStatusMessage('gig-detail-status', 'Application withdrawn', 'success');
-                } else {
-                    btn.textContent = 'Withdraw';
-                    btn.dataset.applied = 'true';
-                    showStatusMessage('gig-detail-status', 'Application submitted', 'success');
-                }
-            });
-        })
-    }});
+            .catch(() => showStatusMessage('gig-detail-status', 'Network Error', 'error'));
+        });
+    }
     
-
     const gigDetailBookmarkBtn = document.getElementById('gig-detail-bookmark-btn');
-
     if (gigDetailBookmarkBtn) {
         gigDetailBookmarkBtn.addEventListener('click', function () {
-
-            if (!isLoggedIn()) {
-                redirectToLogin();
-                return;
-            }
+            if (!isLoggedIn()) { redirectToLogin(); return; }
 
             const gigId = this.dataset.gigId;
             const isBookmarked = this.dataset.bookmarked === 'true';
@@ -220,83 +120,121 @@ document.addEventListener('DOMContentLoaded', function () {
 
             fetch(url, {
                 method: 'POST',
-                headers: {
-                    'X-CSRFToken': getCookie('csrftoken'),
-                    'Content-Type': 'application/json'
-                }
+                headers: { 'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/json' }
             })
-            .then(response => response.json())
+            .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    if (isBookmarked) {
-                        btn.textContent = '★ Bookmark';
-                        btn.classList.remove('bookmarked-btn');
-                        btn.classList.add('bookmark-btn');
-                        showStatusMessage('gig-detail-status', 'Gig removed from saved', 'success');
-                    } else {
-                        btn.textContent = '★ Bookmarked';
-                        btn.dataset.bookmarked = 'true';
-                        btn.classList.remove('bookmark-btn');
-                        btn.classList.add('bookmarked-btn');
-                        showStatusMessage('gig-detail-status', 'Gig saved', 'success');
-                    }
+                    btn.textContent = isBookmarked ? '☆ Bookmark' : '★ Bookmarked';
+                    btn.dataset.bookmarked = isBookmarked ? 'false' : 'true';
+                    btn.classList.toggle('bookmark-btn');
+                    btn.classList.toggle('bookmarked-btn');
+                    btn.classList.toggle('btn-outline-light');
+                    btn.classList.toggle('btn-light');
+                    showStatusMessage('gig-detail-status', isBookmarked ? 'Gig removed from saved.' : 'Gig saved!', 'success');
                 } else {
                     showStatusMessage('gig-detail-status', 'Something went wrong, try again', 'error');
                 }
             })
-            .catch(() => {
-                if (isBookmarked) {
-                    btn.textContent = '★ Bookmark';
-                    btn.dataset.bookmarked = 'false';
-                    btn.classList.remove('bookmarked-btn');
-                    btn.classList.add('bookmark-btn')
+            .catch(() => showStatusMessage('gig-detail-status', 'Network Error', 'error'));
+        });
+    }
+
+    // ==========================================================================
+    // 3. BAND DETAIL PAGE LOGIC (Musicians Saving Bands)
+    // ==========================================================================
+    const saveBandBtn = document.getElementById('save-band-btn');
+    if (saveBandBtn) {
+        saveBandBtn.addEventListener('click', function () {
+            if (!isLoggedIn()) { redirectToLogin(); return; }
+
+            const bandId = this.dataset.bandId;
+            const isBookmarked = this.dataset.bookmarked === 'true';
+            const btn = this;
+            const url = isBookmarked ? `/bands/${bandId}/unsave/` : `/bands/${bandId}/save/`;
+
+            fetch(url, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/json' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    btn.textContent = isBookmarked ? '☆ Save Band' : '★ Saved to Favorites';
+                    btn.dataset.bookmarked = isBookmarked ? 'false' : 'true';
+                    btn.classList.toggle('btn-outline-light');
+                    btn.classList.toggle('apply-btn');
+                    showStatusMessage('status-message', isBookmarked ? 'Band removed from favorites' : 'Band saved to favorites!', 'success');
                 } else {
-                    btn.textContent = 'Bookmarked';
-                    btn.dataset.bookmarked = 'true';
-                    btn.classList.remove('bookmark-btn');
-                    btn.classList.add('bookmarked-btn');
+                    showStatusMessage('status-message', data.error || 'Something went wrong', 'error');
+                }
+            })
+            .catch(() => showStatusMessage('status-message', 'Network error. Try again.', 'error'));
+        });
+    }
+
+    // ==========================================================================
+    // 4. MUSICIAN DETAIL PAGE LOGIC (Bands Scouting & Inviting)
+    // ==========================================================================
+    const scoutMusicianBtn = document.getElementById('scout-musician-btn');
+    if (scoutMusicianBtn) {
+        scoutMusicianBtn.addEventListener('click', function () {
+            if (!isLoggedIn()) { redirectToLogin(); return; }
+
+            const id = this.dataset.musicianId;
+            const isScouted = this.dataset.scouted === 'true';
+            const url = isScouted ? `/musicians/${id}/unsave/` : `/musicians/${id}/save/`;
+
+            fetch(url, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/json' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    this.textContent = isScouted ? '☆ Scout Musician' : '★ On Your Roster';
+                    this.dataset.scouted = isScouted ? 'false' : 'true';
+                    this.classList.toggle('btn-outline-light');
+                    this.classList.toggle('apply-btn');
+                    showStatusMessage('status-message', isScouted ? 'Removed from roster' : 'Added to roster!', 'success');
                 }
             });
         });
     }
 
+    const confirmInviteBtn = document.getElementById('confirm-invite-btn');
+    if (confirmInviteBtn) {
+        confirmInviteBtn.addEventListener('click', function () {
+            const musicianId = this.dataset.musicianId;
+            const gigSelect = document.getElementById('invite-gig-select');
+            if (!gigSelect) return;
+            const listingId = gigSelect.value;
 
-//Helper
-
-function updateGigsList(gigs) {
-    const gigsList = document.getElementById('gigs-list');
-
-    if (gigsList) {
-        gigsList.innerHTML = '';
-
-        if (gigs.length === 0) {
-            gigsList.innerHTML = '<p>No gigs found matching your filters</p>';
-            return;
-        }
-
-        gigs.forEach(function (gig) {
-            const gigCard = document.createElement('div');
-            gigCard.classList.add('gig-card');
-
-            gigCard.innerHTML = `
-                <h3>${gig.title}</h3>
-                <p>Posted by: ${gig.band_name}</p>
-                <p>Position: ${gig.req_instruments}</p>
-                <p>Date: ${formatDate(gig.deadline)}</p>
-                <p>Location: ${gig.location}</p>
-                <button class="apply-btn" data-gig-id="${gig.id}">Apply</button>
-                <button class="bookmark-btn" data-gig-id="${gig.id}">Bookmark</button>
-            `;
-
-            gigsList.appendChild(gigCard);
+            fetch(`/musicians/${musicianId}/invite/`, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/json' },
+                body: JSON.stringify({ listing_id: listingId })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    showStatusMessage('status-message', 'Invitation sent successfully!', 'success');
+                    const modalEl = document.getElementById('inviteModal');
+                    const modal = bootstrap.Modal.getInstance(modalEl);
+                    if (modal) modal.hide();
+                } else {
+                    showStatusMessage('status-message', data.error || 'Failed to send invite.', 'error');
+                }
+            })
+            .catch(() => showStatusMessage('status-message', 'Network error.', 'error'));
         });
     }
-}
 
+});
 
-// ==========================================
-//             GOOGLE MAPS LOGIC 
-// ==========================================
+// ==========================================================================
+// 5. GOOGLE MAPS LOGIC 
+// ==========================================================================
 function initMap() {
     const mapElements = document.querySelectorAll('.gig-mini-map');
 
@@ -305,15 +243,15 @@ function initMap() {
         const lng = parseFloat(mapDiv.getAttribute('data-lng'));
         const title = mapDiv.getAttribute('data-title');
 
-        const location = { lat: lat, lng: lng };
-
-        const map = new google.maps.Map(mapDiv, {
-            zoom: 14,
-            center: location,
-            disableDefaultUI: true 
-        });
-
-        new google.maps.Marker({ position: location, map: map, title: title });
+        if (!isNaN(lat) && !isNaN(lng)) {
+            const location = { lat: lat, lng: lng };
+            const map = new google.maps.Map(mapDiv, {
+                zoom: 14,
+                center: location,
+                disableDefaultUI: true 
+            });
+            new google.maps.Marker({ position: location, map: map, title: title });
+        }
     });
 }
 
