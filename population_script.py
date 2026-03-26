@@ -4,7 +4,7 @@ from datetime import timedelta
 from django.utils import timezone
 
 # Set up Django Environment
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'find_my_gig_.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'find_my_gig.settings')
 import django
 django.setup()
 
