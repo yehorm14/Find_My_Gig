@@ -19,7 +19,7 @@
     <div class="mb-5">
         <h1 class="display-4" style="font-weight: 800; color: #fff;">{{ listing.title }}</h1>
         <h4>
-            <a href="{% url 'gigs:band_profile' listing.band.id %}" class="gig-accent-text" style="text-decoration: none; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+            <a href="{% url 'gigs:band_detail' listing.band.id %}" class="gig-accent-text" style="text-decoration: none; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
                 {{ listing.band.name }}
             </a>
         </h4>

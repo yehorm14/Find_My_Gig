@@ -16,6 +16,7 @@ My Applications | Find My Gig
   </div>
 
   <hr class="mb-5" style="border-color: #2a2a35;">
+  
   {% if invitations %}
   <div class="row justify-content-center mb-5">
     <div class="col-lg-10">
@@ -53,7 +54,7 @@ My Applications | Find My Gig
   </div>
   {% endif %}
 
-  <div class="row justify-content-center">
+  <div class="row justify-content-center" id="gigs-list">
     <div class="col-lg-10">
       
       {% for application in applications %}
@@ -117,5 +118,6 @@ My Applications | Find My Gig
 
 {% block scripts_block %}
     <script src="{% static 'find_my_gig/js/dashboard.js' %}"></script>
-    <script src="{% static 'find_my_gig/js/gigs.js' %}"></script> <script async defer src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_frontend_key }}&callback=initMap"></script>
+    <script src="{% static 'find_my_gig/js/gigs.js' %}"></script> 
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_frontend_key }}&callback=initMap"></script>
 {% endblock %}
