@@ -2,60 +2,110 @@
 {% load static %}
 
 {% block title_block %}
-My Listings
+Gigs
+{% endblock %}
+
+{% block header_block %}
 {% endblock %}
 
 {% block body_block %}
 <div id="status-message"></div>
-<div class="text-center m-4 mt-5">
-  <h1 class="display-4" style="font-weight: 800; color: #fff;">My <span class="gig-accent-text">Listings</span></h1>
-</div>
 
-<hr class="mx-5 mb-5" style="border-color: #2a2a35;">
-
-<div class="row justify-content-center">
-  <div class="col-md-10 mx-5">
+<div class="container mt-5 px-4 px-md-5">
     
-    <div class="text-end mb-4">
-        <a href="{% url 'gigs:create_gig' %}" class="btn apply-btn rounded-pill px-4 py-2">
-            + Post New Gig
-        </a>
-    </div>
-
-    <div id="my-listings-list" class="listings-container">
-      {% for gig in listings %}
-        <div class="listing-card m-2 mb-4">
-            <div class="row align-items-center">
-                <div class="col-md-4">
-                    <h4 style="color: #fff; font-weight: 700;">{{ gig.title }}</h4>
-                    <p class="mb-1 text-muted-custom">🎸 Position: {{ gig.req_instruments }}</p>
-                    <p class="mb-0 text-muted-custom">⏳ Date: {{ gig.deadline }}</p>
-                </div>
-
-                <div class="col-md-5">
-                  <p class="description-text mb-1">{{ gig.description|truncatechars:100 }}</p>
-                  <p class="gig-accent-text mb-0">📍 {{ gig.location }}</p>
-                </div>
-
-                <div class="col-md-3 d-flex flex-column align-items-end justify-content-center">
-                    <button type="button"
-                            class="delete-listing-btn btn btn-outline-danger rounded-pill w-100 my-2"
-                            data-listing-id="{{ gig.id }}">
-                        Delete Listing
-                    </button>
-                </div>
+    <div class="row align-items-center mb-4">
+        <div class="col-md-6">
+            <h2 class="mb-0" style="font-weight: 800; font-size: 2.2rem;">Discover Gigs</h2>
+        </div>
+        <div class="col-md-6 d-flex justify-content-md-end mt-3 mt-md-0">
+            <select class="form-select w-auto me-2" id="filter-instrument" name="filter">
+                <option value="">Filter by Instrument...</option>
+                <option value="Guitar">Guitar</option>
+                <option value="Drums">Drums</option>
+                <option value="Vocals">Vocals</option>
+                <option value="Bass">Bass</option>
+                <option value="Other">Other</option>
+            </select>
+            <button type="button" id="filter-btn" class="btn apply-btn rounded-pill px-4">
+                Filter
+            </button>
+            <div class="col-auto m-3">
+            <a href="/gigs/" class="btn btn-primary nice-button primary-color">Clear</a>
             </div>
         </div>
-      {% empty %}
-        <div class="text-center py-5">
-            <h4 class="text-muted-custom">You haven't posted any gigs yet!</h4>
-        </div>
-      {% endfor %}
     </div>
-  </div>
+
+    <hr class="mb-5" style="border-color: #2a2a35; opacity: 1;">
+
+    <div id="gigs-list" class="row">
+        {% for gig in gigs %}
+        <div class="col-md-6 col-lg-4 d-flex align-items-stretch mb-4">
+            <div class="listing-card w-100 d-flex flex-column">
+                
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="badge badge-instrument rounded-pill px-3 py-2">
+                        🎸 {{ gig.req_instruments }}
+                    </span>
+                    {% if gig.is_urgent %}
+                        <span class="badge badge-urgent rounded-pill px-3 py-2">🔥 URGENT</span>
+                    {% endif %}
+                </div>
+
+                <h3 class="gig-title mb-1">{{ gig.title }}</h3>
+                <p class="text-muted-custom mb-2">
+                    <strong>Band:</strong> {{ gig.band.name }}
+                </p>
+                <p class="mb-3">
+                    📍 <span class="gig-accent-text">{{ gig.location }}</span>
+                </p>
+
+                <div class="mt-auto pt-3" style="border-top: 1px solid #2a2a35;">
+                    
+                    <a href="{% url 'gigs:gig_detail' gig.id %}" class="btn btn-outline-light w-100 rounded-pill mb-2">
+                        View Details
+                    </a>
+                    
+                    {% if user.is_authenticated and user.musician %}
+                    <div class="d-flex gap-2 mb-3">
+                        <button type="button" 
+                                class="btn {% if gig.id in applied_gig_ids %}withdraw-btn btn-danger{% else %}apply-btn btn-primary{% endif %} nice-button w-50"
+                                data-gig-id="{{ gig.id }}">
+                          {% if gig.id in applied_gig_ids %}Withdraw{% else %}Apply{% endif %}
+                        </button>
+
+                        <button type="button" 
+                                class="btn {% if gig.id in bookmarked_gig_ids %}bookmarked-btn btn-light{% else %}bookmark-btn btn-outline-light{% endif %} rounded-pill px-4 py-2 w-50"
+                                data-gig-id="{{ gig.id }}">
+                          {% if gig.id in bookmarked_gig_ids %}★ Bookmarked{% else %}☆ Bookmark{% endif %}
+                        </button>
+                    </div>
+                    {% endif %}
+
+                    <div class="d-flex gap-2 mb-3">
+                        <a href="{% url 'gigs:submit_review' gig.id %}" 
+                           class="btn btn-outline-secondary rounded-pill w-100">
+                            Leave a Review
+                        </a>
+                    </div>
+
+                    <div class="text-center">
+                        <small class="text-muted-custom">
+                            ⏳ Deadline: {{ gig.deadline|date:"M d, Y" }}
+                        </small>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <h4 class="text-muted-custom">No gigs found right now. Check back later!</h4>
+        </div>
+        {% endfor %}
+    </div>
 </div>
 {% endblock %}
 
 {% block scripts_block %}
-    <script src="{% static 'find_my_gig/js/dashboard.js' %}"></script>
+    <script src="{% static 'find_my_gig/js/gigs.js' %}"></script>
 {% endblock %}

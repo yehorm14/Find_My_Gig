@@ -236,7 +236,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const confirmed = confirm(`Are you sure you want to ${action.toLowerCase()} this invitation?`);
 
             if (confirmed) {
-                fetch(`/gigs/invitations/${inviteId}/respond/`, {
+                fetch(`/invitations/${inviteId}/respond/`, {
                     method: 'POST',
                     headers: {
                         'X-CSRFToken': getCookie('csrftoken'),

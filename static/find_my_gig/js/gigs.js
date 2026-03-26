@@ -8,63 +8,42 @@ document.addEventListener('DOMContentLoaded', function () {
     if (gigsList) {
         gigsList.addEventListener('click', function (e) {
             
-            // --- Apply to a Gig ---
-            if (e.target.classList.contains('apply-btn')) {
-                const btn = e.target;
-                const gigId = btn.dataset.gigId;
+            // --- Apply / Withdraw ---
+            const applyBtn = e.target.closest('.apply-btn') || e.target.closest('.withdraw-btn');
+            if (applyBtn) {
+                const isApplying = applyBtn.classList.contains('apply-btn');
+                const gigId = applyBtn.dataset.gigId;
 
                 if (!isLoggedIn()) { redirectToLogin(); return; }
+                if (!isApplying && !confirm('Are you sure you want to withdraw your application?')) return;
 
-                fetch(`/gigs/${gigId}/apply/`, {
+                const url = isApplying ? `/gigs/${gigId}/apply/` : `/gigs/${gigId}/withdraw/`;
+
+                fetch(url, {
                     method: 'POST',
                     headers: { 'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/json' }
                 })
                 .then(res => res.json())
                 .then(data => {
                     if (data.success) {
-                        btn.textContent = 'Withdraw';
-                        btn.classList.remove('apply-btn');
-                        btn.classList.add('withdraw-btn');
-                        showStatusMessage('status-message', 'Application submitted', 'success');
-                    } else if (data.error === 'already_applied') {
-                        showStatusMessage('status-message', 'You have already applied for this gig', 'error');
+                        applyBtn.textContent = isApplying ? 'Withdraw' : 'Apply';
+                        applyBtn.classList.toggle('apply-btn');
+                        applyBtn.classList.toggle('withdraw-btn');
+                        applyBtn.classList.toggle('btn-primary');
+                        applyBtn.classList.toggle('btn-danger');
+                        showStatusMessage('status-message', isApplying ? 'Application submitted!' : 'Application withdrawn.', 'success');
                     } else {
-                        showStatusMessage('status-message', 'Something went wrong, try again', 'error');
+                        showStatusMessage('status-message', data.error || 'Something went wrong', 'error');
                     }
                 })
                 .catch(() => showStatusMessage('status-message', 'Network error.', 'error'));
             }
 
-            // --- Withdraw Application ---
-            if (e.target.classList.contains('withdraw-btn')) {
-                const btn = e.target;
-                const gigId = btn.dataset.gigId;
-
-                if (confirm('Are you sure you want to withdraw your application?')) {
-                    fetch(`/gigs/${gigId}/withdraw/`, {
-                        method: 'POST',
-                        headers: { 'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/json' }
-                    })
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.success) {
-                            btn.textContent = 'Apply';
-                            btn.classList.remove('withdraw-btn');
-                            btn.classList.add('apply-btn');
-                            showStatusMessage('status-message', 'Application withdrawn', 'success');
-                        } else {
-                            showStatusMessage('status-message', 'Something went wrong, try again', 'error');
-                        }
-                    })
-                    .catch(() => showStatusMessage('status-message', 'Network Error', 'error'));
-                }
-            }
-
-            // --- Bookmark Toggle (Save/Unsave Gig) ---
-            if (e.target.classList.contains('bookmark-btn') || e.target.classList.contains('bookmarked-btn')) {
-                const btn = e.target;
-                const gigId = btn.dataset.gigId;
-                const isSaving = btn.classList.contains('bookmark-btn');
+            // --- Bookmark / Unbookmark ---
+            const bookmarkBtn = e.target.closest('.bookmark-btn') || e.target.closest('.bookmarked-btn');
+            if (bookmarkBtn) {
+                const gigId = bookmarkBtn.dataset.gigId;
+                const isSaving = bookmarkBtn.classList.contains('bookmark-btn');
 
                 if (!isLoggedIn()) { redirectToLogin(); return; }
 
@@ -77,12 +56,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 .then(res => res.json())
                 .then(data => {
                     if (data.success) {
-                        btn.textContent = isSaving ? '★ Bookmarked' : '★ Bookmark';
-                        btn.classList.toggle('bookmark-btn');
-                        btn.classList.toggle('bookmarked-btn');
-                        showStatusMessage('status-message', isSaving ? 'Gig saved' : 'Removed from saved', 'success');
+                        bookmarkBtn.textContent = isSaving ? '★ Bookmarked' : '☆ Bookmark';
+                        // Toggle the logic classes
+                        bookmarkBtn.classList.toggle('bookmark-btn');
+                        bookmarkBtn.classList.toggle('bookmarked-btn');
+                        // Toggle the visual CSS colors!
+                        bookmarkBtn.classList.toggle('btn-outline-light');
+                        bookmarkBtn.classList.toggle('btn-light');
+                        showStatusMessage('status-message', isSaving ? 'Gig saved!' : 'Removed from saved.', 'success');
                     } else {
-                        showStatusMessage('status-message', 'Something went wrong, try again', 'error');
+                        showStatusMessage('status-message', data.error || 'Something went wrong', 'error');
                     }
                 })
                 .catch(() => showStatusMessage('status-message', 'Network error.', 'error'));
@@ -93,8 +76,6 @@ document.addEventListener('DOMContentLoaded', function () {
     // ==========================================================================
     // 2. SINGLE GIG DETAIL PAGE LOGIC
     // ==========================================================================
-    
-    // Single Gig: Apply/Withdraw
     const gigDetailApplyBtn = document.getElementById('gig-detail-apply-btn');
     if (gigDetailApplyBtn) {
         gigDetailApplyBtn.addEventListener('click', function () {
@@ -116,18 +97,17 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (data.success) {
                     btn.textContent = isApplied ? 'Apply' : 'Withdraw';
                     btn.dataset.applied = isApplied ? 'false' : 'true';
-                    showStatusMessage('gig-detail-status', isApplied ? 'Application withdrawn' : 'Application submitted', 'success');
-                } else if (data.error === 'already_applied') {
-                    showStatusMessage('gig-detail-status', 'You have already applied for this gig', 'error');
+                    btn.classList.toggle('btn-primary');
+                    btn.classList.toggle('btn-danger');
+                    showStatusMessage('gig-detail-status', isApplied ? 'Application withdrawn.' : 'Application submitted!', 'success');
                 } else {
-                    showStatusMessage('gig-detail-status', 'Something went wrong, try again', 'error');
+                    showStatusMessage('gig-detail-status', data.error || 'Something went wrong', 'error');
                 }
             })
             .catch(() => showStatusMessage('gig-detail-status', 'Network Error', 'error'));
         });
     }
     
-    // Single Gig: Bookmark
     const gigDetailBookmarkBtn = document.getElementById('gig-detail-bookmark-btn');
     if (gigDetailBookmarkBtn) {
         gigDetailBookmarkBtn.addEventListener('click', function () {
@@ -145,11 +125,13 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    btn.textContent = isBookmarked ? '★ Bookmark' : '★ Bookmarked';
+                    btn.textContent = isBookmarked ? '☆ Bookmark' : '★ Bookmarked';
                     btn.dataset.bookmarked = isBookmarked ? 'false' : 'true';
                     btn.classList.toggle('bookmark-btn');
                     btn.classList.toggle('bookmarked-btn');
-                    showStatusMessage('gig-detail-status', isBookmarked ? 'Gig removed from saved' : 'Gig saved', 'success');
+                    btn.classList.toggle('btn-outline-light');
+                    btn.classList.toggle('btn-light');
+                    showStatusMessage('gig-detail-status', isBookmarked ? 'Gig removed from saved.' : 'Gig saved!', 'success');
                 } else {
                     showStatusMessage('gig-detail-status', 'Something went wrong, try again', 'error');
                 }
@@ -162,7 +144,6 @@ document.addEventListener('DOMContentLoaded', function () {
     // 3. BAND DETAIL PAGE LOGIC (Musicians Saving Bands)
     // ==========================================================================
     const saveBandBtn = document.getElementById('save-band-btn');
-
     if (saveBandBtn) {
         saveBandBtn.addEventListener('click', function () {
             if (!isLoggedIn()) { redirectToLogin(); return; }
@@ -170,7 +151,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const bandId = this.dataset.bandId;
             const isBookmarked = this.dataset.bookmarked === 'true';
             const btn = this;
-            const url = isBookmarked ? `/gigs/bands/${bandId}/unsave/` : `/gigs/bands/${bandId}/save/`;
+            const url = isBookmarked ? `/bands/${bandId}/unsave/` : `/bands/${bandId}/save/`;
 
             fetch(url, {
                 method: 'POST',
@@ -195,8 +176,6 @@ document.addEventListener('DOMContentLoaded', function () {
     // ==========================================================================
     // 4. MUSICIAN DETAIL PAGE LOGIC (Bands Scouting & Inviting)
     // ==========================================================================
-    
-    // Scout Musician Toggle
     const scoutMusicianBtn = document.getElementById('scout-musician-btn');
     if (scoutMusicianBtn) {
         scoutMusicianBtn.addEventListener('click', function () {
@@ -204,7 +183,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const id = this.dataset.musicianId;
             const isScouted = this.dataset.scouted === 'true';
-            const url = isScouted ? `/gigs/musicians/${id}/unsave/` : `/gigs/musicians/${id}/save/`;
+            const url = isScouted ? `/musicians/${id}/unsave/` : `/musicians/${id}/save/`;
 
             fetch(url, {
                 method: 'POST',
@@ -223,7 +202,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Confirm Invitation from Modal
     const confirmInviteBtn = document.getElementById('confirm-invite-btn');
     if (confirmInviteBtn) {
         confirmInviteBtn.addEventListener('click', function () {
@@ -232,7 +210,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!gigSelect) return;
             const listingId = gigSelect.value;
 
-            fetch(`/gigs/musicians/${musicianId}/invite/`, {
+            fetch(`/musicians/${musicianId}/invite/`, {
                 method: 'POST',
                 headers: { 'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/json' },
                 body: JSON.stringify({ listing_id: listingId })
