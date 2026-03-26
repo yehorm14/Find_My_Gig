@@ -1,27 +1,14 @@
 """
-URL configuration for find_my_gig project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/4.2/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
+Main URL Configuration for the find_my_gig project.
+Routes traffic to the primary 'gigs' application.
 """
 from django.contrib import admin
 from django.urls import path, include
-from django.contrib.auth import views as auth_views
 
 urlpatterns = [
+    # Admin Panel
     path('admin/', admin.site.urls),
+    
+    # Delegate all primary routing and authentication to the 'gigs' app
     path('', include('gigs.urls')),
-    # Use the default login/logout view provided by django
-    path('login/', auth_views.LoginView.as_view(template_name='gigs/login.html',redirect_authenticated_user=True,), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(), name='logout',),
 ]
