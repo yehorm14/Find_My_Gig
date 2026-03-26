@@ -315,7 +315,7 @@ def update_profile(request):
             firstname = data.get('firstname')
             surname = data.get('surname')
             bio = data.get('about')
-            age = request.POST.get('age')
+            age = data.get('age')
             instruments = data.get('instruments')
             picture = None
             media_links_json = data.get('media_links')
@@ -332,7 +332,8 @@ def update_profile(request):
         try:
             profile = user.musician
             profile.bio = bio
-            profile.age = age
+            if age: 
+                profile.age = int(age)
             profile.instruments = instruments
             if picture:
                 profile.profile_picture = picture
