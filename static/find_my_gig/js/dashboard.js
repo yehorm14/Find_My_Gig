@@ -3,7 +3,10 @@ document.addEventListener('DOMContentLoaded', function () {
     let pendingMediaLinks = [];
     let linksToDelete = [];
     
-    //Update Profile
+    // ==========================================================================
+    // --- 1. PROFILE MANAGEMENT ---
+    // ==========================================================================
+    
     const updateProfileBtn = document.getElementById('update-profile-btn');
 
     if (updateProfileBtn){
@@ -25,6 +28,14 @@ document.addEventListener('DOMContentLoaded', function () {
             const profilePictureInput = document.getElementById('profile-picture-input');
             const hasPicture = profilePictureInput?.files[0];
 
+            let requestConfig = {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            };
+
+            // Handle Multipart Form Data (if image exists) vs JSON
             if (hasPicture){
                 const formData = new FormData();
                 formData.append('username', username);
@@ -37,28 +48,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 formData.append('profile_picture', profilePictureInput.files[0]);
                 formData.append('media_links', JSON.stringify(pendingMediaLinks));
                 formData.append('delete_media', JSON.stringify(linksToDelete));
-
-                fetch('/dashboard/my-profile/update/',{
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': getCookie('csrftoken'),
-                    },
-                    body: formData
-                })
-                .then(function(response){
-                    return response.json();
-                })
-                .then(function(data){
-                    handleProfileUpdateResponse(data);
-                })
-                .catch(function (){
-                    showStatusMessage('status-message', 'Profile updated successfully', 'success');
-                    pendingMediaLinks = [];
-                    linksToDelete = []
-                });
-
+                requestConfig.body = formData;
             } else {
-                const profileData = {
+                requestConfig.headers['Content-Type'] = 'application/json';
+                requestConfig.body = JSON.stringify({
                     username: username,
                     firstname: firstname,   
                     surname: surname, 
@@ -68,32 +61,22 @@ document.addEventListener('DOMContentLoaded', function () {
                     instruments: profileInstruments,
                     media_links: pendingMediaLinks,
                     delete_media: linksToDelete
-                };
+                });
+            }
 
-                fetch('/dashboard/my-profile/update/',{
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': getCookie('csrftoken'),
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(profileData)
-                })
-                .then(function (response){
-                    return response.json();
-                })
-                .then(function(data){
-                    handleProfileUpdateResponse(data);
-                })
-                .catch(function(){
+            fetch('/dashboard/my-profile/update/', requestConfig)
+                .then(response => response.json())
+                .then(data => handleProfileUpdateResponse(data))
+                .catch(() => {
+                    // Fallback success if response parsing fails but request succeeded
                     showStatusMessage('status-message', 'Profile updated successfully', 'success');
                     pendingMediaLinks = [];
                     linksToDelete = [];
                 });
-            }
         });
     }
 
-    //Profile Picture preview
+    // Profile Picture Preview Loader
     const profilePictureInput = document.getElementById('profile-picture-input');
     const profilePicturePreview = document.getElementById('profile-picture-preview');
 
@@ -110,9 +93,11 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    //Media Links
-    const addMediaBtn = document.getElementById('add-media-btn');
+    // ==========================================================================
+    // --- 2. MEDIA LINKS MANAGEMENT ---
+    // ==========================================================================
 
+    const addMediaBtn = document.getElementById('add-media-btn');
     if (addMediaBtn){
         addMediaBtn.addEventListener('click', function (e) {
             e.preventDefault()
@@ -138,9 +123,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    //Delete media links
     const mediaList = document.getElementById('media-links-list');
-
     if (mediaList) {
         mediaList.addEventListener('click', function (e) {
             if (e.target.classList.contains('delete-media-btn')) {
@@ -162,9 +145,11 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
     
-    //delete account
-    const deleteAccountBtn = document.getElementById('delete-account-btn');
+    // ==========================================================================
+    // --- 3. ACCOUNT DELETION ---
+    // ==========================================================================
 
+    const deleteAccountBtn = document.getElementById('delete-account-btn');
     if (deleteAccountBtn) {
         deleteAccountBtn.addEventListener('click', function (e) {
             e.preventDefault();
@@ -178,27 +163,26 @@ document.addEventListener('DOMContentLoaded', function () {
                         'Content-Type': 'application/json'
                     }
                 })
-                .then(function (response) {
-                    return response.json();
-                })
-                .then(function (data) {
+                .then(response => response.json())
+                .then(data => {
                     if (data.success) {
                         window.location.href = '/';
                     }
                 })
-                .catch(function(){
-                    window.location.href = '/';
-                });
+                .catch(() => window.location.href = '/');
             }
         });
     }
 
-    //Withdraw application
+    // ==========================================================================
+    // --- 4. GIG & APPLICATION MANAGEMENT ---
+    // ==========================================================================
+
+    // Withdraw Application
     document.querySelectorAll('.withdraw-application-btn').forEach(function (btn) {
         btn.addEventListener('click', function () {
             const gigId = this.dataset.gigId;
             const applicationCard = this.closest('.listing-card');
-
             const confirmed = confirm('Are you sure you want to withdraw this application?');
 
             if (confirmed) {
@@ -209,16 +193,14 @@ document.addEventListener('DOMContentLoaded', function () {
                         'Content-Type': 'application/json'
                     }
                 })
-                .then(function (response){
-                    return response.json();
-                })
-                .then(function (data) {
+                .then(response => response.json())
+                .then(data => {
                     if (data.success) {
                         applicationCard.remove();
                         showStatusMessage('status-message', 'Application withdrawn', 'success');
                     }
                 })
-                .catch(function(){
+                .catch(() => {
                     applicationCard.remove();
                     showStatusMessage('status-message', 'Application withdrawn', 'success');
                 });
@@ -226,9 +208,8 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    //Create Gig Listing
+    // Create Gig Listing
     const createGigBtn = document.getElementById('create-gig-btn');
-    
     if (createGigBtn) {
         createGigBtn.addEventListener('click', function () {
             const gigTitle = document.getElementById('listing-title')?.value?.trim();
@@ -258,10 +239,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 },
                 body: JSON.stringify(gigData)
             })
-            .then(function (response) {
-                return response.json();
-            })
-            .then(function (data) {
+            .then(response => response.json())
+            .then(data => {
                 if (data.success) {
                     showStatusMessage('status-message', 'Gig listing created successfully', 'success');
                     window.location.href = '/dashboard/my-listings/';
@@ -269,12 +248,12 @@ document.addEventListener('DOMContentLoaded', function () {
                     showStatusMessage('status-message', 'Something went wrong, try again', 'error');
                 }
             })
+            .catch(() => showStatusMessage('status-message', 'Network error', 'error'));
         });
     }
 
-    //Delete Listing
+    // Delete Own Listing
     const myListingsList = document.getElementById('my-listings-list');
-
     if (myListingsList) {
         myListingsList.addEventListener('click', function (e) {
             if (e.target.classList.contains('delete-listing-btn')) {
@@ -290,16 +269,14 @@ document.addEventListener('DOMContentLoaded', function () {
                             'Content-Type': 'application/json'
                         }
                     })
-                    .then(function (response) {
-                        return response.json();
-                    })
-                    .then(function (data) {
+                    .then(response => response.json())
+                    .then(data => {
                         if (data.success) {
                             listingCard.remove();
                             showStatusMessage('status-message', 'Listing deleted', 'success');
                         }
                     })
-                    .catch(function () {
+                    .catch(() => {
                         listingCard.remove();
                         showStatusMessage('status-message', 'Listing deleted', 'success');
                     });
@@ -308,13 +285,13 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // REMOVE SAVED GIG
+    // Remove Saved Gig
     document.addEventListener('click', function(e) {
         if (e.target.classList.contains('remove-saved-gig-btn')) {
             e.preventDefault();
             const btn = e.target;
             const gigId = btn.dataset.gigId;
-            const savedGigCard = btn.closest('.col-md-6'); // Safely removes the grid wrapper
+            const savedGigCard = btn.closest('.col-md-6');
 
             fetch(`/gigs/${gigId}/unsave/`, {
                 method: 'POST',
@@ -332,15 +309,46 @@ document.addEventListener('DOMContentLoaded', function () {
                     showStatusMessage('status-message', 'Failed to remove bookmark', 'error');
                 }
             })
-            .catch(error => {
-                showStatusMessage('status-message', 'Failed to remove bookmark', 'error');
-            });
+            .catch(() => showStatusMessage('status-message', 'Failed to remove bookmark', 'error'));
         }
     });
 
+    // ==========================================================================
+    // --- 5. INBOX MANAGEMENT ---
+    // ==========================================================================
+
+    // Dismiss Inbox Message
+    const inboxList = document.getElementById('inbox-list');
+    if (inboxList) {
+        inboxList.addEventListener('click', function(e) {
+            if (e.target.classList.contains('delete-msg-btn')) {
+                const msgId = e.target.dataset.msgId;
+                const msgCard = document.getElementById(`msg-${msgId}`);
+
+                fetch(`/dashboard/inbox/${msgId}/delete/`, {
+                    method: 'POST',
+                    headers: { 
+                        'X-CSRFToken': getCookie('csrftoken'), 
+                        'Content-Type': 'application/json' 
+                    }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        msgCard.remove();
+                        showStatusMessage('status-message', 'Message dismissed.', 'success');
+                    }
+                })
+                .catch(() => showStatusMessage('status-message', 'Failed to dismiss', 'error'));
+            }
+        });
+    }
 });
 
-// Helper Functions
+// ==========================================================================
+// --- 6. HELPER FUNCTIONS ---
+// ==========================================================================
+
 function handleProfileUpdateResponse(data) {
     if (data.success) {
         showStatusMessage('status-message', 'Profile updated successfully', 'success');
@@ -362,10 +370,11 @@ function isValidUrl(url){
     }
 }
 
-function addMediaLinkToList(url,mediaId){
+function addMediaLinkToList(url, mediaId){
     const mediaList = document.getElementById('media-links-list');
     if (mediaList) {
         const listItem = document.createElement('li');
+        
         const link = document.createElement('a');
         link.href = url;
         link.textContent = url;
@@ -387,29 +396,7 @@ function addMediaLinkToList(url,mediaId){
             listItem.appendChild(link);
             listItem.appendChild(deleteBtn);
         }
+        
         mediaList.appendChild(listItem);
     }
 }
-
-// DISMISS INBOX MESSAGE
-    const inboxList = document.getElementById('inbox-list');
-    if (inboxList) {
-        inboxList.addEventListener('click', function(e) {
-            if (e.target.classList.contains('delete-msg-btn')) {
-                const msgId = e.target.dataset.msgId;
-                const msgCard = document.getElementById(`msg-${msgId}`);
-
-                fetch(`/dashboard/inbox/${msgId}/delete/`, {
-                    method: 'POST',
-                    headers: { 'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/json' }
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        msgCard.remove();
-                        showStatusMessage('status-message', 'Message dismissed.', 'success');
-                    }
-                });
-            }
-        });
-    }

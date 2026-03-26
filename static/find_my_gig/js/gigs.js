@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (gigsList) {
         gigsList.addEventListener('click', function (e) {
             
-            // --- Apply / Withdraw ---
+            // --- Apply / Withdraw Actions ---
             const applyBtn = e.target.closest('.apply-btn') || e.target.closest('.withdraw-btn');
             if (applyBtn) {
                 const isApplying = applyBtn.classList.contains('apply-btn');
@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 .catch(() => showStatusMessage('status-message', 'Network error.', 'error'));
             }
 
-            // --- Bookmark / Unbookmark ---
+            // --- Bookmark / Unbookmark Actions ---
             const bookmarkBtn = e.target.closest('.bookmark-btn') || e.target.closest('.bookmarked-btn');
             if (bookmarkBtn) {
                 const gigId = bookmarkBtn.dataset.gigId;
@@ -72,73 +72,46 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // ==========================================================================
-    // 2. SINGLE GIG DETAIL PAGE LOGIC
+    // 2. BAND/VENUE INTERACTION LOGIC (SEND INTEREST)
     // ==========================================================================
-    const gigDetailApplyBtn = document.getElementById('gig-detail-apply-btn');
-    if (gigDetailApplyBtn) {
-        gigDetailApplyBtn.addEventListener('click', function () {
-            if (!isLoggedIn()) { redirectToLogin(); return; }
+    const sendInterestBtn = document.getElementById('send-interest-btn');
+    if (sendInterestBtn) {
+        sendInterestBtn.addEventListener('click', function () {
+            const musicianId = this.dataset.musicianId;
+            const message = document.getElementById('interest-message').value.trim();
 
-            const gigId = this.dataset.gigId;
-            const isApplied = this.dataset.applied === 'true';
-            const btn = this;
-            const url = isApplied ? `/gigs/${gigId}/withdraw/` : `/gigs/${gigId}/apply/`;
+            if (!message) {
+                alert("Please write a message first.");
+                return;
+            }
 
-            if (isApplied && !confirm('Are you sure you want to withdraw your application?')) return;
-
-            fetch(url, {
+            fetch(`/musicians/${musicianId}/send-interest/`, {
                 method: 'POST',
-                headers: { 'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/json' }
+                headers: { 'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: message })
             })
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    const isApplied = btn.dataset.applied === 'true';
-                    btn.textContent = isApplied ? 'Apply Now' : 'Withdraw';
-                    btn.dataset.applied = isApplied ? 'false' : 'true';
-                    btn.className = isApplied ? 'btn apply-btn' : 'btn withdraw-btn';
-                    showStatusMessage('gig-detail-status', isApplied ? 'Application withdrawn.' : 'Application submitted!', 'success');
+                    // Requires Bootstrap JS to be loaded
+                    const modalElement = document.getElementById('interestModal');
+                    if(modalElement) {
+                        const modal = bootstrap.Modal.getInstance(modalElement);
+                        modal.hide();
+                    }
+                    showStatusMessage('status-message', 'Message sent successfully!', 'success');
                 } else {
-                    showStatusMessage('gig-detail-status', data.error || 'Something went wrong', 'error');
+                    alert(data.error);
                 }
             })
-            .catch(() => showStatusMessage('gig-detail-status', 'Network Error', 'error'));
+            .catch(() => alert('Network error.'));
         });
     }
-    
-    const gigDetailBookmarkBtn = document.getElementById('gig-detail-bookmark-btn');
-    if (gigDetailBookmarkBtn) {
-        gigDetailBookmarkBtn.addEventListener('click', function () {
-            if (!isLoggedIn()) { redirectToLogin(); return; }
 
-            const gigId = this.dataset.gigId;
-            const isBookmarked = this.dataset.bookmarked === 'true';
-            const btn = this;
-            const url = isBookmarked ? `/gigs/${gigId}/unsave/` : `/gigs/${gigId}/save/`;
-
-            fetch(url, {
-                method: 'POST',
-                headers: { 'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/json' }
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    btn.textContent = isBookmarked ? '☆ Bookmark' : '★ Bookmarked';
-                    btn.dataset.bookmarked = isBookmarked ? 'false' : 'true';
-                    btn.classList.toggle('btn-outline-light');
-                    btn.classList.toggle('btn-light');
-                    showStatusMessage('gig-detail-status', isBookmarked ? 'Gig removed from saved.' : 'Gig saved!', 'success');
-                } else {
-                    showStatusMessage('gig-detail-status', 'Something went wrong, try again', 'error');
-                }
-            })
-            .catch(() => showStatusMessage('gig-detail-status', 'Network Error', 'error'));
-        });
-    }
 });
 
 // ==========================================================================
-// 3. GOOGLE MAPS LOGIC 
+// 3. GOOGLE MAPS INITIALIZATION (Must be globally accessible)
 // ==========================================================================
 function initMap() {
     const mapElements = document.querySelectorAll('.gig-mini-map');
@@ -160,35 +133,3 @@ function initMap() {
     });
 }
 window.initMap = initMap;
-
-// SEND INTEREST LOGIC
-    const sendInterestBtn = document.getElementById('send-interest-btn');
-    if (sendInterestBtn) {
-        sendInterestBtn.addEventListener('click', function () {
-            const musicianId = this.dataset.musicianId;
-            const message = document.getElementById('interest-message').value.trim();
-
-            if (!message) {
-                alert("Please write a message first.");
-                return;
-            }
-
-            fetch(`/musicians/${musicianId}/send-interest/`, {
-                method: 'POST',
-                headers: { 'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: message })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    // Close Modal
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('interestModal'));
-                    modal.hide();
-                    showStatusMessage('status-message', 'Message sent successfully!', 'success');
-                } else {
-                    alert(data.error);
-                }
-            })
-            .catch(() => alert('Network error.'));
-        });
-    }
