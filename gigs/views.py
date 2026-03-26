@@ -9,6 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.conf import settings
 
+
 # IMPORT THE MODELS and FORMS
 from gigs.models import Musician, Band, Listing, Application, Review, MediaLink, Invitation
 from gigs.forms import UserSignUpForm, MusicianProfileForm, BandProfileForm
