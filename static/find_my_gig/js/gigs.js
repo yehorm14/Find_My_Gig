@@ -93,11 +93,10 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    btn.textContent = isApplied ? 'Apply Now' : 'Withdraw Application';
+                    const isApplied = btn.dataset.applied === 'true';
+                    btn.textContent = isApplied ? 'Apply Now' : 'Withdraw';
                     btn.dataset.applied = isApplied ? 'false' : 'true';
-                    btn.classList.toggle('btn-primary');
-                    btn.classList.toggle('withdraw-btn');
-                    btn.classList.toggle('apply-btn');
+                    btn.className = isApplied ? 'btn apply-btn' : 'btn withdraw-btn';
                     showStatusMessage('gig-detail-status', isApplied ? 'Application withdrawn.' : 'Application submitted!', 'success');
                 } else {
                     showStatusMessage('gig-detail-status', data.error || 'Something went wrong', 'error');
