@@ -507,3 +507,48 @@ def submit_musician_review(request, musician_id):
         return redirect('gigs:musician_detail', id=musician_id)
 
     return render(request, 'gigs/musician_review.html', {'musician': musician})
+
+@login_required
+def send_interest(request, musician_id):
+    """Allows a Band to send a simple interest message to a Musician."""
+    if request.method == 'POST':
+        try:
+            band = request.user.band
+        except Band.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Only bands can send interest.'})
+
+        musician = get_object_or_404(Musician, id=musician_id)
+        data = json.loads(request.body)
+        message = data.get('message', '').strip()
+
+        if not message:
+            return JsonResponse({'success': False, 'error': 'Message cannot be empty.'})
+
+        if BandInterest.objects.filter(band=band, musician=musician).exists():
+            return JsonResponse({'success': False, 'error': 'You have already reached out to this musician.'})
+
+        BandInterest.objects.create(band=band, musician=musician, message=message)
+        return JsonResponse({'success': True})
+    
+@login_required
+def my_inbox(request):
+    """Shows a Musician all the interest messages they have received."""
+    try:
+        musician = request.user.musician
+    except Musician.DoesNotExist:
+        return redirect('gigs:dashboard')
+
+    messages = musician.received_interests.all().order_by('-created_at')
+    return render(request, 'gigs/my_inbox.html', {'messages': messages})
+
+@login_required
+def delete_interest(request, interest_id):
+    """Allows a Musician to delete a message from their inbox."""
+    if request.method == 'POST':
+        try:
+            musician = request.user.musician
+            interest = BandInterest.objects.get(id=interest_id, musician=musician)
+            interest.delete()
+            return JsonResponse({'success': True})
+        except (Musician.DoesNotExist, BandInterest.DoesNotExist):
+            return JsonResponse({'success': False, 'error': 'Not found.'})

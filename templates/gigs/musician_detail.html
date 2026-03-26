@@ -70,6 +70,12 @@
                         <a href="{% url 'gigs:submit_musician_review' musician.id %}" class="btn btn-outline-light rounded-pill w-100 py-2">
                             Leave a Review
                         </a>
+                        
+                        {% if hasattr user 'band' %}
+                            <button type="button" class="btn apply-btn rounded-pill w-100 py-2" data-bs-toggle="modal" data-bs-target="#interestModal">
+                                Reach Out
+                            </button>
+                        {% endif %}
                     </div>
                 {% endif %}
 
@@ -108,6 +114,26 @@
         
     </div>
 </div>
+
+<div class="modal fade" id="interestModal" tabindex="-1" aria-labelledby="interestModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="background-color: var(--card-bg); border: 1px solid var(--border-dim);">
+      <div class="modal-header border-bottom-0">
+        <h5 class="modal-title text-light" id="interestModalLabel">Reach out to {{ musician.user.first_name }}</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted-custom small mb-3">Send a quick message to let them know you're interested in playing together. They will see this in their Inbox.</p>
+        <textarea id="interest-message" class="form-control text-light" rows="4" placeholder="Hey, love your playing! Check out our band profile..." style="background-color: var(--bg-dark); border: 1px solid var(--border-dim);"></textarea>
+      </div>
+      <div class="modal-footer border-top-0">
+        <button type="button" class="btn btn-outline-light rounded-pill" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" id="send-interest-btn" class="btn apply-btn rounded-pill" data-musician-id="{{ musician.id }}">Send Message</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 {% endblock %}
 
 {% block scripts_block %}

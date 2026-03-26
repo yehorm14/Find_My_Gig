@@ -390,3 +390,26 @@ function addMediaLinkToList(url,mediaId){
         mediaList.appendChild(listItem);
     }
 }
+
+// DISMISS INBOX MESSAGE
+    const inboxList = document.getElementById('inbox-list');
+    if (inboxList) {
+        inboxList.addEventListener('click', function(e) {
+            if (e.target.classList.contains('delete-msg-btn')) {
+                const msgId = e.target.dataset.msgId;
+                const msgCard = document.getElementById(`msg-${msgId}`);
+
+                fetch(`/dashboard/inbox/${msgId}/delete/`, {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/json' }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        msgCard.remove();
+                        showStatusMessage('status-message', 'Message dismissed.', 'success');
+                    }
+                });
+            }
+        });
+    }

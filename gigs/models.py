@@ -1,5 +1,6 @@
 import logging
 import requests
+
 from django.db import models
 from django.contrib.auth.models import User
 from django.conf import settings
@@ -7,64 +8,87 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 
 logger = logging.getLogger(__name__)
 
-class Musician(models.Model):
+# ==========================================
+# MIXINS & ABSTRACT CLASSES
+# ==========================================
+
+class ReviewBadgeMixin:
+    """
+    Mixin to provide dynamic community badges based on review counts.
+    Requires the model to have a OneToOneField to the User model.
+    """
+    @property
+    def community_badge(self):
+        """
+        Dynamically calculates the user's community badge based on 
+        the number of reviews they have submitted.
+        """
+        # Ensure the instance has a user object attached
+        if not hasattr(self, 'user'):
+            return None
+            
+        review_count = self.user.reviews_written.count()
+        
+        if review_count >= 20:
+            return {'level': 'Gold', 'color': '#FFD700', 'text': 'Gold Reviewer 🌟'}
+        elif review_count >= 10:
+            return {'level': 'Silver', 'color': '#C0C0C0', 'text': 'Silver Reviewer 🥈'}
+        elif review_count >= 5:
+            return {'level': 'Bronze', 'color': '#CD7F32', 'text': 'Bronze Reviewer 🥉'}
+        
+        return None
+
+
+# ==========================================
+# USER PROFILE MODELS
+# ==========================================
+
+class Musician(ReviewBadgeMixin, models.Model):
+    """
+    Profile model for individual musicians.
+    """
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     instruments = models.CharField(max_length=100)
     bio = models.CharField(max_length=500)
     age = models.IntegerField(null=True, blank=True)
-    profile_picture = models.ImageField(upload_to='profile_images', blank=True, default='profile_images/pfp-placeholder.png')
+    profile_picture = models.ImageField(
+        upload_to='profile_images', 
+        blank=True, 
+        default='profile_images/pfp-placeholder.png'
+    )
     media_link = models.URLField(blank=True)
     location = models.CharField(max_length=100)
-
-
-    @property
-    def community_badge(self):
-        """
-        Dynamically calculates the user's community badge based on 
-        the number of reviews they have submitted.
-        """
-        review_count = self.user.reviews_written.count()
-        
-        if review_count >= 20:
-            return {'level': 'Gold', 'color': '#FFD700', 'text': 'Gold Reviewer 🏆'}
-        elif review_count >= 10:
-            return {'level': 'Silver', 'color': '#C0C0C0', 'text': 'Silver Reviewer 🥈'}
-        elif review_count >= 5:
-            return {'level': 'Bronze', 'color': '#CD7F32', 'text': 'Bronze Reviewer 🥉'}
-        
-        return None
 
     def __str__(self):
         return self.user.username
 
-class Band(models.Model):
+
+class Band(ReviewBadgeMixin, models.Model):
+    """
+    Profile model for bands seeking musicians or gigs.
+    """
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=50)
     location = models.CharField(max_length=100)
     bio = models.CharField(max_length=500)
-    profile_picture = models.ImageField(upload_to='profile_images', blank=True, default='profile_images/pfp-placeholder.png')
-
-    @property
-    def community_badge(self):
-        """
-        Dynamically calculates the user's community badge based on 
-        the number of reviews they have submitted.
-        """
-        review_count = self.user.reviews_written.count()
-        
-        if review_count >= 20:
-            return {'level': 'Gold', 'color': '#FFD700', 'text': 'Gold Reviewer 🏆'}
-        elif review_count >= 10:
-            return {'level': 'Silver', 'color': '#C0C0C0', 'text': 'Silver Reviewer 🥈'}
-        elif review_count >= 5:
-            return {'level': 'Bronze', 'color': '#CD7F32', 'text': 'Bronze Reviewer 🥉'}
-        
-        return None
+    profile_picture = models.ImageField(
+        upload_to='profile_images', 
+        blank=True, 
+        default='profile_images/pfp-placeholder.png'
+    )
 
     def __str__(self):
         return self.name
 
+
+# ==========================================
+# GIG & LISTING MODELS
+# ==========================================
+
 class Listing(models.Model):
+    """
+    Represents a specific gig or open position posted by a Band.
+    """
     band = models.ForeignKey(Band, on_delete=models.CASCADE)
     title = models.CharField(max_length=50)
     req_instruments = models.CharField(max_length=100)
@@ -77,11 +101,18 @@ class Listing(models.Model):
     longitude = models.FloatField(null=True, blank=True)
 
     def save(self, *args, **kwargs):
-        # 1. Logic to check if geocoding is needed
+        """
+        Overrides the default save method to automatically fetch 
+        and save latitude and longitude using the Google Maps API 
+        if a location is provided but coordinates are missing.
+        """
         if self.location and not self.latitude:
             try:
                 api_key = settings.GOOGLE_MAPS_BACKEND_KEY
-                url = f"https://maps.googleapis.com/maps/api/geocode/json?address={self.location}&key={api_key}"
+                url = (
+                    f"https://maps.googleapis.com/maps/api/geocode/json"
+                    f"?address={self.location}&key={api_key}"
+                )
                 
                 response = requests.get(url, timeout=5).json()
 
@@ -96,13 +127,21 @@ class Listing(models.Model):
             except requests.exceptions.RequestException as e:
                 logger.error(f"Network error during geocoding for '{self.location}': {e}")
 
-        # 2. Save the instance
+        # Execute the standard save functionality
         super().save(*args, **kwargs)
 
     def __str__(self):
         return self.title
 
+
+# ==========================================
+# INTERACTION & RELATIONSHIP MODELS
+# ==========================================
+
 class Application(models.Model):
+    """
+    Tracks a user applying to a specific Listing.
+    """
     applicant = models.ForeignKey(User, on_delete=models.CASCADE, related_name="applications_sent")
     listing = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name="applications_received")
     date_applied = models.DateTimeField(auto_now_add=True)
@@ -111,21 +150,46 @@ class Application(models.Model):
     def __str__(self):
         return f"{self.applicant.username} applied to {self.listing.title}"
 
+
 class Review(models.Model):
+    """
+    Represents a rating and comment left by one user for another.
+    """
     reviewer = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reviews_written")
     reviewee = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reviews_received")
-    rating = models.IntegerField(validators= [
-        MinValueValidator(0), MaxValueValidator(5)
+    rating = models.IntegerField(validators=[
+        MinValueValidator(0), 
+        MaxValueValidator(5)
     ])
     comment = models.CharField(max_length=200)
 
     def __str__(self):
         return self.comment
 
+
+class BandInterest(models.Model):
+    """
+    Tracks when a Band shows explicit interest in a Musician.
+    """
+    band = models.ForeignKey(Band, on_delete=models.CASCADE)
+    musician = models.ForeignKey(Musician, on_delete=models.CASCADE, related_name='received_interests')
+    message = models.TextField(max_length=500)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.band.name} interested in {self.musician.user.username}"
+
+
+# ==========================================
+# MEDIA MODELS
+# ==========================================
+
 class MediaLink(models.Model):
+    """
+    Stores external URLs (e.g., YouTube, SoundCloud) associated with a Musician.
+    """
     musician = models.ForeignKey(Musician, on_delete=models.CASCADE, related_name='media_links')
     url = models.URLField()
 
     def __str__(self):
         return self.url
-    

@@ -36,7 +36,7 @@ urlpatterns = [
 
     # Reviewing and Saving Bands
     path('musicians/<int:musician_id>/review/', views.submit_musician_review, name='submit_musician_review'),
-
+     path('musicians/<int:musician_id>/send-interest/', views.send_interest, name='send_interest'),
 
     # ==========================================
     # --- 4. USER PORTAL & DASHBOARD ---
@@ -52,7 +52,8 @@ urlpatterns = [
     path('dashboard/my-profile/delete-account/', views.delete_account, name='delete_account'),
     path('dashboard/my-listings/create/', views.create_gig_listing, name='create_gig_listing'), # The AJAX submission
     path('dashboard/my-listings/<int:listing_id>/delete/', views.delete_listing, name='delete_listing'),
-
+    path('dashboard/inbox/', views.my_inbox, name='my_inbox'),
+    path('dashboard/inbox/<int:interest_id>/delete/', views.delete_interest, name='delete_interest'),
 
     # ==========================================
     # --- 5. AUTHENTICATION & SIGNUPS ---

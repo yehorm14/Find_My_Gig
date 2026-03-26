@@ -160,3 +160,35 @@ function initMap() {
     });
 }
 window.initMap = initMap;
+
+// SEND INTEREST LOGIC
+    const sendInterestBtn = document.getElementById('send-interest-btn');
+    if (sendInterestBtn) {
+        sendInterestBtn.addEventListener('click', function () {
+            const musicianId = this.dataset.musicianId;
+            const message = document.getElementById('interest-message').value.trim();
+
+            if (!message) {
+                alert("Please write a message first.");
+                return;
+            }
+
+            fetch(`/musicians/${musicianId}/send-interest/`, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: message })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    // Close Modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('interestModal'));
+                    modal.hide();
+                    showStatusMessage('status-message', 'Message sent successfully!', 'success');
+                } else {
+                    alert(data.error);
+                }
+            })
+            .catch(() => alert('Network error.'));
+        });
+    }
