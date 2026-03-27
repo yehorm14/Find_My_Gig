@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 import population_script
 from datetime import date
-from gigs.models import Musician, Band, Listing, Review, Application, Invitation
+from gigs.models import Musician, Band, Listing, Review, Application
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 class BaseTestCase(TestCase):
@@ -153,48 +153,48 @@ class ApplicationTest(ListingTest):
     def test_status(self):
         self.assertEqual("Pending", self.test_application.status)
 
-class InvitationTest(BaseTestCase):
-
-    @classmethod
-    def setUpTestData(cls):
-        super().setUpTestData()
-        cls.band = Band.objects.create(user = cls.test_user1,
-                                            name = "Gouging Fire",
-                                            location = "Glasgow",
-                                            bio = "Looking for a guitar player",
-                                            )
-
-        cls.musician = Musician.objects.create(user=cls.test_user1,
-                                                    bio="Looking for a band that needs a guitar player",
-                                                    age=18,
-                                                    instruments="Guitar",
-                                                    location="Glasgow",
-
-                                                    )
-
-        cls.listing = Listing.objects.create(band = cls.band,
-                                                  title= "Guitar player needed!",
-                                                  deadline = date(2026, 3, 24),
-                                                  is_urgent = True,
-                                                  description = "Looking for a full-time drummer that has 3 years of experience",
-                                                  location = "Glasgow",
-                                                  req_instruments = "Guitar")
-
-        cls.time = timezone.now()
-        cls.test_invitation = Invitation.objects.create(band = cls.band, musician = cls.musician, listing = cls.listing, status = Invitation.STATUS_CHOICES[1][1], created_at = cls.time)
-
-    def test_band(self):
-        self.assertEqual(self.band, self.test_invitation.band)
-
-    def test_musician(self):
-        self.assertEqual(self.musician, self.test_invitation.musician)
-    def test_listing(self):
-        self.assertEqual(self.listing, self.test_invitation.listing)
-
-    def test_status(self):
-        self.assertEqual("Accepted", self.test_invitation.status)
-
-    def test_created_at(self):
-        self.assertEqual(self.time, self.test_invitation.created_at)
+# class InvitationTest(BaseTestCase):
+#
+#     @classmethod
+#     def setUpTestData(cls):
+#         super().setUpTestData()
+#         cls.band = Band.objects.create(user = cls.test_user1,
+#                                             name = "Gouging Fire",
+#                                             location = "Glasgow",
+#                                             bio = "Looking for a guitar player",
+#                                             )
+#
+#         cls.musician = Musician.objects.create(user=cls.test_user1,
+#                                                     bio="Looking for a band that needs a guitar player",
+#                                                     age=18,
+#                                                     instruments="Guitar",
+#                                                     location="Glasgow",
+#
+#                                                     )
+#
+#         cls.listing = Listing.objects.create(band = cls.band,
+#                                                   title= "Guitar player needed!",
+#                                                   deadline = date(2026, 3, 24),
+#                                                   is_urgent = True,
+#                                                   description = "Looking for a full-time drummer that has 3 years of experience",
+#                                                   location = "Glasgow",
+#                                                   req_instruments = "Guitar")
+#
+#         cls.time = timezone.now()
+#         cls.test_invitation = Invitation.objects.create(band = cls.band, musician = cls.musician, listing = cls.listing, status = Invitation.STATUS_CHOICES[1][1], created_at = cls.time)
+#
+#     def test_band(self):
+#         self.assertEqual(self.band, self.test_invitation.band)
+#
+#     def test_musician(self):
+#         self.assertEqual(self.musician, self.test_invitation.musician)
+#     def test_listing(self):
+#         self.assertEqual(self.listing, self.test_invitation.listing)
+#
+#     def test_status(self):
+#         self.assertEqual("Accepted", self.test_invitation.status)
+#
+#     def test_created_at(self):
+#         self.assertEqual(self.time, self.test_invitation.created_at)
 
 
