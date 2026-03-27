@@ -136,3 +136,46 @@ class BandInterestTest(BaseTestCase):
 
     def test_message(self):
         self.assertEqual("Audition?", self.band_interest.message)
+
+class ModelMethodTests(BaseTestCase):
+    """EDGE CASE: Verifying that custom model methods and string representations work correctly."""
+    
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.band = Band.objects.create(user=cls.test_user1, name="The Beatles", location="Liverpool")
+        cls.musician = Musician.objects.create(user=cls.test_user2, instruments="Drums", location="Liverpool")
+        cls.listing = Listing.objects.create(
+            band=cls.band, title="Need a drummer!", deadline=date(2026, 4, 1),
+            is_urgent=False,
+            description="Urgent", location="Liverpool", req_instruments="Drums"
+        )
+        cls.review = Review.objects.create(
+            reviewer=cls.test_user2, reviewee=cls.test_user1, listing=cls.listing, rating=5, comment="Great!"
+        )
+
+    def test_band_str(self):
+        """Verifies the __str__ method of the Band model."""
+        self.assertEqual(str(self.band), "The Beatles")
+
+    def test_musician_str(self):
+        """Verifies the __str__ method of the Musician model."""
+        self.assertEqual(str(self.musician), self.test_user2.username)
+
+    def test_listing_str(self):
+        """Verifies the __str__ method of the Listing model."""
+        self.assertEqual(str(self.listing), "Need a drummer!")
+
+    def test_review_str(self):
+        """Verifies the __str__ method of the Review model formats the string correctly."""
+        expected_str = f"Review by {self.test_user2.username} for {self.test_user1.username}"
+        self.assertEqual(str(self.review), expected_str)
+
+    def test_review_minimum_rating_validation(self):
+        """EDGE CASE: Rating validation must block integers below 1."""
+        bad_review = Review(
+            reviewer=self.test_user1, reviewee=self.test_user2, 
+            listing=self.listing, rating=0, comment="Terrible!"
+        )
+        with self.assertRaises(ValidationError):
+            bad_review.full_clean()

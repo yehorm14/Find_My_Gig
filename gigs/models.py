@@ -148,14 +148,11 @@ class Review(models.Model):
     reviewer = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reviews_written")
     reviewee = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reviews_received")
     listing = models.ForeignKey(Listing, on_delete=models.CASCADE, null=True, blank=True, related_name='reviews')
-    rating = models.IntegerField(validators=[
-        MinValueValidator(0), 
-        MaxValueValidator(5)
-    ])
-    comment = models.CharField(max_length=200)
+    rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+    comment = models.TextField(200)
 
     def __str__(self):
-        return self.comment
+        return f"Review by {self.reviewer.username} for {self.reviewee.username}"
 
 
 class BandInterest(models.Model):

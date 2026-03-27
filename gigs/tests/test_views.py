@@ -133,3 +133,70 @@ class SecurityViewTests(TestCase):
         response = self.client.post(reverse('gigs:apply_gig', args=[self.listing.id]))
         self.assertEqual(response.json()['success'], False)
         self.assertEqual(response.json()['error'], 'not_logged_in')
+
+class AccountManagementTests(TestCase):
+    """EDGE CASE: Verifying that users can successfully register and update their profiles."""
+    
+    def test_signup_creates_musician_profile(self):
+        """EDGE CASE: Submitting the signup form as a 'musician' should create both a User and a Musician."""
+        data = {
+            'username': 'new_drummer',
+            'first_name': 'Test',       
+            'last_name': 'Musician',    
+            'email': 'drummer@test.com',
+            'password1': 'SecurePassword123!',  
+            'password2': 'SecurePassword123!',  
+            'location': 'Glasgow',             
+            'user_type': 'musician'
+        }
+        response = self.client.post(reverse('gigs:signup'), data=data)
+        
+        if response.status_code == 200:
+            print("\nSIGNUP ERRORS (Musician):", response.context['user_form'].errors)
+
+        self.assertEqual(response.status_code, 302) 
+        self.assertTrue(User.objects.filter(username='new_drummer').exists())
+        self.assertTrue(Musician.objects.filter(user__username='new_drummer').exists())
+
+    def test_signup_creates_band_profile(self):
+        """EDGE CASE: Submitting the signup form as a 'band' should create both a User and a Band."""
+        data = {
+            'username': 'new_manager',
+            'first_name': 'Test',       
+            'last_name': 'Manager',     
+            'email': 'manager@test.com',
+            'password1': 'SecurePassword123!',
+            'password2': 'SecurePassword123!',
+            'location': 'Glasgow',
+            'user_type': 'band',
+            'band_name': 'The Rockers'
+        }
+        response = self.client.post(reverse('gigs:signup'), data=data)
+
+        if response.status_code == 200:
+            print("\nSIGNUP ERRORS (Band):", response.context['user_form'].errors)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(Band.objects.filter(name='The Rockers').exists())
+
+
+class DataDeletionTests(ViewBaseTestCase):
+    """EDGE CASE: Verifying that users can safely delete their data without server crashes."""
+    
+    def test_withdraw_application(self):
+        """EDGE CASE: Withdrawing an application should remove the database record."""
+        self.client.login(username='musicianuser', password='pass123')
+        Application.objects.create(applicant=self.musician_user, listing=self.listing)
+        
+      
+        response = self.client.post(reverse('gigs:withdraw_gig', args=[self.listing.id]))
+        self.assertEqual(response.json()['success'], True)
+        self.assertFalse(Application.objects.filter(applicant=self.musician_user, listing=self.listing).exists())
+
+    def test_delete_listing(self):
+        """EDGE CASE: A band deleting their own listing."""
+        self.client.login(username='banduser', password='pass123')
+        
+        response = self.client.post(reverse('gigs:delete_listing', args=[self.listing.id]))
+        self.assertEqual(response.json()['success'], True)
+        self.assertFalse(Listing.objects.filter(id=self.listing.id).exists())
