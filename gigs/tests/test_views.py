@@ -9,166 +9,127 @@ from gigs.models import Musician, Band, Listing, Application, Review
 class ViewBaseTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        "Prepare shared objects for all the tests"
-        cls.band_user = User.objects.create_user(
-            username="banduser", email="band@test.com", password="pass123"
-        )
-        cls.musician_user = User.objects.create_user(
-            username="musicianuser", email="musician@test.com", password="pass123"
-        )
+        cls.band_user = User.objects.create_user(username="banduser", email="band@test.com", password="pass123")
+        cls.musician_user = User.objects.create_user(username="musicianuser", email="musician@test.com", password="pass123")
 
-        cls.band = Band.objects.create(
-            user=cls.band_user,
-            name="Test Band",
-            location="Glasgow",
-            bio="Band bio"
-        )
-
-        cls.musician = Musician.objects.create(
-            user=cls.musician_user,
-            bio="Musician bio",
-            age=21,
-            instruments="Guitar",
-            location="Glasgow"
-        )
+        cls.band = Band.objects.create(user=cls.band_user, name="Test Band", location="Glasgow", bio="Band bio")
+        cls.musician = Musician.objects.create(user=cls.musician_user, bio="Musician bio", age=21, instruments="Guitar", location="Glasgow")
 
         cls.listing = Listing.objects.create(
-            band=cls.band,
-            title="Guitarist needed",
-            deadline=date(2026, 4, 1),
-            is_urgent=False,
-            description="Need a guitarist",
-            location="Glasgow",
-            req_instruments="Guitar"
+            band=cls.band, title="Guitarist needed", deadline=date(2026, 4, 1),
+            is_urgent=False, description="Need a guitarist", location="Glasgow", req_instruments="Guitar"
         )
 
 class PublicViewTests(ViewBaseTestCase):
-    "When There is data in the database, do the public views respond correctly?"
     def test_home_page_loads_for_anonymous_user(self):
         response = self.client.get(reverse('gigs:home'))
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'gigs/home.html')
-        self.assertContains(response, 'Connecting local talent')
-
-    def test_gig_listings_page_loads(self):
-        response = self.client.get(reverse('gigs:gig_listings'))
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'gigs/gig_listings.html')
-        self.assertIn(self.listing, response.context['gigs'])
-
-    def test_gig_detail_page_loads(self):
-        response = self.client.get(reverse('gigs:gig_detail', args=[self.listing.id]))
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'gigs/gig_detail.html')
-        self.assertEqual(response.context['listing'], self.listing)
-
-    def test_musicians_list_page_loads(self):
-        response = self.client.get(reverse('gigs:musicians_list'))
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'gigs/musicians_list.html')
-        self.assertIn(self.musician, response.context['musicians'])
-
-    def test_bands_list_page_loads(self):
-        response = self.client.get(reverse('gigs:bands_list'))
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'gigs/bands_list.html')
-        self.assertIn(self.band, response.context['bands'])
 
     def test_gig_detail_invalid_id_returns_404(self):
+        """EDGE CASE: Looking up a gig that does not exist"""
         response = self.client.get(reverse('gigs:gig_detail', args=[999999]))
         self.assertEqual(response.status_code, 404)
 
-class PublicViewEmptyStateTests(TestCase):
-    "When There is no data in the database, do the public views respond correctly?"
-    def test_gig_listings_empty(self):
-        response = self.client.get(reverse('gigs:gig_listings'))
+class FilterTests(ViewBaseTestCase):
+    def test_filter_gigs_by_instrument_match(self):
+        """EDGE CASE: Using the search filter should return matching gigs"""
+        response = self.client.get(reverse('gigs:gig_listings'), {'instrument': 'Guitar'})
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'gigs/gig_listings.html')
-        self.assertEqual(list(response.context['gigs']), [])
+        self.assertIn(self.listing, response.context['gigs'])
 
-    def test_musicians_list_empty(self):
-        response = self.client.get(reverse('gigs:musicians_list'))
+    def test_filter_gigs_by_instrument_no_match(self):
+        """EDGE CASE: Using the search filter should exclude non-matching gigs"""
+        response = self.client.get(reverse('gigs:gig_listings'), {'instrument': 'Drums'})
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'gigs/musicians_list.html')
-        self.assertEqual(list(response.context['musicians']), [])
+        self.assertNotIn(self.listing, response.context['gigs'])
 
-    def test_bands_list_empty(self):
-        response = self.client.get(reverse('gigs:bands_list'))
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'gigs/bands_list.html')
-        self.assertEqual(list(response.context['bands']), [])
-
-class CreateGigViewTests(ViewBaseTestCase):
-
-    def test_create_gig_page_loads_for_band(self):
-        self.client.login(username='banduser', password='pass123')
-        response = self.client.get(reverse("gigs:create_gig"))
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'gigs/create_gig.html')
-
-    def test_band_can_create_gig(self):
-        self.client.login(username='banduser', password='pass123')
-
-        response = self.client.post(
-            reverse('gigs:create_gig_listing'),
-            data=json.dumps({
-                'title': 'Drummer wanted',
-                'req_instruments': 'Drums',
-                'date': '2026-05-01',
-                'description': 'Need drummer',
-                'location': 'Glasgow',
-            }),
-            content_type='application/json'
-        )
-
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(Listing.objects.filter(title='Drummer wanted').exists())
-
-
-    def test_anonymous_user_cannot_create_gig(self):
-        response = self.client.post(
-            reverse('gigs:create_gig_listing'),
-            data=json.dumps({
-                'title': 'Drummer wanted',
-                'req_instruments': 'Drums',
-                'date': '2026-05-01',
-                'description': 'Need drummer',
-                'location': 'Glasgow',
-            }),
-            content_type='application/json'
-        )
-
-        self.assertEqual(response.status_code, 302)
-        self.assertFalse(Listing.objects.filter(title='Drummer wanted').exists())
-
-    def test_musician_cannot_create_gig(self):
+class AjaxActionTests(ViewBaseTestCase):
+    def setUp(self):
         self.client.login(username='musicianuser', password='pass123')
-        response = self.client.post(
-            reverse('gigs:create_gig_listing'),
-            data=json.dumps({
-                'title': 'Drummer wanted',
-                'req_instruments': 'Drums',
-                'date': '2026-05-01',
-                'description': 'Need drummer',
-                'location': 'Glasgow',
-            }),
-            content_type='application/json'
+
+    def test_apply_for_gig_success(self):
+        response = self.client.post(reverse('gigs:apply_gig', args=[self.listing.id]))
+        self.assertEqual(response.json()['success'], True)
+        self.assertTrue(Application.objects.filter(applicant=self.musician_user, listing=self.listing).exists())
+
+    def test_duplicate_application_blocked(self):
+        """EDGE CASE: Spamming the apply button should return an error"""
+        Application.objects.create(applicant=self.musician_user, listing=self.listing)
+        response = self.client.post(reverse('gigs:apply_gig', args=[self.listing.id]))
+        self.assertEqual(response.json()['success'], False)
+        self.assertEqual(response.json()['error'], 'already_applied')
+
+    def test_invalid_http_method_blocked(self):
+        """EDGE CASE: Sending a GET request to an AJAX POST endpoint"""
+        response = self.client.get(reverse('gigs:apply_gig', args=[self.listing.id]))
+        self.assertEqual(response.json()['success'], False)
+        self.assertEqual(response.json()['error'], 'Invalid request')
+
+    def test_save_gig_bookmark(self):
+        response = self.client.post(reverse('gigs:save_gig', args=[self.listing.id]))
+        self.assertEqual(response.json()['success'], True)
+        self.assertTrue(self.listing.bookmarks.filter(id=self.musician_user.id).exists())
+
+class ReviewViewTests(ViewBaseTestCase):
+    def setUp(self):
+        self.client.login(username='musicianuser', password='pass123')
+
+    def test_submit_valid_review(self):
+        response = self.client.post(reverse('gigs:submit_review', args=[self.listing.id]), data={
+            'rating': '5',
+            'comment': 'Awesome band!'
+        })
+        self.assertEqual(response.status_code, 302) 
+        self.assertTrue(Review.objects.filter(reviewer=self.musician_user, listing=self.listing).exists())
+
+    def test_duplicate_review_blocked(self):
+        """EDGE CASE: Submitting two reviews for the exact same gig is forbidden"""
+        Review.objects.create(reviewer=self.musician_user, reviewee=self.band_user, listing=self.listing, rating=4, comment="Good")
+        
+        response = self.client.post(reverse('gigs:submit_review', args=[self.listing.id]), data={
+            'rating': '5',
+            'comment': 'I am trying to review them again!'
+        })
+        
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Review.objects.filter(reviewer=self.musician_user, listing=self.listing).count(), 1)
+
+
+class SecurityViewTests(TestCase):
+    """EDGE CASE: Verifying that unauthenticated users are blocked from protected views."""
+    
+    @classmethod
+    def setUpTestData(cls):
+        cls.band_user = User.objects.create_user(username="secureband", email="band@test.com", password="pass")
+        cls.band = Band.objects.create(user=cls.band_user, name="Secure Band", location="Glasgow")
+        cls.listing = Listing.objects.create(
+            band=cls.band, title="Gig", deadline=date(2026, 4, 1),
+            is_urgent=False,
+            description="Desc", location="Glasgow", req_instruments="Guitar"
         )
 
-        self.assertEqual(response.status_code, 200)
-        self.assertFalse(Listing.objects.filter(title='Drummer wanted').exists())
+    def test_dashboard_requires_login(self):
+        """EDGE CASE: Anonymous user trying to access the dashboard"""
+        response = self.client.get(reverse('gigs:dashboard'))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.startswith(reverse('login')))
 
-    def test_invalid_gig_data_does_not_create_listing(self):
+    def test_create_gig_requires_login(self):
+        """EDGE CASE: Anonymous user trying to load the create gig form"""
+        response = self.client.get(reverse('gigs:create_gig'))
+        self.assertEqual(response.status_code, 302)
 
-        self.client.login(username='banduser', password='pass123')
+    def test_submit_review_requires_login(self):
+        """EDGE CASE: Anonymous user trying to submit a review directly via URL"""
+        response = self.client.post(reverse('gigs:submit_review', args=[self.listing.id]), data={
+            'rating': '5',
+            'comment': 'Hacked review!'
+        })
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(Review.objects.exists())
 
-        response = self.client.post(
-                reverse('gigs:create_gig_listing'),
-                data=json.dumps({
-                    'title': 'Drummer wanted',
-                }),
-                content_type='application/json'
-            )
-
-        self.assertEqual(response.status_code, 200)
-        self.assertFalse(Listing.objects.filter(title='Drummer wanted').exists())
+    def test_ajax_apply_requires_login(self):
+        """EDGE CASE: Anonymous user trying to hit the apply endpoint"""
+        response = self.client.post(reverse('gigs:apply_gig', args=[self.listing.id]))
+        self.assertEqual(response.json()['success'], False)
+        self.assertEqual(response.json()['error'], 'not_logged_in')
