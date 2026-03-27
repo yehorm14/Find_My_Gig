@@ -9,11 +9,10 @@
     
     <script>
       window.addEventListener('pageshow', function(event) {
-          // Check modern performance API first
           var perfEntries = performance.getEntriesByType("navigation");
           var isBackForward = perfEntries.length > 0 && perfEntries[0].type === "back_forward";
           
-          // Force a true server reload if navigated via the Back/Forward buttons
+      
           if (isBackForward || event.persisted) {
               window.location.reload();
           }
@@ -70,9 +69,9 @@
           
           {% if user.is_authenticated %}
             <div class="ms-3">
-              {% if user.musician.profile_picture %}
+              {% if profile_type == 'musician' and user.musician.profile_picture %}
                 <img src="{{ user.musician.profile_picture.url }}" class="nav-profile-pic" alt="Profile">
-              {% elif user.band.profile_picture %}
+              {% elif profile_type == 'band' and user.band.profile_picture %}
                 <img src="{{ user.band.profile_picture.url }}" class="nav-profile-pic" alt="Profile">
               {% else %}
                 <img src="{% static 'find_my_gig/images/pfp-placeholder.png' %}" class="nav-profile-pic" alt="Profile">

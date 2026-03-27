@@ -9,6 +9,7 @@ from django.db import transaction
 from django.contrib.auth import login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages 
 
 # Local App Imports
 from gigs.models import (
@@ -83,28 +84,27 @@ def gig_listings(request):
 
     return render(request, 'gigs/gig_listings.html', context)
 
-
 def gig_detail(request, gig_id):
-    """
-    Shows the full details of a single gig, including the Google Map.
-    """
+    """Shows the full details of a single gig, including the Google Map."""
     listing = get_object_or_404(Listing, id=gig_id)
     has_applied = False
     is_bookmarked = False
+    has_reviewed = False 
     
     if request.user.is_authenticated:
         has_applied = listing.applications_received.filter(applicant=request.user).exists()
         is_bookmarked = listing.bookmarks.filter(id=request.user.id).exists()
+        has_reviewed = Review.objects.filter(reviewer=request.user, listing=listing).exists()
 
     context = {
         'listing': listing, 
         'has_applied': has_applied,
         'is_bookmarked': is_bookmarked,
+        'has_reviewed': has_reviewed,
         'google_maps_frontend_key': settings.GOOGLE_MAPS_FRONTEND_KEY, 
     }
     
     return render(request, 'gigs/gig_detail.html', context)
-
 
 def musicians_list(request):
     """
@@ -210,6 +210,24 @@ def my_bookmarks(request):
         'saved_gigs': request.user.saved_gigs.all()
     }
     return render(request, 'gigs/my_bookmarks.html', context)
+
+
+@login_required
+def my_reviews(request):
+    """Shows a user both the reviews they have received and written."""
+    
+    received_reviews = Review.objects.filter(reviewee=request.user).order_by('-id')
+    
+    written_reviews = Review.objects.filter(reviewer=request.user).order_by('-id')
+    
+    profile_type = 'musician' if hasattr(request.user, 'musician') else 'band'
+    
+    context = {
+        'received_reviews': received_reviews,
+        'written_reviews': written_reviews,
+        'profile_type': profile_type
+    }
+    return render(request, 'gigs/my_reviews.html', context)
 
 
 @login_required
@@ -519,32 +537,39 @@ def unsave_gig(request, gig_id):
 # ==============================================================================
 # --- 5. REVIEWS & FEEDBACK ---
 # ==============================================================================
-
 @login_required
 def submit_review(request, gig_id):
-    """Allows a Musician to submit a review for a Band after a gig."""
-    gig = get_object_or_404(Listing, id=gig_id)
+    """Handles the submission of a review for a specific gig."""
+    listing = get_object_or_404(Listing, id=gig_id)
+    target_user = listing.band.user  
+    already_reviewed = Review.objects.filter(reviewer=request.user, listing=listing).exists()
     
+    if already_reviewed:
+        messages.error(request, "You have already left a review for this gig!")
+        return redirect('gigs:gig_detail', gig_id=listing.id)
+
     if request.method == 'POST':
         rating = request.POST.get('rating')
-        comment = request.POST.get('feedback')
+        comment = request.POST.get('comment')
+        
+        if rating and comment:
+            Review.objects.create(
+                reviewer=request.user,
+                reviewee=target_user,
+                listing=listing, 
+                rating=int(rating),
+                comment=comment
+            )
+            messages.success(request, "Your review has been successfully published!")
+            return redirect('gigs:gig_detail', gig_id=listing.id)
+        else:
+            messages.error(request, "Please provide both a rating and a comment.")
 
-        if not rating:
-            return render(request, 'gigs/gig_review.html', {
-                'gig': gig,
-                'error': 'Please select a rating'
-            })
-
-        Review.objects.create(
-            reviewer=request.user,
-            reviewee=gig.band.user,
-            rating=int(rating),
-            comment=comment
-        )
-        return redirect('gigs:gig_detail', gig_id=gig_id)
-
-    return render(request, 'gigs/gig_review.html', {'gig': gig})
-
+    context = {
+        'listing': listing,
+        'target_user': target_user
+    }
+    return render(request, 'gigs/gig_review.html', context)
 
 @login_required
 def submit_musician_review(request, musician_id):

@@ -52,7 +52,7 @@ urlpatterns = [
     path('dashboard/my-listings/', views.my_listings, name='my_listings'),
     path('dashboard/my-profile/', views.my_profile, name='my_profile'),
     path('dashboard/my-reach-outs/', views.my_reach_outs, name='my_reach_outs'),
-    
+    path('dashboard/my-reviews/', views.my_reviews, name='my_reviews'),
     # --- Dashboard Settings & Management Actions ---
     path('dashboard/my-profile/update/', views.update_profile, name='update_profile'),
     path('dashboard/my-profile/delete-account/', views.delete_account, name='delete_account'),

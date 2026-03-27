@@ -31,6 +31,21 @@ document.addEventListener('DOMContentLoaded', function () {
                         applyBtn.classList.toggle('withdraw-btn');
                         applyBtn.classList.toggle('btn-primary');
                         applyBtn.classList.toggle('btn-danger');
+                        
+                        // Find the review button inside this specific gig's card
+                        const listingCard = applyBtn.closest('.listing-card') || applyBtn.closest('.card');
+                        if (listingCard) {
+                            const reviewBtn = listingCard.querySelector('.review-btn');
+                            if (reviewBtn) {
+                                if (isApplying) {
+                                    reviewBtn.classList.remove('d-none'); // Unhide on Apply
+                                } else {
+                                    reviewBtn.classList.add('d-none');    // Hide on Withdraw
+                                }
+                            }
+                        }
+                        // --------------------------------------------
+
                         showStatusMessage('status-message', isApplying ? 'Application submitted!' : 'Application withdrawn.', 'success');
                     } else {
                         showStatusMessage('status-message', data.error || 'Something went wrong', 'error');
@@ -96,6 +111,17 @@ document.addEventListener('DOMContentLoaded', function () {
                     btn.dataset.applied = isApplied ? 'false' : 'true';
                     btn.textContent = isApplied ? 'Apply Now' : 'Withdraw Application';
                     btn.className = isApplied ? 'btn apply-btn rounded-pill px-4 py-2' : 'btn withdraw-btn rounded-pill px-4 py-2';
+                    
+                    const reviewBtn = document.getElementById('gig-detail-review-btn');
+                    if (reviewBtn) {
+                        if (isApplied) {
+                            reviewBtn.classList.add('d-none');    // Hide on Withdraw
+                        } else {
+                            reviewBtn.classList.remove('d-none'); // Unhide on Apply
+                        }
+                    }
+                    // --------------------------------------------
+
                     showStatusMessage('gig-detail-status', isApplied ? 'Application withdrawn.' : 'Application submitted!', 'success');
                 } else {
                     showStatusMessage('gig-detail-status', data.error || 'Something went wrong', 'error');

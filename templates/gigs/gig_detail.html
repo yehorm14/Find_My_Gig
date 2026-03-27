@@ -68,7 +68,7 @@
                               ☆ Bookmark
                             </button>
 
-                        {% elif user.musician %}
+                        {% elif profile_type == 'musician' %}
                             <button type="button" id="gig-detail-apply-btn"
                                     class="btn {% if has_applied %}withdraw-btn{% else %}apply-btn{% endif %} rounded-pill px-4 py-2"
                                     data-gig-id="{{ listing.id }}"
@@ -82,13 +82,19 @@
                                     data-bookmarked="{{ is_bookmarked|yesno:'true,false' }}">
                               {% if is_bookmarked %}★ Bookmarked{% else %}☆ Bookmark{% endif %}
                             </button>
-                        {% endif %}
-
-                        {% if user.is_authenticated and has_applied %}
-                          <a href="{% url 'gigs:submit_review' listing.id %}" 
-                             class="btn btn-outline-secondary rounded-pill px-4 py-2">
-                             Leave a Review
-                          </a>
+                            
+                            {% if has_reviewed %}
+                                <button class="btn btn-success rounded-pill px-4 py-2" disabled>
+                                    ✓ Review Submitted
+                                </button>
+                            {% else %}
+                                <a href="{% url 'gigs:submit_review' listing.id %}" 
+                                   id="gig-detail-review-btn" 
+                                   class="btn btn-outline-light rounded-pill px-4 py-2 {% if not has_applied %}d-none{% endif %}">
+                                   Leave a Review
+                                </a>
+                            {% endif %}
+                            
                         {% endif %}
                         
                     </div>
