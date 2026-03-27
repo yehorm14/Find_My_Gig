@@ -40,9 +40,13 @@ EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_PASS')
 SECRET_KEY = 'django-insecure--01bdgbf2xr=2+s#3hmnz%gm6m2*h1mu0+kw9vg+v8r577w6_k'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    '127.0.0.1', 
+    'localhost', 
+    'abaig01.pythonanywhere.com',  
+]
 
 
 # Application definition
