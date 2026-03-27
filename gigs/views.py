@@ -85,9 +85,6 @@ def gig_listings(request):
     return render(request, 'gigs/gig_listings.html', context)
 
 def gig_detail(request, gig_id):
-    """
-    Shows the full details of a single gig, including the Google Map.
-    """
     listing = get_object_or_404(Listing, id=gig_id)
     has_applied = False
     is_bookmarked = False
@@ -96,13 +93,12 @@ def gig_detail(request, gig_id):
     if request.user.is_authenticated:
         has_applied = listing.applications_received.filter(applicant=request.user).exists()
         is_bookmarked = listing.bookmarks.filter(id=request.user.id).exists()
-        has_reviewed = Review.objects.filter(reviewer=request.user, reviewee=listing.band.user).exists()
 
     context = {
         'listing': listing, 
         'has_applied': has_applied,
         'is_bookmarked': is_bookmarked,
-        'has_reviewed': has_reviewed, 
+        'has_reviewed': has_reviewed,
         'google_maps_frontend_key': settings.GOOGLE_MAPS_FRONTEND_KEY, 
     }
     
@@ -213,6 +209,24 @@ def my_bookmarks(request):
         'saved_gigs': request.user.saved_gigs.all()
     }
     return render(request, 'gigs/my_bookmarks.html', context)
+
+
+@login_required
+def my_reviews(request):
+    """Shows a user both the reviews they have received and written."""
+    
+    received_reviews = Review.objects.filter(reviewee=request.user).order_by('-id')
+    
+    written_reviews = Review.objects.filter(reviewer=request.user).order_by('-id')
+    
+    profile_type = 'musician' if hasattr(request.user, 'musician') else 'band'
+    
+    context = {
+        'received_reviews': received_reviews,
+        'written_reviews': written_reviews,
+        'profile_type': profile_type
+    }
+    return render(request, 'gigs/my_reviews.html', context)
 
 
 @login_required
@@ -522,19 +536,12 @@ def unsave_gig(request, gig_id):
 # ==============================================================================
 # --- 5. REVIEWS & FEEDBACK ---
 # ==============================================================================
-
 @login_required
 def submit_review(request, gig_id):
     """Handles the submission of a review for a band associated with a specific gig."""
     listing = get_object_or_404(Listing, id=gig_id)
     target_user = listing.band.user  
     
-    already_reviewed = Review.objects.filter(reviewer=request.user, reviewee=target_user).exists()
-    
-    if already_reviewed:
-        messages.error(request, "You have already left a review for this band!")
-        return redirect('gigs:gig_detail', gig_id=listing.id)
-
     if request.method == 'POST':
         rating = request.POST.get('rating')
         comment = request.POST.get('comment')

@@ -1,0 +1,110 @@
+{% extends 'gigs/base.html' %}
+{% load static %}
+
+{% block title_block %}My Reviews | Find My Gig{% endblock %}
+
+{% block body_block %}
+<div class="container mt-5 px-4 px-md-5 mb-5">
+  
+  <div class="text-center mb-4">
+    <h1 class="display-4" style="font-weight: 800; color: #fff;">My <span class="gig-accent-text">Reviews</span></h1>
+    <p class="lead text-muted-custom">Manage your reputation and community feedback.</p>
+  </div>
+
+  <div class="row justify-content-center mb-4">
+      <div class="col-lg-8">
+          <ul class="nav nav-pills nav-fill gap-2 p-1 bg-dark rounded-pill border border-secondary" id="reviewTabs" role="tablist">
+              <li class="nav-item" role="presentation">
+                  <button class="nav-link active rounded-pill text-light" id="received-tab" data-bs-toggle="tab" data-bs-target="#received" type="button" role="tab">
+                      Received Reviews
+                  </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                  <button class="nav-link rounded-pill text-light" id="written-tab" data-bs-toggle="tab" data-bs-target="#written" type="button" role="tab">
+                      Reviews I've Written
+                  </button>
+              </li>
+          </ul>
+      </div>
+  </div>
+
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="tab-content" id="reviewTabsContent">
+          
+        <div class="tab-pane fade show active" id="received" role="tabpanel">
+            {% for review in received_reviews %}
+              <div class="listing-card p-4 mb-4">
+                  <div class="d-flex justify-content-between align-items-start mb-3 border-bottom-accent pb-3">
+                      <div>
+                          <h5 style="font-weight: 700; color: #fff; margin-bottom: 0;">
+                              {% if review.reviewer.band %}
+                                  {{ review.reviewer.band.name }}
+                              {% else %}
+                                  {{ review.reviewer.first_name }} {{ review.reviewer.last_name }}
+                              {% endif %}
+                          </h5>
+                          <span class="text-muted-custom small">@{{ review.reviewer.username }}</span>
+                      </div>
+                      <div class="badge apply-btn rounded-pill px-3 py-2" style="font-size: 1rem;">
+                          {{ review.rating }} / 5 ⭐
+                      </div>
+                  </div>
+                  <div class="p-3 rounded" style="background-color: var(--bg-dark); border: 1px solid var(--border-dim);">
+                      <p class="description-text mb-0">"{{ review.comment }}"</p>
+                  </div>
+              </div>
+            {% empty %}
+              <div class="text-center py-5 border rounded" style="border-color: var(--border-dim) !important;">
+                  <h1 class="display-1 text-muted mb-3">⭐</h1>
+                  <h4 class="text-muted-custom">No reviews received yet.</h4>
+                  <p class="text-muted-custom mb-0">Apply for gigs and collaborate to build your reputation!</p>
+              </div>
+            {% endfor %}
+        </div>
+
+        <div class="tab-pane fade" id="written" role="tabpanel">
+            {% for review in written_reviews %}
+              <div class="listing-card p-4 mb-4">
+                  <div class="d-flex justify-content-between align-items-start mb-3 border-bottom-accent pb-3">
+                      <div>
+                          <p class="text-muted-custom small mb-1">You reviewed:</p>
+                          <h5 style="font-weight: 700; color: #fff; margin-bottom: 0;">
+                              {% if review.reviewee.band %}
+                                  {{ review.reviewee.band.name }}
+                              {% else %}
+                                  {{ review.reviewee.first_name }} {{ review.reviewee.last_name }}
+                              {% endif %}
+                          </h5>
+                          <span class="text-muted-custom small">@{{ review.reviewee.username }}</span>
+                      </div>
+                      <div class="badge apply-btn rounded-pill px-3 py-2" style="font-size: 1rem;">
+                          {{ review.rating }} / 5 ⭐
+                      </div>
+                  </div>
+                  <div class="p-3 rounded" style="background-color: var(--bg-dark); border: 1px solid var(--border-dim);">
+                      <p class="description-text mb-0">"{{ review.comment }}"</p>
+                  </div>
+              </div>
+            {% empty %}
+              <div class="text-center py-5 border rounded" style="border-color: var(--border-dim) !important;">
+                  <h1 class="display-1 text-muted mb-3">✍️</h1>
+                  <h4 class="text-muted-custom">You haven't written any reviews.</h4>
+                  <p class="text-muted-custom mb-0">Once you work with a band or musician, leave them feedback here!</p>
+              </div>
+            {% endfor %}
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+    .nav-pills .nav-link.active {
+        background-color: var(--accent-color) !important;
+        color: #000 !important;
+        font-weight: bold;
+    }
+</style>
+{% endblock %}
