@@ -387,8 +387,10 @@ def update_profile(request):
 
             if media_links_json:
                 new_links = json.loads(media_links_json) if isinstance(media_links_json, str) else media_links_json
+                MediaLink.objects.filter(musician=profile).delete()
                 for url in new_links:
-                    MediaLink.objects.create(musician=profile, url=url)
+                    if url.strip():
+                        MediaLink.objects.create(musician=profile, url=url.strip())
 
             if delete_media_json:
                 ids_to_delete = json.loads(delete_media_json) if isinstance(delete_media_json, str) else delete_media_json
