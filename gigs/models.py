@@ -147,6 +147,7 @@ class Application(models.Model):
 class Review(models.Model):
     reviewer = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reviews_written")
     reviewee = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reviews_received")
+    listing = models.ForeignKey(Listing, on_delete=models.CASCADE, null=True, blank=True, related_name='reviews')
     rating = models.IntegerField(validators=[
         MinValueValidator(0), 
         MaxValueValidator(5)

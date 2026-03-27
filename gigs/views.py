@@ -85,6 +85,7 @@ def gig_listings(request):
     return render(request, 'gigs/gig_listings.html', context)
 
 def gig_detail(request, gig_id):
+    """Shows the full details of a single gig, including the Google Map."""
     listing = get_object_or_404(Listing, id=gig_id)
     has_applied = False
     is_bookmarked = False
@@ -93,6 +94,7 @@ def gig_detail(request, gig_id):
     if request.user.is_authenticated:
         has_applied = listing.applications_received.filter(applicant=request.user).exists()
         is_bookmarked = listing.bookmarks.filter(id=request.user.id).exists()
+        has_reviewed = Review.objects.filter(reviewer=request.user, listing=listing).exists()
 
     context = {
         'listing': listing, 
@@ -103,7 +105,6 @@ def gig_detail(request, gig_id):
     }
     
     return render(request, 'gigs/gig_detail.html', context)
-
 
 def musicians_list(request):
     """
@@ -538,10 +539,15 @@ def unsave_gig(request, gig_id):
 # ==============================================================================
 @login_required
 def submit_review(request, gig_id):
-    """Handles the submission of a review for a band associated with a specific gig."""
+    """Handles the submission of a review for a specific gig."""
     listing = get_object_or_404(Listing, id=gig_id)
     target_user = listing.band.user  
+    already_reviewed = Review.objects.filter(reviewer=request.user, listing=listing).exists()
     
+    if already_reviewed:
+        messages.error(request, "You have already left a review for this gig!")
+        return redirect('gigs:gig_detail', gig_id=listing.id)
+
     if request.method == 'POST':
         rating = request.POST.get('rating')
         comment = request.POST.get('comment')
@@ -550,6 +556,7 @@ def submit_review(request, gig_id):
             Review.objects.create(
                 reviewer=request.user,
                 reviewee=target_user,
+                listing=listing, 
                 rating=int(rating),
                 comment=comment
             )
