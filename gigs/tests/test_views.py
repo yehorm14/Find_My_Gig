@@ -112,7 +112,7 @@ class SecurityViewTests(TestCase):
         """EDGE CASE: Anonymous user trying to access the dashboard"""
         response = self.client.get(reverse('gigs:dashboard'))
         self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.url.startswith(reverse('login')))
+        self.assertTrue(response.url.startswith(reverse('gigs:login')))
 
     def test_create_gig_requires_login(self):
         """EDGE CASE: Anonymous user trying to load the create gig form"""
