@@ -14,7 +14,7 @@ django.setup()
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.contrib.auth.models import User
-from gigs.models import Musician, Band, Listing
+from gigs.models import Musician, Band, Listing, Review, Application, MediaLink, BandInterest
 
 # ==========================================
 # 1. HELPER DATA & FUNCTIONS
@@ -120,12 +120,8 @@ def clear_data():
 def clear_media():
     """Wipes the files inside profile_images without deleting the locked folder itself."""
     print("🧹 Clearing old profile images...")
-    
-    # Safely build the path to profile_images directory
     media_dir = os.path.join(settings.MEDIA_ROOT, 'profile_images')
-    
     if os.path.exists(media_dir):
-        # Iterate through the files inside the directory and delete them individually
         for filename in os.listdir(media_dir):
             file_path = os.path.join(media_dir, filename)
             try:
@@ -134,11 +130,9 @@ def clear_media():
                 elif os.path.isdir(file_path):
                     shutil.rmtree(file_path)
             except Exception as e:
-                print(f"  [!] Could not delete {filename}. It might be open in another program. Error: {e}")
+                pass
     else:
-        # If the folder doesn't exist at all yet, create it safely
         os.makedirs(media_dir, exist_ok=True)
-        
     print("✅ Media cleared.\n")
 
 
@@ -150,14 +144,14 @@ def populate():
     clear_media()
     
     bands_list = []
+    musicians_list = []
+    listings_list = []
     
     # --- CREATE 10 BANDS ---
     print("🎸 Creating 10 Bands (Downloading unique images...)")
     for i in range(10):
         username = f"band_user_{i+1}"
         band_name = BAND_NAMES[i]
-        
-        # Pick a random "home base" from our real venues list to assign them a city
         home_base = random.choice(UK_VENUES)
         
         user = User.objects.create_user(username=username, email=f"{username}@test.com", password="Password123!")
@@ -197,25 +191,26 @@ def populate():
             bio=random.choice(MUSICIAN_BIOS),
             age=random.randint(18, 55),
             instruments=random.choice(INSTRUMENTS),
-            location=random.choice(UK_VENUES)['city'],  # Populating required Location
-            media_link="https://www.youtube.com/watch?v=dQw4w9WgXcQ" # Dummy link for UI testing
+            location=random.choice(UK_VENUES)['city']
         )
+        
+        MediaLink.objects.create(musician=musician, url="https://www.youtube.com/watch?v=dQw4w9WgXcQ")
         
         image_file = download_image(f"musician_unique_seed_{i}")
         if image_file:
             musician.profile_picture.save(f"musician_{i}.jpg", image_file)
             
+        musicians_list.append(musician)
         print(f"  - Created Musician: @{user.username} ({musician.instruments} from {musician.location})")
 
     print("\n")
 
 
     # --- CREATE 30 GIG LISTINGS ---
-    print("📅 Creating 30 Gig Listings (Assigning to Real UK Venues!)...")
+    print("📅 Creating 30 Gig Listings...")
     for i in range(30):
         owning_band = random.choice(bands_list)
         future_date = timezone.now() + timedelta(days=random.randint(1, 60))
-        
         venue = random.choice(UK_VENUES)
         
         listing = Listing.objects.create(
@@ -224,16 +219,46 @@ def populate():
             req_instruments=random.choice(INSTRUMENTS),
             deadline=future_date,
             description=random.choice(GIG_DESCRIPTIONS),
-            
-            # Format: "King Tut's Wah Wah Hut, Glasgow"
             location=f"{venue['name']}, {venue['city']}",
             is_urgent=random.choice([True, False, False]),
-            
-            # Real-world Google Maps coordinates!
             latitude=venue['lat'],
             longitude=venue['lng']
         )
+        listings_list.append(listing)
         print(f"  - Created Gig: '{listing.title}' at {venue['name']}")
+
+    print("\n")
+
+
+    # --- CREATE APPLICATIONS & REVIEWS ---
+    print("📝 Generating Applications and Reviews...")
+    for listing in listings_list:
+        # Pick 1 to 3 random musicians to apply for each gig
+        applicants = random.sample(musicians_list, random.randint(1, 3))
+        
+        for applicant in applicants:
+            Application.objects.create(applicant=applicant.user, listing=listing)
+            
+            # 50% chance the Musician reviewed the Band (with the Listing ID)
+            if random.choice([True, False]):
+                Review.objects.create(
+                    reviewer=applicant.user,
+                    reviewee=listing.band.user,
+                    listing=listing, 
+                    rating=random.randint(3, 5),
+                    comment="Great communication and a really solid audition process."
+                )
+                
+            # 50% chance the Band reviewed the Musician (with the Listing ID)
+            if random.choice([True, False]):
+                Review.objects.create(
+                    reviewer=listing.band.user,
+                    reviewee=applicant.user,
+                    listing=listing, 
+                    rating=random.randint(3, 5),
+                    comment="Showed up on time, knew the material, and had a great attitude."
+                )
+    print("  - Applications and Reviews generated successfully.")
 
     print("\n🎉 POPULATION COMPLETE! 🎉")
     print("Log in with any username (e.g., 'musician_1' or 'band_user_1') and password: Password123!")
