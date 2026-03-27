@@ -1,62 +1,58 @@
 {% extends 'gigs/base.html' %}
-
 {% load static %}
 
-{% block title_block %}
-Login
-{% endblock %}
-
-{% block header_detailed %}
-{% endblock %}
+{% block title_block %}Review {{ target_user.band.name }}{% endblock %}
 
 {% block body_block %}
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+<div class="container mt-5 px-4 px-md-5 mb-5" style="max-width: 800px;">
+    
+    <nav aria-label="breadcrumb" class="mb-4">
+        <a href="{% url 'gigs:gig_detail' listing.id %}" class="subtle-link d-inline-flex align-items-center">
+            ← Back to Gig Details
+        </a>
+    </nav>
 
-<div class="text-center m-4">
-  <h2>{{ gig.title }}</h2>
+    <div class="listing-card p-4 p-md-5">
+        <h2 class="mb-4 border-bottom-accent pb-3" style="font-weight: 800; color: #fff;">
+            Leave a Review for <span class="gig-accent-text">{{ target_user.band.name }}</span>
+        </h2>
+
+        <form method="POST" action="{% url 'gigs:submit_review' listing.id %}" onsubmit="disableSubmitBtn(this)">
+            {% csrf_token %}
+            
+            <div class="mb-4 pt-2">
+                <label for="rating" class="form-label uppercase-label text-muted-custom">Rating (1 to 5 Stars) *</label>
+                <select class="form-select bg-dark text-light border-secondary" id="rating" name="rating" required>
+                    <option value="" selected disabled>Select a rating...</option>
+                    <option value="5">⭐⭐⭐⭐⭐ (5) - Excellent</option>
+                    <option value="4">⭐⭐⭐⭐ (4) - Very Good</option>
+                    <option value="3">⭐⭐⭐ (3) - Average</option>
+                    <option value="2">⭐⭐ (2) - Poor</option>
+                    <option value="1">⭐ (1) - Terrible</option>
+                </select>
+            </div>
+
+            <div class="mb-4">
+                <label for="comment" class="form-label uppercase-label text-muted-custom">Your Review *</label>
+                <textarea class="form-control bg-dark text-light border-secondary" id="comment" name="comment" rows="5" placeholder="Share your experience working with this band..." required></textarea>
+            </div>
+
+            <div class="d-flex justify-content-end gap-3 mt-5 border-top-accent pt-4">
+                <a href="{% url 'gigs:gig_detail' listing.id %}" class="btn btn-outline-light rounded-pill px-4 py-2">Cancel</a>
+                
+                <button type="submit" id="submit-review-btn" class="btn apply-btn rounded-pill px-5 py-2">Submit Review</button>
+            </div>
+        </form>
+        
+    </div>
 </div>
 
-<hr class="mx-5" />
-<div class="row justify-content-center">
-  <div class="col-4">
-    {% if error %}
-      <div class="alert alert-danger">{{ error }}</div>
-    {% endif %}
-    <form method="POST" action="">
-      {% csrf_token %}
-
-      <!-- {% if form.errors %} -->
-      <!--   <p>Username or password was incorrect. Please try again.</p> -->
-      <!-- {% endif %} -->
-
-      <!-- {% if next %} -->
-      <!--   <input type="hidden" name="next" value="{{ next }}"> -->
-      <!-- {% endif %} -->
-
-      <div class="mb-3">
-        <div class="star-rating animated-stars">
-            <input type="radio" id="star5" name="rating" value="5">
-            <label for="star5" class="bi bi-star-fill"></label>
-            <input type="radio" id="star4" name="rating" value="4">
-            <label for="star4" class="bi bi-star-fill"></label>
-            <input type="radio" id="star3" name="rating" value="3">
-            <label for="star3" class="bi bi-star-fill"></label>
-            <input type="radio" id="star2" name="rating" value="2">
-            <label for="star2" class="bi bi-star-fill"></label>
-            <input type="radio" id="star1" name="rating" value="1">
-            <label for="star1" class="bi bi-star-fill"></label>
-        </div>
-      </div>
-
-      <div class="mb-3">
-        <label for="feedback" class="form-label">Feedback</label>
-        <textarea type="text" class="form-control" id="feedback" name="feedback" required /></textarea>
-      </div>
-
-      <button type="submit" class="btn btn-primary nice-button primary-color">
-        Submit Review
-      </button>
-    </form>
-  </div>
-</div>
+<script>
+    function disableSubmitBtn(form) {
+        const btn = document.getElementById('submit-review-btn');
+        btn.disabled = true;
+        btn.innerText = 'Submitting...';
+        return true;
+    }
+</script>
 {% endblock %}

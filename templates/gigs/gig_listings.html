@@ -64,7 +64,8 @@
 
                     {% if user.is_authenticated %}
                     <div class="mb-3">
-                        <a href="{% url 'gigs:submit_review' gig.id %}" class="btn btn-outline-secondary rounded-pill w-100">
+                        <a href="{% url 'gigs:submit_review' gig.id %}" 
+                            class="btn btn-outline-light w-100 rounded-pill mt-2 review-btn {% if gig.id not in applied_gig_ids %}d-none{% endif %}">
                             Leave a Review
                         </a>
                     </div>
