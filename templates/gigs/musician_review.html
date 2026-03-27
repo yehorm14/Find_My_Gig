@@ -1,59 +1,60 @@
 {% extends 'gigs/base.html' %}
-
 {% load static %}
 
-{% block title_block %}
-Review {{ musician.user.username }}
-{% endblock %}
-
-{% block header_detailed %}
-{% endblock %}
+{% block title_block %}Review {{ musician.user.username }}{% endblock %}
 
 {% block body_block %}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
-<div class="text-center m-4">
-  <h2>Review {{ musician.user.username }}</h2>
-</div>
-
-<hr class="mx-5" />
-<div class="row justify-content-center">
-  <div class="col-4">
-    <form method="POST" action="">
-      {% csrf_token %}
-
-      <!-- {% if form.errors %} -->
-      <!--   <p>Username or password was incorrect. Please try again.</p> -->
-      <!-- {% endif %} -->
-
-      <!-- {% if next %} -->
-      <!--   <input type="hidden" name="next" value="{{ next }}"> -->
-      <!-- {% endif %} -->
-
-      <div class="mb-3">
-        <div class="star-rating animated-stars">
-            <input type="radio" id="star5" name="rating" value="5">
-            <label for="star5" class="bi bi-star-fill"></label>
-            <input type="radio" id="star4" name="rating" value="4">
-            <label for="star4" class="bi bi-star-fill"></label>
-            <input type="radio" id="star3" name="rating" value="3">
-            <label for="star3" class="bi bi-star-fill"></label>
-            <input type="radio" id="star2" name="rating" value="2">
-            <label for="star2" class="bi bi-star-fill"></label>
-            <input type="radio" id="star1" name="rating" value="1">
-            <label for="star1" class="bi bi-star-fill"></label>
-        </div>
+<div class="container mt-5 pt-4 mb-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-5">
+      
+      <div class="text-center mb-4">
+        <h1 class="display-5" style="font-weight: 800; color: #fff;">
+          Review <span class="gig-accent-text">Musician</span>
+        </h1>
+        <p class="text-muted-custom">How was your experience with {{ musician.user.username }}?</p>
       </div>
 
-      <div class="mb-3">
-        <label for="feedback" class="form-label">Feedback</label>
-        <textarea type="text" class="form-control" id="feedback" name="feedback" required /></textarea>
+      <div class="listing-card p-4 p-md-5">
+        
+        {% if error %}
+          <div class="status-error mb-4" style="display: block;">{{ error }}</div>
+        {% endif %}
+        
+        <form method="POST" action="">
+          {% csrf_token %}
+
+          <div class="mb-4 text-center">
+            <label class="detail-label mb-2">Rating</label>
+            <div class="star-rating animated-stars justify-content-center">
+                <input type="radio" id="star5" name="rating" value="5">
+                <label for="star5" class="bi bi-star-fill"></label>
+                <input type="radio" id="star4" name="rating" value="4">
+                <label for="star4" class="bi bi-star-fill"></label>
+                <input type="radio" id="star3" name="rating" value="3">
+                <label for="star3" class="bi bi-star-fill"></label>
+                <input type="radio" id="star2" name="rating" value="2">
+                <label for="star2" class="bi bi-star-fill"></label>
+                <input type="radio" id="star1" name="rating" value="1">
+                <label for="star1" class="bi bi-star-fill"></label>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label for="feedback" class="detail-label">Feedback</label>
+            <textarea class="form-control" id="feedback" name="feedback" rows="4" placeholder="Share your experience playing with this musician..." style="background-color: var(--bg-dark); color: #fff; border: 1px solid var(--border-dim);" required></textarea>
+          </div>
+
+          <button type="submit" class="btn apply-btn rounded-pill w-100 py-2 mt-3" style="font-size: 1.1rem;">
+            Submit Review
+          </button>
+          
+        </form>
       </div>
 
-      <button type="submit" class="btn btn-primary nice-button primary-color">
-        Submit Review
-      </button>
-    </form>
+    </div>
   </div>
 </div>
 {% endblock %}

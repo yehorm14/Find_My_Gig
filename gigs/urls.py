@@ -1,14 +1,15 @@
 from django.urls import path, reverse_lazy
-from gigs import views
 from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
 
-# This is our "namespace". If we ever add another app (like 'accounts'), 
-# this stops Django from confusing 'gigs:home' with 'accounts:home'.
+from gigs import views
+
+# Application namespace to prevent URL naming conflicts
 app_name = 'gigs'
 
 urlpatterns = [
+    
     # ==========================================
     # --- 1. MAIN PAGES & GIGS ROUTING ---
     # ==========================================
@@ -17,7 +18,7 @@ urlpatterns = [
     path('gigs/<int:gig_id>/', views.gig_detail, name='gig_detail'),
     path('create-gig/', views.create_gig, name='create_gig'),
 
-    # Gig AJAX Actions
+    # --- Gig AJAX Actions ---
     path('gigs/<int:gig_id>/apply/', views.apply_gig, name='apply_gig'),
     path('gigs/<int:gig_id>/withdraw/', views.withdraw_gig, name='withdraw_gig'),
     path('gigs/<int:gig_id>/save/', views.save_gig, name='save_gig'),
@@ -32,10 +33,14 @@ urlpatterns = [
     path('musicians/<int:id>/', views.musician_detail, name='musician_detail'), 
     
     path('bands/', views.bands_list, name='bands_list'), 
-    path('bands/<int:id>/', views.band_detail, name='band_detail'), #
+    path('bands/<int:id>/', views.band_detail, name='band_detail'),
 
-    # Reviewing and Saving Bands
+
+    # ==========================================
+    # --- 3. INTERACTIONS & CONNECTIONS ---
+    # ==========================================
     path('musicians/<int:musician_id>/review/', views.submit_musician_review, name='submit_musician_review'),
+    path('musicians/<int:musician_id>/send-interest/', views.send_interest, name='send_interest'),
 
 
     # ==========================================
@@ -46,12 +51,15 @@ urlpatterns = [
     path('dashboard/my-bookmarks/', views.my_bookmarks, name='my_bookmarks'),
     path('dashboard/my-listings/', views.my_listings, name='my_listings'),
     path('dashboard/my-profile/', views.my_profile, name='my_profile'),
+    path('dashboard/my-reach-outs/', views.my_reach_outs, name='my_reach_outs'),
     
-    # Dashboard Settings & Management Actions
+    # --- Dashboard Settings & Management Actions ---
     path('dashboard/my-profile/update/', views.update_profile, name='update_profile'),
     path('dashboard/my-profile/delete-account/', views.delete_account, name='delete_account'),
-    path('dashboard/my-listings/create/', views.create_gig_listing, name='create_gig_listing'), # The AJAX submission
+    path('dashboard/my-listings/create/', views.create_gig_listing, name='create_gig_listing'), 
     path('dashboard/my-listings/<int:listing_id>/delete/', views.delete_listing, name='delete_listing'),
+    path('dashboard/inbox/', views.my_inbox, name='my_inbox'),
+    path('dashboard/inbox/<int:interest_id>/delete/', views.delete_interest, name='delete_interest'),
 
 
     # ==========================================
@@ -61,14 +69,18 @@ urlpatterns = [
     
     path(
         'login/', 
-         auth_views.LoginView.as_view(
-             template_name='gigs/login.html',
-             redirect_authenticated_user=True,
-         ), 
+        auth_views.LoginView.as_view(
+            template_name='gigs/login.html',
+            redirect_authenticated_user=True,
+        ), 
         name='login'
     ),
     
-    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path(
+        'logout/', 
+        auth_views.LogoutView.as_view(), 
+        name='logout'
+    ),
 
 
     # ==========================================
@@ -84,6 +96,7 @@ urlpatterns = [
         ),
         name='password_reset',
     ),
+    
     path(
         'password-reset/done/',
         auth_views.PasswordResetDoneView.as_view(
@@ -91,6 +104,7 @@ urlpatterns = [
         ),
         name='password_reset_done',
     ),
+    
     path(
         'reset/<uidb64>/<token>/',
         auth_views.PasswordResetConfirmView.as_view(
@@ -99,6 +113,7 @@ urlpatterns = [
         ),
         name='password_reset_confirm',
     ),
+    
     path(
         'reset/done/',
         auth_views.PasswordResetCompleteView.as_view(

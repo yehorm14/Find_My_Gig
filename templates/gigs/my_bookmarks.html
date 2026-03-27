@@ -1,9 +1,7 @@
 {% extends 'gigs/base.html' %}
 {% load static %}
 
-{% block title_block %}
-My Bookmarks | Find My Gig
-{% endblock %}
+{% block title_block %}My Bookmarks | Find My Gig{% endblock %}
 
 {% block body_block %}
 <div class="container mt-5 px-4 px-md-5 mb-5">
@@ -12,9 +10,7 @@ My Bookmarks | Find My Gig
     <h1 class="display-4" style="font-weight: 800; color: #fff;">
         My <span class="gig-accent-text">Bookmarks</span>
     </h1>
-    <p class="lead text-muted-custom">
-        All the gigs you've saved for later.
-    </p>
+    <p class="lead text-muted-custom">All the gigs you've saved for later.</p>
   </div>
 
   <hr class="mb-5" style="border-color: var(--border-dim);">
@@ -27,12 +23,16 @@ My Bookmarks | Find My Gig
                 <h4 class="gig-title mb-1">{{ gig.title }}</h4>
                 <p class="text-muted-custom mb-2">{{ gig.band.name }}</p>
                 <p class="mb-3">📍 <span class="gig-accent-text">{{ gig.location }}</span></p>
+                
                 <div class="mt-auto pt-3 border-top-accent">
                     <a href="{% url 'gigs:gig_detail' gig.id %}" class="btn btn-outline-light w-100 rounded-pill mb-2">View Details</a>
-                    <button type="button" class="btn btn-outline-danger w-100 rounded-pill remove-saved-gig-btn" data-gig-id="{{ gig.id }}">Remove Bookmark</button>
+                    <button type="button" class="btn btn-outline-danger w-100 rounded-pill remove-saved-gig-btn" data-gig-id="{{ gig.id }}">
+                        Remove Bookmark
+                    </button>
                 </div>
             </div>
         </div>
+        
       {% empty %}
         <div class="col-12 text-center py-5">
             <h1 class="display-1 text-muted mb-3">⭐</h1>
@@ -45,6 +45,7 @@ My Bookmarks | Find My Gig
 
 </div>
 {% endblock %}
+
 {% block scripts_block %}
     <script src="{% static 'find_my_gig/js/dashboard.js' %}"></script>
 {% endblock %}

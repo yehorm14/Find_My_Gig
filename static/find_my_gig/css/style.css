@@ -19,6 +19,9 @@
     /* Animation Speeds */
     --transition-fast: 0.2s ease;
 }
+*::placeholder{
+    color: #888899  !important;
+}
 
 body {
     background-color: var(--bg-dark);

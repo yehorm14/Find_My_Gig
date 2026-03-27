@@ -1,46 +1,37 @@
 {% extends 'gigs/base.html' %}
 {% load static %}
 
-{% block title_block %}
-Gigs
-{% endblock %}
-
-{% block header_block %}
-{% endblock %}
+{% block title_block %}Discover Gigs{% endblock %}
 
 {% block body_block %}
 <div id="status-message"></div>
 
-<div class="container mt-5 px-4 px-md-5">
+<div class="container mt-5 px-4 px-md-5 mb-5">
     
     <div class="row align-items-center mb-4">
         <div class="col-md-6">
-            <h2 class="mb-0" style="font-weight: 800; font-size: 2.2rem;">Discover Gigs</h2>
+            <h2 class="mb-0" style="font-weight: 800; font-size: 2.2rem;">Discover <span class="gig-accent-text">Gigs</span></h2>
         </div>
         <div class="col-md-6 d-flex justify-content-md-end mt-3 mt-md-0">
-            <select class="form-select w-auto me-2" id="filter-instrument" name="filter">
+            <select class="form-select w-auto me-2" id="filter-instrument" name="filter" style="color: #fff !important;">
                 <option value="">Filter by Instrument...</option>
-                <option value="Guitar">Guitar</option>
-                <option value="Drums">Drums</option>
-                <option value="Vocals">Vocals</option>
-                <option value="Bass">Bass</option>
-                <option value="Other">Other</option>
+                <option value="Guitar" {% if selected_instrument == 'Guitar' %}selected{% endif %}>Guitar</option>
+                <option value="Drums"  {% if selected_instrument == 'Drums' %}selected{% endif %}>Drums</option>
+                <option value="Vocals" {% if selected_instrument == 'Vocals' %}selected{% endif %}>Vocals</option>
+                <option value="Bass"   {% if selected_instrument == 'Bass' %}selected{% endif %}>Bass</option>
+                <option value="Other"  {% if selected_instrument == 'Other' %}selected{% endif %}>Other</option>
             </select>
-            <button type="button" id="filter-btn" class="btn apply-btn rounded-pill px-4">
-                Filter
-            </button>
-            <div class="col-auto m-3">
-            <a href="/gigs/" class="btn btn-primary nice-button primary-color">Clear</a>
-            </div>
+            <button type="button" id="filter-btn" class="btn apply-btn rounded-pill px-4 me-2">Filter</button>
+            <a href="{% url 'gigs:gig_listings' %}" class="btn btn-outline-light rounded-pill px-4">Clear</a>
         </div>
     </div>
 
-    <hr class="mb-5" style="border-color: #2a2a35; opacity: 1;">
+    <hr class="mb-5" style="border-color: var(--border-dim);">
 
     <div id="gigs-list" class="row">
         {% for gig in gigs %}
         <div class="col-md-6 col-lg-4 d-flex align-items-stretch mb-4">
-            <div class="listing-card w-100 d-flex flex-column">
+            <div class="listing-card w-100 d-flex flex-column p-4">
                 
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <span class="badge badge-instrument rounded-pill px-3 py-2">
@@ -52,47 +43,44 @@ Gigs
                 </div>
 
                 <h3 class="gig-title mb-1">{{ gig.title }}</h3>
-                <p class="text-muted-custom mb-2">
-                    <strong>Band:</strong> {{ gig.band.name }}
-                </p>
-                <p class="mb-3">
-                    📍 <span class="gig-accent-text">{{ gig.location }}</span>
-                </p>
+                <p class="text-muted-custom mb-2"><strong>Band:</strong> {{ gig.band.name }}</p>
+                <p class="mb-3">📍 <span class="gig-accent-text">{{ gig.location }}</span></p>
 
-                <div class="mt-auto pt-3" style="border-top: 1px solid #2a2a35;">
+                <div class="mt-auto pt-3 border-top-accent">
                     
                     <a href="{% url 'gigs:gig_detail' gig.id %}" class="btn btn-outline-light w-100 rounded-pill mb-2">
                         View Details
                     </a>
                     
-                    {% if user.is_authenticated and user.musician %}
-                    <div class="d-flex gap-2 mb-3">
+                    {% if user.is_authenticated and profile_type == 'musician' %}
+                    <div class="mb-2">
                         <button type="button" 
-                                class="btn {% if gig.id in applied_gig_ids %}withdraw-btn btn-danger{% else %}apply-btn btn-primary{% endif %} nice-button w-100"
+                                class="btn {% if gig.id in applied_gig_ids %}withdraw-btn btn-danger{% else %}apply-btn btn-primary{% endif %} rounded-pill w-100"
                                 data-gig-id="{{ gig.id }}">
                           {% if gig.id in applied_gig_ids %}Withdraw{% else %}Apply{% endif %}
                         </button>
                     </div>
                     {% endif %}
 
-                    <div class="d-flex gap-2 mb-3">
-                        <a href="{% url 'gigs:submit_review' gig.id %}" 
-                           class="btn btn-outline-secondary rounded-pill w-100">
+                    {% if user.is_authenticated %}
+                    <div class="mb-3">
+                        <a href="{% url 'gigs:submit_review' gig.id %}" class="btn btn-outline-secondary rounded-pill w-100">
                             Leave a Review
                         </a>
                     </div>
+                    {% endif %}
 
                     <div class="text-center">
-                        <small class="text-muted-custom">
-                            ⏳ Deadline: {{ gig.deadline|date:"M d, Y" }}
-                        </small>
+                        <small class="text-muted-custom">⏳ Deadline: {{ gig.deadline|date:"M d, Y" }}</small>
                     </div>
                 </div>
 
             </div>
         </div>
+        
         {% empty %}
         <div class="col-12 text-center py-5">
+            <h1 class="display-1 text-muted mb-3">📋</h1>
             <h4 class="text-muted-custom">No gigs found right now. Check back later!</h4>
         </div>
         {% endfor %}

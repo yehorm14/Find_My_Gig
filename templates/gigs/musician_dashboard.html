@@ -1,19 +1,29 @@
 {% extends 'gigs/base.html' %}
 {% load static %}
 
-{% block title_block %}
-Musician Dashboard | Find My Gig
-{% endblock %}
+{% block title_block %}Musician Dashboard | Find My Gig{% endblock %}
 
 {% block body_block %}
 <div class="container mt-4 px-4 px-md-5 mb-5">
   
   <div class="text-center mb-5">
-    <h1 class="display-4" style="font-weight: 800; color: #fff;">Musician <span class="gig-accent-text">Dashboard</span></h1>
+    <h1 class="display-4" style="font-weight: 800; color: #fff;">
+        Musician <span class="gig-accent-text">Dashboard</span>
+    </h1>
     <p class="lead text-muted-custom">Find gigs, track applications, and manage your saved items.</p>
   </div>
 
   <div class="row justify-content-center g-4">
+    
+    <div class="col-md-6 col-lg-4 d-flex align-items-stretch">
+      <a href="{% url 'gigs:my_inbox' %}" class="text-decoration-none w-100">
+        <div class="dashboard-card h-100 text-center d-flex flex-column align-items-center justify-content-center p-5">
+          <h1 class="display-3 mb-3">📩</h1>
+          <h4 class="mb-2" style="color: #fff; font-weight: 700;">Inbox</h4>
+          <p class="text-muted-custom mb-0">View messages from Bands</p>
+        </div>
+      </a>
+    </div>
     
     <div class="col-md-6 col-lg-4 d-flex align-items-stretch">
       <a href="{% url 'gigs:gig_listings' %}" class="text-decoration-none w-100">
@@ -37,7 +47,7 @@ Musician Dashboard | Find My Gig
 
     <div class="col-md-6 col-lg-4 d-flex align-items-stretch">
       <a href="{% url 'gigs:my_bookmarks' %}" class="text-decoration-none w-100">
-        <div class="dashboard-card h-100 text-center d-flex flex-column align-items-center justify-content-center p-5" style="border-color: var(--neon-cyan);">
+        <div class="dashboard-card h-100 text-center d-flex flex-column align-items-center justify-content-center p-5">
           <h1 class="display-3 mb-3" style="color: var(--neon-cyan);">★</h1>
           <h4 class="mb-2" style="color: #fff; font-weight: 700;">My Bookmarks</h4>
           <p class="text-muted-custom mb-0">View your saved gigs & bands</p>
